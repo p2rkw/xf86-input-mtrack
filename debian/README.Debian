@@ -1,9 +1,5 @@
-xf86-input-multitouch Xorg driver
-
-* Install the debian package
-
+Xorg Multitouch Trackpad Driver
+* Install the Debian package
+* Configure xorg.conf
 * Restart X
 
-Enjoy!
-
-Henrik Rydberg <rydberg@euromail.se>

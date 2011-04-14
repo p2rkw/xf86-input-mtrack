@@ -17,7 +17,7 @@ install:
 	dh_testroot
 	dh_clean -k
 	dh_installdirs
-	$(MAKE) DESTDIR=$(CURDIR)/debian/xf86-input-multitouch install
+	$(MAKE) DESTDIR=$(CURDIR)/debian/xf86-input-mtrack install
 
 binary-arch: build-arch install
 	dh_testdir

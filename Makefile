@@ -2,13 +2,13 @@ VERSION = 1
 PATCHLEVEL = 0
 EXTRAVERSION = rc2
 
-LIBRARY	= multitouch.so
+LIBRARY	= mtrack.so
 MODULES = src
 XMODULES = driver
 
 o_src	= capabilities hwstate mtstate gestures mconfig mtouch trig
 
-o_driver= multitouch
+o_driver= mtrack
 
 TARGETS	+= src/test
 
@@ -56,7 +56,7 @@ clean:
 	rm -rf bin obj
 
 distclean: clean
-	rm -rf debian/*.log debian/files debian/xf86-input-multitouch*
+	rm -rf debian/*.log debian/files debian/xf86-input-mtrack*
 
 install: $(TLIB)
 	install -d "$(DESTDIR)/$(DLIB)"

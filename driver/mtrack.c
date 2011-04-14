@@ -102,11 +102,11 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 
 	local->fd = xf86OpenSerial(local->options);
 	if (local->fd < 0) {
-		xf86Msg(X_ERROR, "multitouch: cannot open device\n");
+		xf86Msg(X_ERROR, "mtrack: cannot open device\n");
 		return !Success;
 	}
 	if (mtouch_configure(mt, local->fd)) {
-		xf86Msg(X_ERROR, "multitouch: cannot configure device\n");
+		xf86Msg(X_ERROR, "mtrack: cannot configure device\n");
 		return !Success;
 	}
 	xf86CloseSerial(local->fd);
@@ -161,11 +161,11 @@ static int device_on(LocalDevicePtr local)
 	struct MTouch *mt = local->private;
 	local->fd = xf86OpenSerial(local->options);
 	if (local->fd < 0) {
-		xf86Msg(X_ERROR, "multitouch: cannot open device\n");
+		xf86Msg(X_ERROR, "mtrack: cannot open device\n");
 		return !Success;
 	}
 	if (mtouch_open(mt, local->fd)) {
-		xf86Msg(X_ERROR, "multitouch: cannot grab device\n");
+		xf86Msg(X_ERROR, "mtrack: cannot grab device\n");
 		return !Success;
 	}
 	xf86AddEnabledDevice(local);
@@ -177,7 +177,7 @@ static int device_off(LocalDevicePtr local)
 	struct MTouch *mt = local->private;
 	xf86RemoveEnabledDevice(local);
 	if (mtouch_close(mt, local->fd))
-		xf86Msg(X_WARNING, "multitouch: cannot ungrab device\n");
+		xf86Msg(X_WARNING, "mtrack: cannot ungrab device\n");
 	xf86CloseSerial(local->fd);
 	return Success;
 }
@@ -285,9 +285,9 @@ static void uninit(InputDriverPtr drv, InputInfoPtr local, int flags)
 	xf86DeleteInput(local, 0);
 }
 
-static InputDriverRec MULTITOUCH = {
+static InputDriverRec MTRACK = {
 	1,
-	"multitouch",
+	"mtrack",
 	NULL,
 	preinit,
 	uninit,
@@ -296,7 +296,7 @@ static InputDriverRec MULTITOUCH = {
 };
 
 static XF86ModuleVersionInfo VERSION = {
-	"multitouch",
+	"mtrack",
 	MODULEVENDORSTRING,
 	MODINFOSTRING1,
 	MODINFOSTRING2,
@@ -310,8 +310,8 @@ static XF86ModuleVersionInfo VERSION = {
 
 static pointer setup(pointer module, pointer options, int *errmaj, int *errmin)
 {
-	xf86AddInputDriver(&MULTITOUCH, module, 0);
+	xf86AddInputDriver(&MTRACK, module, 0);
 	return module;
 }
 
-XF86ModuleData multitouchModuleData = {&VERSION, &setup, NULL };
+XF86ModuleData mtrackModuleData = {&VERSION, &setup, NULL };

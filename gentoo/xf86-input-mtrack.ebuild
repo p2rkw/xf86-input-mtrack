@@ -7,14 +7,13 @@ EAPI=3
 #inherit x-modular
 inherit eutils
 
-DESCRIPTION="Multitouch-X-Driver for MT-Touchpads"
+DESCRIPTION="Xorg Driver for Multitouch Trackpads"
 HOMEPAGE="http://bitmath.org/code/multitouch/"
-COMMIT="fc4d145"
-SRC_URI="http://github.com/rydberg/Multitouch-X-Driver/tarball/v1.0-rc2 -> ${P}.tar.gz"
+SRC_URI="http://www.dev.fatalmachine.org/xf86-input-mtrack/${P}.tar.gz"
 IUSE="debug"
 
 #S="${WORKDIR}/rydberg-Multitouch-X-Driver-${COMMIT}"
-S="${WORKDIR}/multitouch-${PV}"
+#S="${WORKDIR}/${P}-${PV}"
 
 LICENSE="GPL-2"
 SLOT="0"

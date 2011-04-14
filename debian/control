@@ -1,17 +1,17 @@
-Source: xf86-input-multitouch
+Source: xf86-input-mtrack
 Section: misc
 Priority: optional
-Maintainer: Henrik Rydberg <rydberg@euromail.se>
+Maintainer: Ryan Bourgeois <bluedragonx@gmail.com>
 Build-Depends:
 	debhelper (>= 5),
 	xserver-xorg-dev (>= 2:1.7.6.901),
 	libmtdev-dev (>= 1.0.10)
 Standards-Version: 3.7.2
-Homepage: http://bitmath.org/code/multitouch/
+Homepage: http://www.dev.fatalmachine.org/xf86-input-mtrack/
 
-Package: xf86-input-multitouch
+Package: xf86-input-mtrack
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libmtdev1 (>= 1.0)
-Description: Multitouch X input driver
+Description: Xorg Multitouch Trackpad Driver
  This X input driver provides gestures support for multitouch touchpads,
- in particular those with integrated button.
+ with or without an integrated button.
