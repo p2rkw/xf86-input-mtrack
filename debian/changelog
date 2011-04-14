@@ -1,0 +1,6 @@
+xf86-input-multitouch (1.0~rc2-mactel1) unstable; urgency=low
+
+  * Introducing the multitouch Xorg input driver
+
+ -- Henrik Rydberg <rydberg@euromail.se>  Thu, 21 Oct 2010 19:30:17 +0200
+

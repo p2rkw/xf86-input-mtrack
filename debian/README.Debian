@@ -1,0 +1,9 @@
+xf86-input-multitouch Xorg driver
+
+* Install the debian package
+
+* Restart X
+
+Enjoy!
+
+Henrik Rydberg <rydberg@euromail.se>
