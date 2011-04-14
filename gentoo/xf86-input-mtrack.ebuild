@@ -49,7 +49,7 @@ pkg_postinst() {
 	elog "Section \"InputClass\""
 	elog "  MatchIsTouchpad \"true\""
 	elog "  Identifier      \"Touchpads\""
-	elog "  Driver          \"multitouch\""
+	elog "  Driver          \"mtrack\""
 	elog "EndSection"
 	elog ""
 }
