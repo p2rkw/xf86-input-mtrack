@@ -105,10 +105,8 @@ void mconfig_init(struct MConfig* cfg,
 }
 
 void mconfig_configure(struct MConfig* cfg,
-			InputInfoPtr local)
+			pointer opts)
 {
-	pointer opts = local->options;
-
 	// Configure MTState
 	cfg->touch_down = CLAMPVAL(xf86SetIntOption(opts, "FingerHigh", DEFAULT_TOUCH_DOWN), 0, 100);
 	cfg->touch_up = CLAMPVAL(xf86SetIntOption(opts, "FingerLow", DEFAULT_TOUCH_UP), 0, 100);
@@ -151,6 +149,15 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->rotate_rt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateRightButton", DEFAULT_ROTATE_RT_BTN), 0, 23) - 1;
 	cfg->drag_enable = xf86SetBoolOption(opts, "TapDragEnable", DEFAULT_DRAG_ENABLE);
 	cfg->drag_timeout = MAXVAL(xf86SetIntOption(opts, "TapDragTime", DEFAULT_DRAG_TIMEOUT), 1);
+
+	xf86Msg(X_INFO, "ClickTime = %d (default %d)\n", cfg->tap_hold, DEFAULT_TAP_HOLD);
+	xf86Msg(X_INFO, "TapButton1 = %d (default %d)\n", cfg->tap_1touch, DEFAULT_TAP_1TOUCH);
+	xf86Msg(X_INFO, "TapButton2 = %d (default %d)\n", cfg->tap_2touch, DEFAULT_TAP_2TOUCH);
+	xf86Msg(X_INFO, "TapButton3 = %d (default %d)\n", cfg->tap_3touch, DEFAULT_TAP_3TOUCH);
+	xf86Msg(X_INFO, "ButtonEnable = %d (default %d)\n", cfg->button_enable, DEFAULT_BUTTON_ENABLE);
+	xf86Msg(X_INFO, "ButtonIntegrated = %d (default %d)\n", cfg->button_integrated, DEFAULT_BUTTON_INTEGRATED);
+	xf86Msg(X_INFO, "ClickFinger1 = %d (default %d)\n", cfg->button_1touch, DEFAULT_BUTTON_1TOUCH);
+	xf86Msg(X_INFO, "ClickFinger2 = %d (default %d)\n", cfg->button_2touch, DEFAULT_BUTTON_2TOUCH);
 }
 
 

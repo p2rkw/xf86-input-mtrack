@@ -136,7 +136,7 @@ void mconfig_init(struct MConfig* cfg,
 			const struct Capabilities* caps);
 
 void mconfig_configure(struct MConfig* cfg,
-			InputInfoPtr local);
+			pointer opts);
 
 #endif
 

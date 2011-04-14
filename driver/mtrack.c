@@ -274,8 +274,11 @@ static int preinit(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
 	pInfo->device_control = device_control;
 	pInfo->read_input = read_input;
 	pInfo->switch_mode = 0;
-	//xf86CollectInputOptions(local, NULL);
-	//xf86ProcessCommonOptions(local, local->options);
+
+    xf86CollectInputOptions(pInfo, NULL);
+    xf86OptionListReport(pInfo->options);
+    xf86ProcessCommonOptions(pInfo, pInfo->options);
+    mconfig_configure(&mt->cfg, pInfo->options);
 
 	return Success;
 }
@@ -299,11 +302,9 @@ static InputInfoPtr preinit(InputDriverPtr drv, IDevPtr dev, int flags)
 	local->conf_idev = dev;
 
 	xf86CollectInputOptions(local, NULL, NULL);
-	mconfig_configure(&mt->cfg, local);
 	xf86OptionListReport(local->options);
 	xf86ProcessCommonOptions(local, local->options);
-
-	mconfig_configure(&mt->cfg, local);
+	mconfig_configure(&mt->cfg, local->options);
 
 	local->flags |= XI86_CONFIGURED;
  error:

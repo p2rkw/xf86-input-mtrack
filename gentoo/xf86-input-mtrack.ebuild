@@ -8,7 +8,7 @@ EAPI=3
 inherit eutils
 
 DESCRIPTION="Xorg Driver for Multitouch Trackpads"
-HOMEPAGE="http://bitmath.org/code/multitouch/"
+HOMEPAGE="http://www.dev.fatalmachine.org/xf86-input-mtrack/"
 SRC_URI="http://www.dev.fatalmachine.org/xf86-input-mtrack/${P}.tar.gz"
 IUSE="debug"
 
@@ -32,7 +32,7 @@ DEPEND="${RDEPEND}
 src_compile() {
 	CFLAGS=""
 	if use debug; then
-		CFLAGS="${CFLAGS} -DDEBUG_GESTURES=1 -DDEBUG_DRIVER=1"
+		CFLAGS="${CFLAGS} -DDEBUG_GESTURES"
 	fi
 	emake || die "emake failed"
 }

@@ -1,4 +1,4 @@
-xf86-input-multitouch
+xf86-input-mtrack
 
 The Multitouch X Driver provides gestures support for multitouch
 touchpads, in particular those with integrated button.
@@ -16,7 +16,7 @@ The following is a minimal working InputClass section for xorg.conf:
     Section "InputClass"
         MatchIsTouchpad "on"
         Identifier      "Touchpads"
-        Driver          "multitouch"
+        Driver          "mtrack"
     EndSection
 
 Configuration options may be defined inside the InputClass section

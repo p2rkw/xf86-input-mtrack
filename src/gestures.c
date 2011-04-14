@@ -271,6 +271,9 @@ static void trigger_move(struct Gestures* gs,
 		gs->move_wait = 0;
 		gs->move_dist = 0;
 		gs->move_dir = TR_NONE;
+#if DEBUG_GESTURES
+		xf86Msg(X_INFO, "trigger_move: %d, %d\n", dx, dy);
+#endif
 	}
 }
 
