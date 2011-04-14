@@ -36,6 +36,10 @@
 #define SCALE_THRESHOLD 0.15
 #define ROTATE_THRESHOLD 0.15
 
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
+typedef InputInfoPtr LocalDevicePtr;
+#endif
+
 /* button mapping simplified */
 #define PROPMAP(m, x, y) m[x] = XIGetKnownProperty(y)
 
@@ -140,7 +144,11 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 #endif
 				   mt->caps.abs[MTDEV_POSITION_X].minimum,
 				   mt->caps.abs[MTDEV_POSITION_X].maximum,
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
+				   1, 0, 1, Absolute);
+#else
 				   1, 0, 1);
+#endif
 	xf86InitValuatorDefaults(dev, 0);
 	xf86InitValuatorAxisStruct(dev, 1,
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
@@ -148,7 +156,11 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 #endif
 				   mt->caps.abs[MTDEV_POSITION_Y].minimum,
 				   mt->caps.abs[MTDEV_POSITION_Y].maximum,
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
+				   1, 0, 1, Absolute);
+#else
 				   1, 0, 1);
+#endif
 	xf86InitValuatorDefaults(dev, 1);
 
 	XIRegisterPropertyHandler(dev, pointer_property, NULL, NULL);
@@ -248,6 +260,26 @@ static Bool device_control(DeviceIntPtr dev, int mode)
 }
 
 
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
+static int preinit(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
+{
+	struct MTouch *mt;
+
+	mt = calloc(1, sizeof(*mt));
+	if (!mt)
+		return BadAlloc;
+
+	pInfo->private = mt;
+	pInfo->type_name = XI_TOUCHPAD;
+	pInfo->device_control = device_control;
+	pInfo->read_input = read_input;
+	pInfo->switch_mode = 0;
+	//xf86CollectInputOptions(local, NULL);
+	//xf86ProcessCommonOptions(local, local->options);
+
+	return Success;
+}
+#else
 static InputInfoPtr preinit(InputDriverPtr drv, IDevPtr dev, int flags)
 {
 	struct MTouch *mt;
@@ -277,6 +309,7 @@ static InputInfoPtr preinit(InputDriverPtr drv, IDevPtr dev, int flags)
  error:
 	return local;
 }
+#endif
 
 static void uninit(InputDriverPtr drv, InputInfoPtr local, int flags)
 {
