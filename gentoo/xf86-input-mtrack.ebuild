@@ -4,12 +4,14 @@
 
 EAPI=3
 
-#inherit x-modular
-inherit eutils
+EGIT_REPO_URI="git://github.com/BlueDragonX/xf86-input-mtrack.git"
+EGIT_BRANCH="v${PV}"
+
+inherit eutils git
 
 DESCRIPTION="Xorg Driver for Multitouch Trackpads"
-HOMEPAGE="http://www.dev.fatalmachine.org/xf86-input-mtrack/"
-SRC_URI="http://www.dev.fatalmachine.org/xf86-input-mtrack/${P}.tar.gz"
+HOMEPAGE="https://github.com/BlueDragonX/xf86-input-mtrack"
+SRC_URI=""
 IUSE="debug"
 
 #S="${WORKDIR}/rydberg-Multitouch-X-Driver-${COMMIT}"
