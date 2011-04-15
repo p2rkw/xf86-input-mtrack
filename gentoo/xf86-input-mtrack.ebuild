@@ -4,18 +4,14 @@
 
 EAPI=3
 
-EGIT_REPO_URI="git://github.com/BlueDragonX/xf86-input-mtrack.git"
-EGIT_BRANCH="v${PV}"
-
 inherit eutils git
 
 DESCRIPTION="Xorg Driver for Multitouch Trackpads"
 HOMEPAGE="https://github.com/BlueDragonX/xf86-input-mtrack"
 SRC_URI=""
+EGIT_REPO_URI="git://github.com/BlueDragonX/xf86-input-mtrack.git"
+EGIT_COMMIT="v${PV}"
 IUSE="debug"
-
-#S="${WORKDIR}/rydberg-Multitouch-X-Driver-${COMMIT}"
-#S="${WORKDIR}/${P}-${PV}"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -26,10 +22,6 @@ RDEPEND="
 	>=sys-libs/mtdev-1.0"
 DEPEND="${RDEPEND}
 	x11-proto/inputproto"
-
-#src_prepare() {
-#	epatch "${FILESDIR}/gentoo-${PV}.patch"
-#}
 
 src_compile() {
 	CFLAGS=""
