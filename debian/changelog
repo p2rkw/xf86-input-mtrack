@@ -1,6 +1,5 @@
-xf86-input-mtrack (0.1.0) unstable; urgency=low
+xserver-xorg-input-mtrack (0.1.0) unstable; urgency=low
 
-  First release, unstable.
+  * Initial release.
 
-  -- Ryan Bourgeois <bluedragonx@gmail.ocm> Thu, 14 Apr 2011 14:00:00 +0600
-
+ -- Ryan Bourgeois <bluedragonx@gmail.com>  Fri, 15 Apr 2011 14:46:10 -0500

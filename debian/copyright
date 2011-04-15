@@ -1,10 +1,10 @@
-Source URL: http://www.dev.fatalmachine.org/xf86-input-mtrack/
+Source URL: https://github.com/BlueDragonX/xf86-input-mtrack
 
 Upstream Author: Ryan Bourgeois <bluedragonx@gmail.com>
 
 Copyright:
 	Copyright (C) 2008	Henrik Rydberg (rydberg@euromail.se)
-	Copyright (C) 2011  Ryan Bourgeois (bluedragonx@gmail.com)
+	Copyright (C) 2011	Ryan Bourgeois (bluedragonx@gmail.com)
 
 License:
 
@@ -23,7 +23,7 @@ License:
 	Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
 
 Packaging:
-        Copyright (C) 2008 by Henrik Rydberg <rydberg@euromail.se>
-		Copyright (C) 2011 by Ryan Bourgeois <bluedragonx@gmail.com>
-        released under GPL 2
+	Copyright (C) 2008 by Henrik Rydberg <rydberg@euromail.se>
+	Copyright (C) 2011 by Ryan Bourgeois <bluedragonx@gmail.com>
+	released under GPL 2
 

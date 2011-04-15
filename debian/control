@@ -1,4 +1,4 @@
-Source: xf86-input-mtrack
+Source: xserver-xorg-input-mtrack
 Section: misc
 Priority: optional
 Maintainer: Ryan Bourgeois <bluedragonx@gmail.com>
@@ -7,9 +7,9 @@ Build-Depends:
 	xserver-xorg-dev (>= 2:1.7.6.901),
 	libmtdev-dev (>= 1.0.10)
 Standards-Version: 3.7.2
-Homepage: http://www.dev.fatalmachine.org/xf86-input-mtrack/
+Homepage: https://github.com/BlueDragonX/xf86-input-mtrack
 
-Package: xf86-input-mtrack
+Package: xserver-xorg-input-mtrack
 Architecture: any
 Depends: ${shlibs:Depends}, ${misc:Depends}, libmtdev1 (>= 1.0)
 Description: Xorg Multitouch Trackpad Driver
