@@ -265,8 +265,8 @@ static void trigger_move(struct Gestures* gs,
 {
 	if ((gs->move_type == GS_MOVE || hs->evtime >= gs->move_wait) && (dx != 0 || dy != 0)) {
 		trigger_drag_start(gs);
-		gs->move_dx = dx;
-		gs->move_dy = dy;
+		gs->move_dx = (int)(dx*cfg->sensitivity);
+		gs->move_dy = (int)(dy*cfg->sensitivity);
 		gs->move_type = GS_MOVE;
 		gs->move_wait = 0;
 		gs->move_dist = 0;

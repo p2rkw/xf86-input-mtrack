@@ -11,12 +11,17 @@ void xf86Msg(int type, const char *format, ...)
 	va_end(args);
 }
 
-int xf86SetIntOption(pointer optlist, const char *name, int deflt)
+int xf86SetIntOption(pointer opts, const char *name, int deflt)
 {
 	return deflt;
 }
 
-int xf86SetBoolOption(pointer list, const char *name, int deflt)
+int xf86SetBoolOption(pointer opts, const char *name, int deflt)
+{
+	return deflt;
+}
+
+double xf86SetRealOption(pointer opts, const char *name, double deflt)
 {
 	return deflt;
 }
