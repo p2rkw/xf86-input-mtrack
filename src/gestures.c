@@ -141,7 +141,7 @@ static void buttons_update(struct Gestures* gs,
 		return;
 
 	static bitmask_t button_prev = 0U;
-	int i, n, down, emulate;
+	int i, down, emulate, touching;
 	down = 0;
 	emulate = GETBIT(hs->button, 0) && !GETBIT(button_prev, 0);
 
@@ -160,22 +160,22 @@ static void buttons_update(struct Gestures* gs,
 	if (down) {
 		gs->move_type = GS_NONE;
 		gs->move_wait = hs->evtime + cfg->gesture_wait;
-		n = 0;
+		touching = 0;
 		foreach_bit(i, ms->touch_used) {
 			if (GETBIT(ms->touch[i].state, MT_INVALID))
 				continue;
 			if (cfg->button_integrated && !GETBIT(ms->touch[i].flags, GS_BUTTON))
 				SETBIT(ms->touch[i].flags, GS_BUTTON);
-			n++;
+			touching++;
 		}
 
 		if (emulate) {
 			if (cfg->button_integrated)
-				n--;
+				touching--;
 
-			if (n == 1 && cfg->button_1touch > 0)
+			if (touching == 1 && cfg->button_1touch > 0)
 				trigger_button_emulation(gs, cfg->button_1touch);
-			else if (n == 2 && cfg->button_2touch > 0)
+			else if (touching == 2 && cfg->button_2touch > 0)
 				trigger_button_emulation(gs, cfg->button_2touch);
 		}
 	}
