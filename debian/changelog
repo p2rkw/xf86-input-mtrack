@@ -1,3 +1,11 @@
+xserver-xorg-input-mtrack (0.1.1) unstable; urgency=low
+
+  * Bugfix release.
+  * Disabling tapping no longer (wrongly) disables pointer movement.
+  * Button emulation set to ignore "old" touches. What consitutes an old touch can be adjusted with the ButtonTouchExpire option.
+
+ -- Ryan Bourgeois <bluedragonx@gmail.com>  Thu, 28 Apr 2011 01:14:58 -0500
+
 xserver-xorg-input-mtrack (0.1.0) unstable; urgency=low
 
   * Initial release.
