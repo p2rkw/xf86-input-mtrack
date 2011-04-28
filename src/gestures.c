@@ -55,7 +55,7 @@ static void trigger_button_down(struct Gestures* gs, int button)
 	}
 #if DEBUG_GESTURES
 	else if (IS_VALID_BUTTON(button))
-		xf86Msg(X_INFO, "trigger_button_down: %d down ignored, %d in delayed mode\n", button, button);
+		xf86Msg(X_INFO, "trigger_button_down: %d down ignored, in delayed mode\n", button);
 #endif
 }
 
@@ -485,6 +485,10 @@ static void moving_update(struct Gestures* gs,
 				touches[count++] = &ms->touch[i];
 		}
 	}
+
+#if DEBUG_GESTURES
+		xf86Msg(X_INFO, "moving_update: count = %d, btn_count = %d\n", count, btn_count);
+#endif
 
 	// Determine gesture type.
 	if (count == 0) {
