@@ -55,7 +55,7 @@ static void trigger_button_down(struct Gestures* gs, int button)
 	}
 #if DEBUG_GESTURES
 	else if (IS_VALID_BUTTON(button))
-		xf86Msg(X_INFO, "trigger_button_down: %d down ignored, %d in delayed mode\n", button, button);
+		xf86Msg(X_INFO, "trigger_button_down: %d down ignored, in delayed mode\n", button);
 #endif
 }
 
@@ -186,7 +186,7 @@ static void tapping_update(struct Gestures* gs,
 			const struct HWState* hs,
 			struct MTState* ms)
 {
-	if (!cfg->tap_1touch && !cfg->tap_2touch && !cfg->tap_3touch)
+	if (cfg->tap_1touch < 0 && cfg->tap_2touch < 0 && cfg->tap_3touch < 0)
 		return;
 
 	int i, n, dist, released_max;
@@ -263,6 +263,9 @@ static void trigger_move(struct Gestures* gs,
 			const struct HWState* hs,
 			int dx, int dy)
 {
+#if DEBUG_GESTURES
+		xf86Msg(X_INFO, "trigger_move: move_type = %d, evtime = %llu, move_wait = %llu, dx = %d, dy = %d\n", gs->move_type, hs->evtime, gs->move_wait, dx, dy);
+#endif
 	if ((gs->move_type == GS_MOVE || hs->evtime >= gs->move_wait) && (dx != 0 || dy != 0)) {
 		trigger_drag_start(gs);
 		gs->move_dx = (int)(dx*cfg->sensitivity);
@@ -485,6 +488,10 @@ static void moving_update(struct Gestures* gs,
 				touches[count++] = &ms->touch[i];
 		}
 	}
+
+#if DEBUG_GESTURES
+		xf86Msg(X_INFO, "moving_update: count = %d, btn_count = %d\n", count, btn_count);
+#endif
 
 	// Determine gesture type.
 	if (count == 0) {
