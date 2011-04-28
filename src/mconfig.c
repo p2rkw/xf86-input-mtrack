@@ -37,6 +37,7 @@ void mconfig_defaults(struct MConfig* cfg)
 	// Configure Gestures
 	cfg->button_enable = DEFAULT_BUTTON_ENABLE;
 	cfg->button_integrated = DEFAULT_BUTTON_INTEGRATED;
+	cfg->button_expire = DEFAULT_BUTTON_EXPIRE;
 	cfg->button_1touch = DEFAULT_BUTTON_1TOUCH - 1;
 	cfg->button_2touch = DEFAULT_BUTTON_2TOUCH - 1;
 	cfg->tap_1touch = DEFAULT_TAP_1TOUCH - 1;
@@ -122,6 +123,7 @@ void mconfig_configure(struct MConfig* cfg,
 	// Configure Gestures
 	cfg->button_enable = xf86SetBoolOption(opts, "ButtonEnable", DEFAULT_BUTTON_ENABLE);
 	cfg->button_integrated = xf86SetBoolOption(opts, "ButtonIntegrated", DEFAULT_BUTTON_INTEGRATED);
+	cfg->button_expire = MAXVAL(xf86SetIntOption(opts, "ButtonTouchExpire", DEFAULT_BUTTON_EXPIRE), 0);
 	cfg->button_1touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger1", DEFAULT_BUTTON_1TOUCH), 0, 32) - 1;
 	cfg->button_2touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger2", DEFAULT_BUTTON_2TOUCH), 0, 32) - 1;
 	cfg->tap_1touch = CLAMPVAL(xf86SetIntOption(opts, "TapButton1", DEFAULT_TAP_1TOUCH), 0, 32) - 1;
