@@ -186,7 +186,7 @@ static void tapping_update(struct Gestures* gs,
 			const struct HWState* hs,
 			struct MTState* ms)
 {
-	if (!cfg->tap_1touch && !cfg->tap_2touch && !cfg->tap_3touch)
+	if (cfg->tap_1touch < 0 && cfg->tap_2touch < 0 && cfg->tap_3touch < 0)
 		return;
 
 	int i, n, dist, released_max;
