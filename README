@@ -82,7 +82,7 @@ ButtonIntegrated
 
 ButtonTouchExpire
     How long (in ms) to consider a touching finger as part of button emulation.
-    Integer value. Defaults to 100.
+    A value of 0 will not expire touches. Integer value. Defaults to 100.
 
 ClickFinger1
     Which button to emulate when one finger is touching the trackpad during
