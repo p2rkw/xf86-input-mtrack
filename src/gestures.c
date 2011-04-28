@@ -263,6 +263,9 @@ static void trigger_move(struct Gestures* gs,
 			const struct HWState* hs,
 			int dx, int dy)
 {
+#if DEBUG_GESTURES
+		xf86Msg(X_INFO, "trigger_move: move_type = %d, evtime = %llu, move_wait = %llu, dx = %d, dy = %d\n", gs->move_type, hs->evtime, gs->move_wait, dx, dy);
+#endif
 	if ((gs->move_type == GS_MOVE || hs->evtime >= gs->move_wait) && (dx != 0 || dy != 0)) {
 		trigger_drag_start(gs);
 		gs->move_dx = dx;
