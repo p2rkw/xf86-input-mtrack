@@ -25,6 +25,10 @@
 #define MTRACK_PROP_SENSITIVITY "Trackpad Sensitivity"	// float, 1 value
 
 struct MProps {
+	// Properties Config
+	Atom float_type;
+
+	// Adjustable Properties
 	Atom sensitivity;
 };
 

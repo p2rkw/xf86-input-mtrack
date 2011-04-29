@@ -50,17 +50,6 @@ static void pointer_control(DeviceIntPtr dev, PtrCtrl *ctrl)
 #endif
 }
 
-static int pointer_property(DeviceIntPtr dev,
-			    Atom property,
-			    XIPropertyValuePtr prop,
-			    BOOL checkonly)
-{
-#if DEBUG_DRIVER
-	xf86Msg(X_INFO, "pointer_property\n");
-#endif
-	return Success;
-}
-
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
 static void initAxesLabels(Atom map[2])
 {
@@ -163,7 +152,7 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 #endif
 	xf86InitValuatorDefaults(dev, 1);
 
-	XIRegisterPropertyHandler(dev, pointer_property, NULL, NULL);
+	XIRegisterPropertyHandler(dev, mprops_init, NULL, NULL);
 
 	return Success;
 }
