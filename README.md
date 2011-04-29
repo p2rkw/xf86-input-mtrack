@@ -40,9 +40,14 @@ The following is a minimal working InputClass section for xorg.conf:
 Configuration options may be defined inside the InputClass section to configure
 the driver. Available options and their defaults are as follows.
 
+**TrackpadDisable** -
+Disables all trackpad touch input. Physical buttons will still work. Boolean.
+Default is false.
+
 **Sensitivity** - 
 Adjusts the sensitivity (movement speed) of the touchpad. This is a real number
-greater than or equal to zero. Default is 1. A value of 0 will disable movement.
+greater than or equal to zero. Default is 1. A value of 0 will disable pointer
+movement.
 
 **FingerHigh** - 
 Defines the pressure at which a finger is detected as a touch. This is a
