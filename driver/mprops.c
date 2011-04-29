@@ -100,7 +100,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	InputInfoPtr local = dev->public.devicePrivate;
 	struct MConfig* cfg = &((struct MTouch*)local->private)->cfg;
 
-	int* ivals;
+	uint8_t* ivals8;
 	float* fvals;
 
 	if (property == mprops.trackpad_disable) {
@@ -108,8 +108,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		if (!checkonly) {
-			ivals = (int*)prop->data;
-			cfg->trackpad_disable = ivals[0] ? 1 : 0;
+			ivals8 = (uint8_t*)prop->data;
+			cfg->trackpad_disable = ivals8[0] ? 1 : 0;
 #ifdef DEBUG_PROPS
 			if (cfg->trackpad_disable)
 				xf86Msg(X_INFO, "mtrack: trackpad input disabled\n");
@@ -131,16 +131,19 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		}
 	}
 	else if (property == mprops.tap_buttons) {
-		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER)
+		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER) {
+			xf86Input(X_INFO, "mprops_set_property: size = %ld, format = %d\n");
 			return BadMatch;
+		}
 
 		if (!checkonly) {
-			ivals = (int*)prop->data;
-			cfg->tap_1touch = CLAMPVAL(ivals[0], 0, 32);
-			cfg->tap_1touch = CLAMPVAL(ivals[1], 0, 32);
-			cfg->tap_1touch = CLAMPVAL(ivals[2], 0, 32);
+			ivals8 = (uint8_t*)prop->data;
+			cfg->tap_1touch = CLAMPVAL(ivals8[0], 0, 32);
+			cfg->tap_2touch = CLAMPVAL(ivals8[1], 0, 32);
+			cfg->tap_3touch = CLAMPVAL(ivals8[2], 0, 32);
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: changing tap buttons to %d %d %d\n", cfg->tap_1touch, cfg->tap_1touch, cfg->tap_1touch);
+			xf86Msg(X_INFO, "mtrack: changing tap buttons to %d %d %d, clamped to %d %d %d\n",
+				ivals8[0], ivals8[1], ivals8[2], cfg->tap_1touch, cfg->tap_1touch, cfg->tap_1touch);
 #endif
 		}
 	}
