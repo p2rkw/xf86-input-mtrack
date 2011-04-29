@@ -36,14 +36,18 @@
 #define XATOM_FLOAT "FLOAT"
 #endif
 
-#define MTRACK_PROP_SENSITIVITY "Trackpad Sensitivity"	// float, 1 value
+#define MTRACK_PROP_TRACKPAD_DISABLE "Trackpad Disable Input"	// int, 1 value
+#define MTRACK_PROP_SENSITIVITY "Trackpad Sensitivity"			// float, 1 value
+#define MTRACK_PROP_TAP_BUTTONS "Trackpad Tap Emulated Button"	// int, 3 values
 
 struct MProps {
 	// Properties Config
 	Atom float_type;
 
 	// Adjustable Properties
+	Atom trackpad_disable;
 	Atom sensitivity;
+	Atom tap_buttons;
 };
 
 void mprops_init(struct MConfig* cfg, InputInfoPtr local);

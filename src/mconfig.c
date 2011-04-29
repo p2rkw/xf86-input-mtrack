@@ -35,6 +35,7 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->palm_size = DEFAULT_PALM_SIZE;
 
 	// Configure Gestures
+	cfg->trackpad_disable = DEFAULT_TRACKPAD_DISABLE;
 	cfg->button_enable = DEFAULT_BUTTON_ENABLE;
 	cfg->button_integrated = DEFAULT_BUTTON_INTEGRATED;
 	cfg->button_1touch = DEFAULT_BUTTON_1TOUCH - 1;
@@ -120,6 +121,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->palm_size = CLAMPVAL(xf86SetIntOption(opts, "PalmSize", DEFAULT_PALM_SIZE), 0, 100);
 
 	// Configure Gestures
+	cfg->trackpad_disable = xf86SetBoolOption(opts, "TrackpadDisable", DEFAULT_TRACKPAD_DISABLE);;
 	cfg->button_enable = xf86SetBoolOption(opts, "ButtonEnable", DEFAULT_BUTTON_ENABLE);
 	cfg->button_integrated = xf86SetBoolOption(opts, "ButtonIntegrated", DEFAULT_BUTTON_INTEGRATED);
 	cfg->button_1touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger1", DEFAULT_BUTTON_1TOUCH), 0, 32) - 1;

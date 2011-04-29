@@ -84,8 +84,16 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 		}
 	}
 
+	ivals[0] = cfg->trackpad_disable;
+	mprops.trackpad_disable = atom_init_integer(local->dev, MTRACK_PROP_TRACKPAD_DISABLE, 1, ivals, 8);
+
 	fvals[0] = (float)cfg->sensitivity;
 	mprops.sensitivity = atom_init_float(local->dev, MTRACK_PROP_SENSITIVITY, 1, fvals, mprops.float_type);
+
+	ivals[0] = cfg->tap_1touch;
+	ivals[1] = cfg->tap_2touch;
+	ivals[2] = cfg->tap_3touch;
+	mprops.tap_buttons = atom_init_integer(local->dev, MTRACK_PROP_TAP_BUTTONS, 3, ivals, 8);
 }
 
 int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly) {
@@ -95,14 +103,45 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	int* ivals;
 	float* fvals;
 
-	if (property == mprops.sensitivity) {
+	if (property == mprops.trackpad_disable) {
+		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		if (!checkonly) {
+			ivals = (int*)prop->data;
+			cfg->trackpad_disable = ivals[0] ? 1 : 0;
+#ifdef DEBUG_PROPS
+			if (cfg->trackpad_disable)
+				xf86Msg(X_INFO, "mtrack: trackpad input disabled\n");
+			else
+				xf86Msg(X_INFO, "mtrack: trackpad input enabled\n");
+#endif
+		}
+	}
+	else if (property == mprops.sensitivity) {
 		if (prop->size != 1 || prop->format != 32 || prop->type != mprops.float_type)
 			return BadMatch;
 
 		if (!checkonly) {
 			fvals = (float*)prop->data;
-			cfg->sensitivity = fvals[0];
-			xf86Msg(X_INFO, "mtrack: changing sensitivity to %f\n", fvals[0]);
+			cfg->sensitivity = MAXVAL(fvals[0], 0);
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: changing sensitivity to %f\n", cfg->sensitivity);
+#endif
+		}
+	}
+	else if (property == mprops.tap_buttons) {
+		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		if (!checkonly) {
+			ivals = (int*)prop->data;
+			cfg->tap_1touch = CLAMPVAL(ivals[0], 0, 32);
+			cfg->tap_1touch = CLAMPVAL(ivals[1], 0, 32);
+			cfg->tap_1touch = CLAMPVAL(ivals[2], 0, 32);
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: changing tap buttons to %d %d %d\n", cfg->tap_1touch, cfg->tap_1touch, cfg->tap_1touch);
+#endif
 		}
 	}
 

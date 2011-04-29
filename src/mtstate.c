@@ -213,7 +213,10 @@ static void touches_update(struct MTState* ms,
 
 		if (n >= 0) {
 			// Track and invalidate thumb and palm touches.
+			// Trackpad disabling happens here, too.
 			if (!GETBIT(ms->touch[n].state, MT_INVALID)) {
+				if (cfg->trackpad_disable)
+					SETBIT(ms->touch[n].state, MT_INVALID);
 				if (is_thumb(cfg, &hs->data[i])) {
 					if (cfg->ignore_thumb)
 						SETBIT(ms->touch[n].state, MT_INVALID);
