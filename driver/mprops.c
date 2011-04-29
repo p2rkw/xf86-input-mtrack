@@ -96,24 +96,13 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	float* fvals;
 
 	if (property == mprops.sensitivity) {
-		if (prop->size != 1 || prop->format != 32 || prop->type != mprops.float_type) {
-			xf86Msg(X_ERROR, "mtrack: invalid property format for sensitivity.\n");
-			if (prop->size != 1)
-				xf86Msg(X_ERROR, "mtrack: invalid property size %ld\n", prop->size);
-			if (prop->format != 32)
-				xf86Msg(X_ERROR, "mtrack: invalid property format %d\n", prop->format);
-			if (prop->type != mprops.float_type)
-				xf86Msg(X_ERROR, "mtrack: invalid property type\n");
+		if (prop->size != 1 || prop->format != 32 || prop->type != mprops.float_type)
 			return BadMatch;
-		}
 
 		if (!checkonly) {
 			fvals = (float*)prop->data;
 			cfg->sensitivity = fvals[0];
 			xf86Msg(X_INFO, "mtrack: changing sensitivity to %f\n", fvals[0]);
-		}
-		else {
-			xf86Msg(X_INFO, "mtrack: changing sensitivity ignored\n");
 		}
 	}
 
