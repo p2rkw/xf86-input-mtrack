@@ -22,8 +22,14 @@
 #ifndef MTRACK_PROPS_H
 #define MTRACK_PROPS_H
 
+#include <xorg-server.h>
+#include "xf86Module.h"
+
 #include <X11/Xatom.h>
+#include <xf86.h>
 #include <xf86Xinput.h>
+#include <exevents.h>
+
 #include "mconfig.h"
 
 #ifndef XATOM_FLOAT
