@@ -55,7 +55,7 @@ static void trigger_button_down(struct Gestures* gs, int button)
 	}
 #if DEBUG_GESTURES
 	else if (IS_VALID_BUTTON(button))
-		xf86Msg(X_INFO, "trigger_button_down: %d down ignored, %d in delayed mode\n", button, button);
+		xf86Msg(X_INFO, "trigger_button_down: %d down ignored, in delayed mode\n", button);
 #endif
 }
 
@@ -141,7 +141,7 @@ static void buttons_update(struct Gestures* gs,
 		return;
 
 	static bitmask_t button_prev = 0U;
-	int i, n, down, emulate;
+	int i, down, emulate, touching, latest;
 	down = 0;
 	emulate = GETBIT(hs->button, 0) && !GETBIT(button_prev, 0);
 
@@ -160,22 +160,29 @@ static void buttons_update(struct Gestures* gs,
 	if (down) {
 		gs->move_type = GS_NONE;
 		gs->move_wait = hs->evtime + cfg->gesture_wait;
-		n = 0;
+		latest = -1;
 		foreach_bit(i, ms->touch_used) {
 			if (GETBIT(ms->touch[i].state, MT_INVALID))
 				continue;
 			if (cfg->button_integrated && !GETBIT(ms->touch[i].flags, GS_BUTTON))
 				SETBIT(ms->touch[i].flags, GS_BUTTON);
-			n++;
+			if (latest == -1 || ms->touch[i].down > ms->touch[latest].down)
+				latest = i;
 		}
 
-		if (emulate) {
-			if (cfg->button_integrated)
-				n--;
+		if (emulate && latest >= 0) {
+			touching = 0;
+			foreach_bit(i, ms->touch_used) {
+				if (cfg->button_expire == 0 || ms->touch[latest].down < ms->touch[i].down + cfg->button_expire)
+					touching++;
+			}
 
-			if (n == 1 && cfg->button_1touch > 0)
+			if (cfg->button_integrated)
+				touching--;
+
+			if (touching == 1 && cfg->button_1touch > 0)
 				trigger_button_emulation(gs, cfg->button_1touch);
-			else if (n == 2 && cfg->button_2touch > 0)
+			else if (touching == 2 && cfg->button_2touch > 0)
 				trigger_button_emulation(gs, cfg->button_2touch);
 		}
 	}
@@ -186,7 +193,7 @@ static void tapping_update(struct Gestures* gs,
 			const struct HWState* hs,
 			struct MTState* ms)
 {
-	if (!cfg->tap_1touch && !cfg->tap_2touch && !cfg->tap_3touch)
+	if (cfg->tap_1touch < 0 && cfg->tap_2touch < 0 && cfg->tap_3touch < 0)
 		return;
 
 	int i, n, dist, released_max;

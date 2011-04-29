@@ -38,6 +38,7 @@
 #define DEFAULT_BUTTON_INTEGRATED 1
 #define DEFAULT_BUTTON_1TOUCH 3
 #define DEFAULT_BUTTON_2TOUCH 2
+#define DEFAULT_BUTTON_EXPIRE 100
 #define DEFAULT_TAP_1TOUCH 1
 #define DEFAULT_TAP_2TOUCH 3
 #define DEFAULT_TAP_3TOUCH 2
@@ -99,6 +100,7 @@ struct MConfig {
 	int trackpad_disable;	// Disable the trackpad? 0 or 1
 	int button_enable;		// Enable physical buttons? 0 or 1
 	int button_integrated;	// Is the button under the touchpad? 0 or 1
+	int button_expire;		// How long to consider a touch for button emulation. >= 0
 	int button_1touch;		// What button to emulate when one (extra) finger is on the pad? 0 to 32
 	int button_2touch;		// What button to emulate when two (extra) fingers are on the pad? 0 to 32
 	int tap_1touch;			// What button to emulate for one touch taps? 0 to 32
