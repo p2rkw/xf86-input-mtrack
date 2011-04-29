@@ -22,6 +22,14 @@
 #ifndef MTRACK_PROPS_H
 #define MTRACK_PROPS_H
 
+#include <X11/Xatom.h>
+#include <xf86Xinput.h>
+#include "mconfig.h"
+
+#ifndef XATOM_FLOAT
+#define XATOM_FLOAT "FLOAT"
+#endif
+
 #define MTRACK_PROP_SENSITIVITY "Trackpad Sensitivity"	// float, 1 value
 
 struct MProps {
@@ -32,7 +40,8 @@ struct MProps {
 	Atom sensitivity;
 };
 
-void mprops_init(struct MProps* props, InputInfoPtr local);
+void mprops_init(struct MConfig* cfg, InputInfoPtr local);
+int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly);
 
 #endif
 

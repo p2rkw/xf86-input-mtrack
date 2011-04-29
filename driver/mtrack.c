@@ -21,6 +21,7 @@
  **************************************************************************/
 
 #include "mtouch.h"
+#include "mprops.h"
 
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
 #include <X11/Xatom.h>
@@ -151,8 +152,8 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 				   1, 0, 1);
 #endif
 	xf86InitValuatorDefaults(dev, 1);
-
-	XIRegisterPropertyHandler(dev, mprops_init, NULL, NULL);
+	mprops_init(&mt->cfg, local);
+	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
 	return Success;
 }

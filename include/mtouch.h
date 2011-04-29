@@ -28,7 +28,6 @@
 #include "hwstate.h"
 #include "mtstate.h"
 #include "mconfig.h"
-#include "mprops.h"
 #include "gestures.h"
 
 struct MTouch {
@@ -37,7 +36,6 @@ struct MTouch {
 	struct HWState hs;
 	struct MTState state;
 	struct MConfig cfg;
-	struct MProps props;
 	struct Gestures gs;
 };
 

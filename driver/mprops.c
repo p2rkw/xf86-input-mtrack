@@ -21,11 +21,14 @@
 
 #include "mprops.h"
 #include "common.h"
+#include "mtouch.h"
 
 #define MAX_INT_VALUES 4
 #define MAX_FLOAT_VALUES 4
 
-static void atom_init_integer(DeviceIntPtr dev, char* name, int nvalues int* values, int size) {
+struct MProps mprops;
+
+Atom atom_init_integer(DeviceIntPtr dev, char* name, int nvalues, int* values, int size) {
 	Atom atom;
 	int i;
 	uint8_t uvals8[MAX_INT_VALUES];
@@ -61,42 +64,45 @@ static void atom_init_integer(DeviceIntPtr dev, char* name, int nvalues int* val
 	return atom;
 }
 
-static void atom_init_float(DeviceIntPtr dev, char* name, int nvalues, float* values, Atom float_type) {
+Atom atom_init_float(DeviceIntPtr dev, char* name, int nvalues, float* values, Atom float_type) {
 	Atom atom = MakeAtom(name, strlen(name), TRUE);
 	XIChangeDeviceProperty(dev, atom, float_type, 32, PropModeReplace, nvalues, values, FALSE);
 }
 
-void mprops_init(struct MProps* props, static struct MConfig* cfg, InputInfoPtr local) {
+void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	int ivals[MAX_INT_VALUES];
 	float fvals[MAX_FLOAT_VALUES];
 
-	props->float_type = XIGetKnownProperty(XATOM_FLOAT);
-	if (!props->float_type) {
-		props->float_type = MakeAtom(XATOM_FLOAT, strlen(XATOM_FLOAT), TRUE);
-		if (!props->float_type)
+	mprops.float_type = XIGetKnownProperty(XATOM_FLOAT);
+	if (!mprops.float_type) {
+		mprops.float_type = MakeAtom(XATOM_FLOAT, strlen(XATOM_FLOAT), TRUE);
+		if (!mprops.float_type) {
 			xf86Msg(X_ERROR, "mtrack: %s: Failed to init float atom. Property support is disabled.\n", local->name);
+			return;
+		}
 	}
 
 	fvals[0] = (float)cfg->sensitivity;
-	props->sensitivity = atom_init_float(local->dev, MTRACK_PROP_SENSITIVITY, 1, fvals, props->float_type);
+	mprops.sensitivity = atom_init_float(local->dev, MTRACK_PROP_SENSITIVITY, 1, fvals, mprops.float_type);
 }
 
 int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly) {
 	InputInfoPtr local = dev->public.devicePrivate;
-	struct MProps props_tmp;
-	struct MProps* props_real = ((MTouch*)local->private)->props;
-	struct MProps* props = checkonly ? &props_tmp : props_real;
-	struct MConfig* cfg = ((MTouch*)local->private)->cfg;
+	struct MConfig* cfg = &((struct MTouch*)local->private)->cfg;
 
 	int* ivals;
 	float* fvals;
 
-	if (property == props_real->sensitivity) {
-		if (prop->size != 1 || prop->format != 32 || prop->type != props_real->float_type)
+	if (property == mprops.sensitivity) {
+		if (prop->size != 1 || prop->format != 32 || prop->type != mprops.float_type)
 			return BadMatch;
 
-		fvals = (float*)prop->data;
-		cfg->sensitivity = fvals[0];
+		if (!checkonly) {
+			fvals = (float*)prop->data;
+			cfg->sensitivity = fvals[0];
+		}
 	}
+
+	return Success;
 }
 

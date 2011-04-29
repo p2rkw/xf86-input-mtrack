@@ -7,8 +7,7 @@ MODULES = src
 XMODULES = driver
 
 o_src	= capabilities hwstate mtstate gestures mconfig mtouch trig
-
-o_driver= mtrack
+o_driver= mtrack mprops
 
 TARGETS	+= src/test
 
