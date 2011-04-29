@@ -20,9 +20,9 @@ This software is licensed under the [GPLv2][2] and is a fork of the
 Binaries
 --------
 
-* [Gentoo][3]
-* [Ubuntu][4]
-* [Arch][5]
+* [Gentoo][4]
+* [Ubuntu][5]
+* [Arch][6]
 
 Arch package contributed and maintained by Mike Zackles.
 
