@@ -84,16 +84,88 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 		}
 	}
 
+	ivals[0] = MTRACK_PROP_VERSION;
+	mprops.api = atom_init_integer(local->dev, MTRACK_PROP_API, 1, ivals, 32);
+
 	ivals[0] = cfg->trackpad_disable;
 	mprops.trackpad_disable = atom_init_integer(local->dev, MTRACK_PROP_TRACKPAD_DISABLE, 1, ivals, 8);
 
 	fvals[0] = (float)cfg->sensitivity;
 	mprops.sensitivity = atom_init_float(local->dev, MTRACK_PROP_SENSITIVITY, 1, fvals, mprops.float_type);
 
-	ivals[0] = cfg->tap_1touch;
-	ivals[1] = cfg->tap_2touch;
-	ivals[2] = cfg->tap_3touch;
-	mprops.tap_buttons = atom_init_integer(local->dev, MTRACK_PROP_TAP_BUTTONS, 3, ivals, 8);
+	ivals[0] = cfg->button_enable;
+	ivals[1] = cfg->button_integrated;
+	ivals[2] = cfg->button_expire;
+	mprops.button_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_SETTINGS, 3, ivals, 16);
+
+	ivals[0] = cfg->button_1touch + 1;
+	ivals[1] = cfg->button_2touch + 1;
+	mprops.button_emulate = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE, 2, ivals, 8);
+
+	ivals[0] = cfg->tap_hold;
+	ivals[1] = cfg->tap_timeout;
+	ivals[2] = cfg->tap_dist;
+	mprops.tap_settings = atom_init_integer(local->dev, MTRACK_PROP_TAP_SETTINGS, 3, ivals, 32);
+
+	ivals[0] = cfg->tap_1touch + 1;
+	ivals[1] = cfg->tap_2touch + 1;
+	ivals[2] = cfg->tap_3touch + 1;
+	mprops.tap_emulate = atom_init_integer(local->dev, MTRACK_PROP_TAP_EMULATE, 3, ivals, 8);
+
+	ivals[0] = cfg->ignore_thumb;
+	ivals[1] = cfg->disable_on_thumb;
+	mprops.thumb_detect = atom_init_integer(local->dev, MTRACK_PROP_THUMB_DETECT, 2, ivals, 8);
+
+	ivals[0] = cfg->thumb_size;
+	ivals[1] = cfg->thumb_ratio;
+	mprops.thumb_size = atom_init_integer(local->dev, MTRACK_PROP_THUMB_SIZE, 2, ivals, 32);
+
+	ivals[0] = cfg->ignore_palm;
+	ivals[1] = cfg->disable_on_palm;
+	mprops.palm_detect = atom_init_integer(local->dev, MTRACK_PROP_PALM_DETECT, 2, ivals, 8);
+
+	ivals[0] = cfg->palm_size;
+	mprops.palm_size = atom_init_integer(local->dev, MTRACK_PROP_PALM_SIZE, 1, ivals, 32);
+
+	ivals[0] = cfg->gesture_hold;
+	ivals[1] = cfg->gesture_wait;
+	mprops.gesture_settings = atom_init_integer(local->dev, MTRACK_PROP_GESTURE_SETTINGS, 2, ivals, 16);
+
+	ivals[0] = cfg->scroll_dist;
+	mprops.scroll_dist = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_DIST, 1, ivals, 32);
+
+	ivals[0] = cfg->scroll_up_btn + 1;
+	ivals[1] = cfg->scroll_dn_btn + 1;
+	ivals[2] = cfg->scroll_lt_btn + 1;
+	ivals[3] = cfg->scroll_rt_btn + 1;
+	mprops.scroll_buttons = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_BUTTONS, 4, ivals, 8);
+
+	ivals[0] = cfg->swipe_dist;
+	mprops.swipe_dist = atom_init_integer(local->dev, MTRACK_PROP_SWIPE_DIST, 1, ivals, 32);
+
+	ivals[0] = cfg->swipe_up_btn + 1;
+	ivals[1] = cfg->swipe_dn_btn + 1;
+	ivals[2] = cfg->swipe_lt_btn + 1;
+	ivals[3] = cfg->swipe_rt_btn + 1;
+	mprops.swipe_buttons = atom_init_integer(local->dev, MTRACK_PROP_SWIPE_BUTTONS, 4, ivals, 8);
+
+	ivals[0] = cfg->scale_dist;
+	mprops.scale_dist = atom_init_integer(local->dev, MTRACK_PROP_SCALE_DIST, 1, ivals, 32);
+
+	ivals[0] = cfg->scale_up_btn + 1;
+	ivals[1] = cfg->scale_dn_btn + 1;
+	mprops.scale_buttons = atom_init_integer(local->dev, MTRACK_PROP_SCALE_BUTTONS, 2, ivals, 8);
+
+	ivals[0] = cfg->rotate_dist;
+	mprops.rotate_dist = atom_init_integer(local->dev, MTRACK_PROP_ROTATE_DIST, 1, ivals, 32);
+
+	ivals[0] = cfg->rotate_lt_btn + 1;
+	ivals[1] = cfg->rotate_rt_btn + 1;
+	mprops.rotate_buttons = atom_init_integer(local->dev, MTRACK_PROP_SCALE_BUTTONS, 2, ivals, 8);
+
+	ivals[0] = cfg->drag_enable;
+	ivals[1] = cfg->drag_timeout;
+	mprops.drag_settings = atom_init_integer(local->dev, MTRACK_PROP_DRAG_SETTINGS, 2, ivals, 16);
 }
 
 int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly) {
@@ -101,9 +173,15 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	struct MConfig* cfg = &((struct MTouch*)local->private)->cfg;
 
 	uint8_t* ivals8;
+	uint16_t* ivals16;
+	uint32_t* ivals32;
 	float* fvals;
 
-	if (property == mprops.trackpad_disable) {
+	if (property == mprops.api) {
+		xf86Msg(X_ERROR, "mtrack: Changing the properties API value is not allowed!");
+		return BadMatch;
+	}
+	else if (property == mprops.trackpad_disable) {
 		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
@@ -126,24 +204,66 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			fvals = (float*)prop->data;
 			cfg->sensitivity = MAXVAL(fvals[0], 0);
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: changing sensitivity to %f\n", cfg->sensitivity);
+			xf86Msg(X_INFO, "mtrack: set sensitivity to %f\n", cfg->sensitivity);
 #endif
 		}
 	}
-	else if (property == mprops.tap_buttons) {
-		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER) {
-			xf86Input(X_INFO, "mprops_set_property: size = %ld, format = %d\n");
+	else if (property == mprops.button_settings) {
+		if (prop->size != 3 || prop->format != 16 || prop->type != XA_INTEGER) 
 			return BadMatch;
+
+		if (!checkonly) {
+			ivals16 = (uint16_t*)prop->data;
+			cfg->button_enable = ivals16[0] ? 1 : 0;
+			cfg->button_integrated = ivals16[1] ? 1 : 0;
+			cfg->button_expire = MAXVAL(ivals16[2], 0);
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set button settings to %d %d %d\n",
+				cfg->button_enable, cfg->button_integrated, cfg->button_expire);
+#endif
 		}
+	}
+	else if (property == mprops.button_emulate) {
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
 
 		if (!checkonly) {
 			ivals8 = (uint8_t*)prop->data;
-			cfg->tap_1touch = CLAMPVAL(ivals8[0], 0, 32);
-			cfg->tap_2touch = CLAMPVAL(ivals8[1], 0, 32);
-			cfg->tap_3touch = CLAMPVAL(ivals8[2], 0, 32);
+			cfg->button_1touch = CLAMPVAL(ivals8[0], 0, 32) - 1;
+			cfg->button_2touch = CLAMPVAL(ivals8[1], 0, 32) - 1;
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: changing tap buttons to %d %d %d, clamped to %d %d %d\n",
-				ivals8[0], ivals8[1], ivals8[2], cfg->tap_1touch, cfg->tap_1touch, cfg->tap_1touch);
+			xf86Msg(X_INFO, "mtrack: set button emulation to %d %d\n",
+				cfg->button_1touch, cfg->button_2touch);
+#endif
+		}
+	}
+	else if (property == mprops.tap_settings) {
+		if (prop->size != 3 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		if (!checkonly) {
+			ivals32 = (uint32_t*)prop->data;
+			cfg->tap_hold = MAXVAL(ivals32[0], 1);
+			cfg->tap_timeout = MAXVAL(ivals32[1], 1);
+			cfg->tap_dist = MAXVAL(ivals32[2], 1);
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set tap settings to %d %d %d\n",
+				cfg->tap_hold, cfg->tap_timeout, tap_dist);
+#endif
+		}
+	}
+	else if (property == mprops.tap_emulate) {
+		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		if (!checkonly) {
+			ivals8 = (uint8_t*)prop->data;
+			cfg->tap_1touch = CLAMPVAL(ivals8[0], 0, 32) - 1;
+			cfg->tap_2touch = CLAMPVAL(ivals8[1], 0, 32) - 1;
+			cfg->tap_3touch = CLAMPVAL(ivals8[2], 0, 32) - 1;
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set tap emulation to %d %d %d\n",
+				cfg->tap_1touch, cfg->tap_1touch, cfg->tap_1touch);
 #endif
 		}
 	}
