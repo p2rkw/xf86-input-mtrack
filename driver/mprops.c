@@ -344,7 +344,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
 			return BadMatch;
 
-		ivals32 = (uint32_t)prop->data;
+		ivals32 = (uint32_t*)prop->data;
 		if (ivals32[0] < 0)
 			return BadMatch;
 
@@ -353,6 +353,23 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set palm size to %d\n",
 				cfg->palm_size);
+#endif
+		}
+	}
+	else if (property == mprops.gesture_settings) {
+		if (prop->size != 2 || prop->format != 16 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals16 = (uint16_t*)prop->data;
+		if (ivals16[0] < 1 || ivals16[1] < 0)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->gesture_hold = ivals16[0];
+			cfg->gesture_wait = ivals16[1];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set gesture settings to %d %d\n",
+				cfg->gesture_hold, cfg->gesture_wait);
 #endif
 		}
 	}
