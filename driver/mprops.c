@@ -155,8 +155,8 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[0] = cfg->scale_dist;
 	mprops.scale_dist = atom_init_integer(local->dev, MTRACK_PROP_SCALE_DIST, 1, ivals, 32);
 
-	ivals[0] = cfg->scale_up_btn + 1;
-	ivals[1] = cfg->scale_dn_btn + 1;
+	ivals[0] = cfg->scale_up_btn;
+	ivals[1] = cfg->scale_dn_btn;
 	mprops.scale_buttons = atom_init_integer(local->dev, MTRACK_PROP_SCALE_BUTTONS, 2, ivals, 8);
 
 	ivals[0] = cfg->rotate_dist;

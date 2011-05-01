@@ -367,9 +367,9 @@ static void trigger_scale(struct Gestures* gs,
 		if (gs->move_dist >= scale_dist_sqr) {
 			gs->move_dist = MODVAL(gs->move_dist, scale_dist_sqr);
 			if (dir == TR_DIR_UP)
-				trigger_button_click(gs, cfg->scale_up_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->scale_up_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_DN)
-				trigger_button_click(gs, cfg->scale_dn_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->scale_dn_btn - 1, hs->evtime + cfg->gesture_hold);
 		}
 #if DEBUG_GESTURES
 		xf86Msg(X_INFO, "trigger_scale: scaling %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, scale_dist_sqr);
