@@ -408,6 +408,41 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
+	else if (property == mprops.swipe_dist) {
+		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 1)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->swipe_dist = ivals32[0];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set swipe distance to %d\n",
+				cfg->swipe_dist);
+#endif
+		}
+	}
+	else if (property == mprops.swipe_buttons) {
+		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->swipe_up_btn = ivals8[0];
+			cfg->swipe_dn_btn = ivals8[1];
+			cfg->swipe_lt_btn = ivals8[2];
+			cfg->swipe_rt_btn = ivals8[3];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set swipe buttons to %d %d %d %d\n",
+				cfg->swipe_up_btn, cfg->swipe_dn_btn, cfg->swipe_lt_btn, cfg->swipe_rt_btn);
+#endif
+		}
+	}
 
 	return Success;
 }
