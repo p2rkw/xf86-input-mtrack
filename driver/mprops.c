@@ -443,7 +443,39 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
+	else if (property == mprops.scale_dist) {
+		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
 
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 1)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->scale_dist = ivals32[0];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set scale distance to %d\n",
+				cfg->scale_dist);
+#endif
+		}
+	}
+	else if (property == mprops.scale_buttons) {
+		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->scale_up_btn = ivals8[0];
+			cfg->scale_dn_btn = ivals8[1];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set scale buttons to %d %d\n",
+				cfg->scale_up_btn, cfg->scale_dn_btn);
+#endif
+		}
+	}
 	return Success;
 }
 
