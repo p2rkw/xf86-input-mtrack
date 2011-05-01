@@ -373,6 +373,22 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
+	else if (property == mprops.scroll_dist) {
+		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 1)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->scroll_dist = ivals32[0];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set scroll distance to %d\n",
+				cfg->scroll_dist);
+#endif
+		}
+	}
 
 	return Success;
 }
