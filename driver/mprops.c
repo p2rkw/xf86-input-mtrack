@@ -28,6 +28,7 @@
 
 #define VALID_BUTTON(x) (x >= 0 && x <= 32)
 #define VALID_BOOL(x) (x == 0 || x == 1)
+#define VALID_PCNT(x) (x >= 0 && x <= 100)
 
 struct MProps mprops;
 
@@ -302,6 +303,23 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set thumb detect to %d %d\n",
 				cfg->ignore_thumb, cfg->disable_on_thumb);
+#endif
+		}
+	}
+	else if (property == mprops.thumb_size) {
+		if (prop->size != 2 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 0 || !VALID_PCNT(ivals32[1]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->thumb_size = ivals32[0];
+			cfg->thumb_ratio = ivals32[0];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set thumb size to %d %d\n",
+				cfg->thumb_size, cfg->thumb_ratio);
 #endif
 		}
 	}
