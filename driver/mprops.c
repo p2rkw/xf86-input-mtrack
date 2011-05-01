@@ -146,10 +146,10 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[0] = cfg->swipe_dist;
 	mprops.swipe_dist = atom_init_integer(local->dev, MTRACK_PROP_SWIPE_DIST, 1, ivals, 32);
 
-	ivals[0] = cfg->swipe_up_btn + 1;
-	ivals[1] = cfg->swipe_dn_btn + 1;
-	ivals[2] = cfg->swipe_lt_btn + 1;
-	ivals[3] = cfg->swipe_rt_btn + 1;
+	ivals[0] = cfg->swipe_up_btn;
+	ivals[1] = cfg->swipe_dn_btn;
+	ivals[2] = cfg->swipe_lt_btn;
+	ivals[3] = cfg->swipe_rt_btn;
 	mprops.swipe_buttons = atom_init_integer(local->dev, MTRACK_PROP_SWIPE_BUTTONS, 4, ivals, 8);
 
 	ivals[0] = cfg->scale_dist;

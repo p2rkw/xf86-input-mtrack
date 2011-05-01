@@ -334,13 +334,13 @@ static void trigger_swipe(struct Gestures* gs,
 		if (gs->move_dist >= cfg->swipe_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->swipe_dist);
 			if (dir == TR_DIR_UP)
-				trigger_button_click(gs, cfg->swipe_up_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->swipe_up_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_DN)
-				trigger_button_click(gs, cfg->swipe_dn_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->swipe_dn_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_LT)
-				trigger_button_click(gs, cfg->swipe_lt_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->swipe_lt_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_RT)
-				trigger_button_click(gs, cfg->swipe_rt_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->swipe_rt_btn - 1, hs->evtime + cfg->gesture_hold);
 		}
 #if DEBUG_GESTURES
 		xf86Msg(X_INFO, "trigger_swipe: swiping %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->swipe_dist);
