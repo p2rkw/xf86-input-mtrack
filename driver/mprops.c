@@ -248,7 +248,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->tap_dist = MAXVAL(ivals32[2], 1);
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set tap settings to %d %d %d\n",
-				cfg->tap_hold, cfg->tap_timeout, tap_dist);
+				cfg->tap_hold, cfg->tap_timeout, cfg->tap_dist);
 #endif
 		}
 	}
