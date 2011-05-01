@@ -26,6 +26,9 @@
 #define MAX_INT_VALUES 4
 #define MAX_FLOAT_VALUES 4
 
+#define VALID_BUTTON(x) (x >= 0 && x <= 32)
+#define VALID_BOOL(x) (x == 0 || x == 1)
+
 struct MProps mprops;
 
 Atom atom_init_integer(DeviceIntPtr dev, char* name, int nvalues, int* values, int size) {
@@ -185,9 +188,12 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BOOL(ivals8[0]))
+			return BadMatch;
+
 		if (!checkonly) {
-			ivals8 = (uint8_t*)prop->data;
-			cfg->trackpad_disable = ivals8[0] ? 1 : 0;
+			cfg->trackpad_disable = ivals8[0];
 #ifdef DEBUG_PROPS
 			if (cfg->trackpad_disable)
 				xf86Msg(X_INFO, "mtrack: trackpad input disabled\n");
@@ -200,9 +206,12 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (prop->size != 1 || prop->format != 32 || prop->type != mprops.float_type)
 			return BadMatch;
 
+		fvals = (float*)prop->data;
+		if (fvals[0] < 0)
+			return BadMatch;
+
 		if (!checkonly) {
-			fvals = (float*)prop->data;
-			cfg->sensitivity = MAXVAL(fvals[0], 0);
+			cfg->sensitivity = fvals[0];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set sensitivity to %f\n", cfg->sensitivity);
 #endif
@@ -212,11 +221,14 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (prop->size != 3 || prop->format != 16 || prop->type != XA_INTEGER) 
 			return BadMatch;
 
+		ivals16 = (uint16_t*)prop->data;
+		if (!VALID_BOOL(ivals16[0]) || !VALID_BOOL(ivals16[1]) || ivals16[2] < 0)
+			return BadMatch;
+
 		if (!checkonly) {
-			ivals16 = (uint16_t*)prop->data;
-			cfg->button_enable = ivals16[0] ? 1 : 0;
-			cfg->button_integrated = ivals16[1] ? 1 : 0;
-			cfg->button_expire = MAXVAL(ivals16[2], 0);
+			cfg->button_enable = ivals16[0];
+			cfg->button_integrated = ivals16[1];
+			cfg->button_expire = ivals16[2];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set button settings to %d %d %d\n",
 				cfg->button_enable, cfg->button_integrated, cfg->button_expire);
@@ -227,10 +239,13 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]))
+			return BadMatch;
+
 		if (!checkonly) {
-			ivals8 = (uint8_t*)prop->data;
-			cfg->button_1touch = CLAMPVAL(ivals8[0], 0, 32) - 1;
-			cfg->button_2touch = CLAMPVAL(ivals8[1], 0, 32) - 1;
+			cfg->button_1touch = ivals8[0] - 1;
+			cfg->button_2touch = ivals8[1] - 1;
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set button emulation to %d %d\n",
 				cfg->button_1touch, cfg->button_2touch);
@@ -241,11 +256,14 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (prop->size != 3 || prop->format != 32 || prop->type != XA_INTEGER)
 			return BadMatch;
 
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 1 || ivals32[1] < 1 || ivals32[2] < 1)
+			return BadMatch;
+
 		if (!checkonly) {
-			ivals32 = (uint32_t*)prop->data;
-			cfg->tap_hold = MAXVAL(ivals32[0], 1);
-			cfg->tap_timeout = MAXVAL(ivals32[1], 1);
-			cfg->tap_dist = MAXVAL(ivals32[2], 1);
+			cfg->tap_hold = ivals32[0];
+			cfg->tap_timeout = ivals32[1];
+			cfg->tap_dist = ivals32[2];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set tap settings to %d %d %d\n",
 				cfg->tap_hold, cfg->tap_timeout, cfg->tap_dist);
@@ -256,11 +274,14 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
-		if (!checkonly) {
-			ivals8 = (uint8_t*)prop->data;
-			cfg->tap_1touch = CLAMPVAL(ivals8[0], 0, 32) - 1;
-			cfg->tap_2touch = CLAMPVAL(ivals8[1], 0, 32) - 1;
-			cfg->tap_3touch = CLAMPVAL(ivals8[2], 0, 32) - 1;
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]))
+			return BadMatch;
+
+		if (!checkonly) {			
+			cfg->tap_1touch = ivals8[0] - 1;
+			cfg->tap_2touch = ivals8[1] - 1;
+			cfg->tap_3touch = ivals8[2] - 1;
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set tap emulation to %d %d %d\n",
 				cfg->tap_1touch, cfg->tap_1touch, cfg->tap_1touch);
