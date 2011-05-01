@@ -110,9 +110,9 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[2] = cfg->tap_dist;
 	mprops.tap_settings = atom_init_integer(local->dev, MTRACK_PROP_TAP_SETTINGS, 3, ivals, 32);
 
-	ivals[0] = cfg->tap_1touch + 1;
-	ivals[1] = cfg->tap_2touch + 1;
-	ivals[2] = cfg->tap_3touch + 1;
+	ivals[0] = cfg->tap_1touch;
+	ivals[1] = cfg->tap_2touch;
+	ivals[2] = cfg->tap_3touch;
 	mprops.tap_emulate = atom_init_integer(local->dev, MTRACK_PROP_TAP_EMULATE, 3, ivals, 8);
 
 	ivals[0] = cfg->ignore_thumb;
@@ -279,12 +279,12 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		if (!checkonly) {			
-			cfg->tap_1touch = ivals8[0] - 1;
-			cfg->tap_2touch = ivals8[1] - 1;
-			cfg->tap_3touch = ivals8[2] - 1;
+			cfg->tap_1touch = ivals8[0];
+			cfg->tap_2touch = ivals8[1];
+			cfg->tap_3touch = ivals8[2];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set tap emulation to %d %d %d\n",
-				cfg->tap_1touch + 1, cfg->tap_2touch + 1, cfg->tap_3touch + 1);
+				cfg->tap_1touch, cfg->tap_2touch, cfg->tap_3touch);
 #endif
 		}
 	}

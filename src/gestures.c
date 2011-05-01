@@ -193,11 +193,11 @@ static void tapping_update(struct Gestures* gs,
 			const struct HWState* hs,
 			struct MTState* ms)
 {
-	if (cfg->tap_1touch < 0 && cfg->tap_2touch < 0 && cfg->tap_3touch < 0)
+	if (cfg->tap_1touch < 1 && cfg->tap_2touch < 1 && cfg->tap_3touch < 1)
 		return;
 
 	int i, n, dist, released_max;
-	released_max = MAXVAL(cfg->tap_1touch, MAXVAL(cfg->tap_2touch, cfg->tap_3touch));
+	released_max = MAXVAL(cfg->tap_1touch, MAXVAL(cfg->tap_2touch, cfg->tap_3touch)) - 1;
 
 	if (gs->tap_time_down != 0 && hs->evtime >= gs->tap_time_down + cfg->tap_timeout) {
 		gs->tap_time_down = 0;
@@ -246,11 +246,11 @@ static void tapping_update(struct Gestures* gs,
 		}
 
 		if (gs->tap_released == 1)
-			n = cfg->tap_1touch;
+			n = cfg->tap_1touch - 1;
 		else if (gs->tap_released == 2)
-			n = cfg->tap_2touch;
+			n = cfg->tap_2touch - 1;
 		else
-			n = cfg->tap_3touch;
+			n = cfg->tap_3touch - 1;
 
 		trigger_button_click(gs, n, hs->evtime + cfg->tap_hold);
 		if (cfg->drag_enable && n == 0)
