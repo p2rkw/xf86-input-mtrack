@@ -21,6 +21,7 @@
  **************************************************************************/
 
 #include "mtouch.h"
+#include "mprops.h"
 
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
 #include <X11/Xatom.h>
@@ -48,17 +49,6 @@ static void pointer_control(DeviceIntPtr dev, PtrCtrl *ctrl)
 #if DEBUG_DRIVER
 	xf86Msg(X_INFO, "pointer_control\n");
 #endif
-}
-
-static int pointer_property(DeviceIntPtr dev,
-			    Atom property,
-			    XIPropertyValuePtr prop,
-			    BOOL checkonly)
-{
-#if DEBUG_DRIVER
-	xf86Msg(X_INFO, "pointer_property\n");
-#endif
-	return Success;
 }
 
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
@@ -162,8 +152,8 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 				   1, 0, 1);
 #endif
 	xf86InitValuatorDefaults(dev, 1);
-
-	XIRegisterPropertyHandler(dev, pointer_property, NULL, NULL);
+	mprops_init(&mt->cfg, local);
+	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
 	return Success;
 }

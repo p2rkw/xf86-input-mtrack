@@ -24,6 +24,7 @@
 
 #include "capabilities.h"
 
+#define DEFAULT_TRACKPAD_DISABLE 0
 #define DEFAULT_TOUCH_DOWN 5
 #define DEFAULT_TOUCH_UP 5
 #define DEFAULT_IGNORE_THUMB 1
@@ -96,14 +97,15 @@ struct MConfig {
 	/* Used by Gestures */
 
 	// Set by config.
+	int trackpad_disable;	// Disable the trackpad? 0 or 1
 	int button_enable;		// Enable physical buttons? 0 or 1
 	int button_integrated;	// Is the button under the touchpad? 0 or 1
 	int button_expire;		// How long to consider a touch for button emulation. >= 0
-	int button_1touch;		// What button to emulate when one (extra) finger is on the pad? 0, 1, 2, or 3
-	int button_2touch;		// What button to emulate when two (extra) fingers are on the pad? 0, 1, 2, or 3
-	int tap_1touch;			// What button to emulate for one touch taps? 0, 1, 2, or 3
-	int tap_2touch;			// What button to emulate for two touch taps? 0, 1, 2, or 3
-	int tap_3touch;			// What button to emulate for three touch taps? 0, 1, 2, or 3
+	int button_1touch;		// What button to emulate when one (extra) finger is on the pad? 0 to 32
+	int button_2touch;		// What button to emulate when two (extra) fingers are on the pad? 0 to 32
+	int tap_1touch;			// What button to emulate for one touch taps? 0 to 32
+	int tap_2touch;			// What button to emulate for two touch taps? 0 to 32
+	int tap_3touch;			// What button to emulate for three touch taps? 0 to 32
 	int tap_timeout;		// Window for touches when counting for the button. > 0
 	int tap_hold;			// How long to "hold down" the emulated button on tap. > 0
 	int tap_dist;			// How far to allow a touch to move before it's a moving touch. > 0

@@ -181,9 +181,9 @@ static void buttons_update(struct Gestures* gs,
 				touching--;
 
 			if (touching == 1 && cfg->button_1touch > 0)
-				trigger_button_emulation(gs, cfg->button_1touch);
+				trigger_button_emulation(gs, cfg->button_1touch - 1);
 			else if (touching == 2 && cfg->button_2touch > 0)
-				trigger_button_emulation(gs, cfg->button_2touch);
+				trigger_button_emulation(gs, cfg->button_2touch - 1);
 		}
 	}
 }
@@ -193,11 +193,11 @@ static void tapping_update(struct Gestures* gs,
 			const struct HWState* hs,
 			struct MTState* ms)
 {
-	if (cfg->tap_1touch < 0 && cfg->tap_2touch < 0 && cfg->tap_3touch < 0)
+	if (cfg->tap_1touch < 1 && cfg->tap_2touch < 1 && cfg->tap_3touch < 1)
 		return;
 
 	int i, n, dist, released_max;
-	released_max = MAXVAL(cfg->tap_1touch, MAXVAL(cfg->tap_2touch, cfg->tap_3touch));
+	released_max = MAXVAL(cfg->tap_1touch, MAXVAL(cfg->tap_2touch, cfg->tap_3touch)) - 1;
 
 	if (gs->tap_time_down != 0 && hs->evtime >= gs->tap_time_down + cfg->tap_timeout) {
 		gs->tap_time_down = 0;
@@ -226,7 +226,7 @@ static void tapping_update(struct Gestures* gs,
 
 				if (GETBIT(ms->touch[i].flags, GS_TAP)) {
 					dist = dist2(ms->touch[i].total_dx, ms->touch[i].total_dy);
-					if (dist >= cfg->tap_dist) {
+					if (dist >= SQRVAL(cfg->tap_dist)) {
 						CLEARBIT(ms->touch[i].flags, GS_TAP);
 						gs->tap_touching--;
 					}
@@ -246,11 +246,11 @@ static void tapping_update(struct Gestures* gs,
 		}
 
 		if (gs->tap_released == 1)
-			n = cfg->tap_1touch;
+			n = cfg->tap_1touch - 1;
 		else if (gs->tap_released == 2)
-			n = cfg->tap_2touch;
+			n = cfg->tap_2touch - 1;
 		else
-			n = cfg->tap_3touch;
+			n = cfg->tap_3touch - 1;
 
 		trigger_button_click(gs, n, hs->evtime + cfg->tap_hold);
 		if (cfg->drag_enable && n == 0)
@@ -302,13 +302,13 @@ static void trigger_scroll(struct Gestures* gs,
 		if (gs->move_dist >= cfg->scroll_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->scroll_dist);
 			if (dir == TR_DIR_UP)
-				trigger_button_click(gs, cfg->scroll_up_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->scroll_up_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_DN)
-				trigger_button_click(gs, cfg->scroll_dn_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->scroll_dn_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_LT)
-				trigger_button_click(gs, cfg->scroll_lt_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->scroll_lt_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_RT)
-				trigger_button_click(gs, cfg->scroll_rt_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->scroll_rt_btn - 1, hs->evtime + cfg->gesture_hold);
 		}
 #if DEBUG_GESTURES
 		xf86Msg(X_INFO, "trigger_scroll: scrolling %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->scroll_dist);
@@ -334,13 +334,13 @@ static void trigger_swipe(struct Gestures* gs,
 		if (gs->move_dist >= cfg->swipe_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->swipe_dist);
 			if (dir == TR_DIR_UP)
-				trigger_button_click(gs, cfg->swipe_up_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->swipe_up_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_DN)
-				trigger_button_click(gs, cfg->swipe_dn_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->swipe_dn_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_LT)
-				trigger_button_click(gs, cfg->swipe_lt_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->swipe_lt_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_RT)
-				trigger_button_click(gs, cfg->swipe_rt_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->swipe_rt_btn - 1, hs->evtime + cfg->gesture_hold);
 		}
 #if DEBUG_GESTURES
 		xf86Msg(X_INFO, "trigger_swipe: swiping %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->swipe_dist);
@@ -354,6 +354,7 @@ static void trigger_scale(struct Gestures* gs,
 			int dist, int dir)
 {
 	if (gs->move_type == GS_SCALE || hs->evtime >= gs->move_wait) {
+		int scale_dist_sqr = SQRVAL(cfg->scale_dist);
 		trigger_drag_stop(gs, 1);
 		if (gs->move_type != GS_SCALE || gs->move_dir != dir)
 			gs->move_dist = 0;
@@ -363,15 +364,15 @@ static void trigger_scale(struct Gestures* gs,
 		gs->move_wait = hs->evtime + cfg->gesture_wait;
 		gs->move_dist += ABSVAL(dist);
 		gs->move_dir = dir;
-		if (gs->move_dist >= cfg->scale_dist) {
-			gs->move_dist = MODVAL(gs->move_dist, cfg->scale_dist);
+		if (gs->move_dist >= scale_dist_sqr) {
+			gs->move_dist = MODVAL(gs->move_dist, scale_dist_sqr);
 			if (dir == TR_DIR_UP)
-				trigger_button_click(gs, cfg->scale_up_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->scale_up_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_DN)
-				trigger_button_click(gs, cfg->scale_dn_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->scale_dn_btn - 1, hs->evtime + cfg->gesture_hold);
 		}
 #if DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_scale: scaling %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->scale_dist);
+		xf86Msg(X_INFO, "trigger_scale: scaling %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, scale_dist_sqr);
 #endif
 	}
 }
@@ -382,6 +383,7 @@ static void trigger_rotate(struct Gestures* gs,
 			int dist, int dir)
 {
 	if (gs->move_type == GS_ROTATE || hs->evtime >= gs->move_wait) {
+		int rotate_dist_sqr = SQRVAL(cfg->rotate_dist);
 		trigger_drag_stop(gs, 1);
 		if (gs->move_type != GS_ROTATE || gs->move_dir != dir)
 			gs->move_dist = 0;
@@ -391,15 +393,15 @@ static void trigger_rotate(struct Gestures* gs,
 		gs->move_wait = hs->evtime + cfg->gesture_wait;
 		gs->move_dist += ABSVAL(dist);
 		gs->move_dir = dir;
-		if (gs->move_dist >= cfg->scale_dist) {
-			gs->move_dist = MODVAL(gs->move_dist, cfg->scale_dist);
+		if (gs->move_dist >= rotate_dist_sqr) {
+			gs->move_dist = MODVAL(gs->move_dist, rotate_dist_sqr);
 			if (dir == TR_DIR_LT)
-				trigger_button_click(gs, cfg->rotate_lt_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->rotate_lt_btn - 1, hs->evtime + cfg->gesture_hold);
 			else if (dir == TR_DIR_RT)
-				trigger_button_click(gs, cfg->rotate_rt_btn, hs->evtime + cfg->gesture_hold);
+				trigger_button_click(gs, cfg->rotate_rt_btn - 1, hs->evtime + cfg->gesture_hold);
 		}
 #if DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_rotate: rotating %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->rotate_dist);
+		xf86Msg(X_INFO, "trigger_rotate: rotating %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, rotate_dist_sqr);
 #endif
 	}
 }
