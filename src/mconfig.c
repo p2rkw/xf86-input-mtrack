@@ -46,7 +46,7 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->tap_3touch = DEFAULT_TAP_3TOUCH - 1;
 	cfg->tap_timeout = DEFAULT_TAP_TIMEOUT;
 	cfg->tap_hold = DEFAULT_TAP_HOLD;
-	cfg->tap_dist = SQRVAL(DEFAULT_TAP_DIST);
+	cfg->tap_dist = DEFAULT_TAP_DIST;
 	cfg->gesture_hold = DEFAULT_GESTURE_HOLD;
 	cfg->gesture_wait = DEFAULT_GESTURE_WAIT;
 	cfg->scroll_dist = DEFAULT_SCROLL_DIST;
@@ -59,7 +59,7 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->swipe_dn_btn = DEFAULT_SWIPE_DN_BTN - 1;
 	cfg->swipe_lt_btn = DEFAULT_SWIPE_LT_BTN - 1;
 	cfg->swipe_rt_btn = DEFAULT_SWIPE_RT_BTN - 1;
-	cfg->scale_dist = SQRVAL(DEFAULT_SCALE_DIST);
+	cfg->scale_dist = DEFAULT_SCALE_DIST;
 	cfg->scale_up_btn = DEFAULT_SCALE_UP_BTN - 1;
 	cfg->scale_dn_btn = DEFAULT_SCALE_DN_BTN - 1;
 	cfg->rotate_dist = SQRVAL(DEFAULT_ROTATE_DIST);
@@ -133,7 +133,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->tap_3touch = CLAMPVAL(xf86SetIntOption(opts, "TapButton3", DEFAULT_TAP_3TOUCH), 0, 32) - 1;
 	cfg->tap_hold = MAXVAL(xf86SetIntOption(opts, "ClickTime", DEFAULT_TAP_HOLD), 1);
 	cfg->tap_timeout = MAXVAL(xf86SetIntOption(opts, "MaxTapTime", DEFAULT_TAP_TIMEOUT), 1);
-	cfg->tap_dist = SQRVAL(MAXVAL(xf86SetIntOption(opts, "MaxTapMove", DEFAULT_TAP_DIST), 1));
+	cfg->tap_dist = MAXVAL(xf86SetIntOption(opts, "MaxTapMove", DEFAULT_TAP_DIST), 1);
 	cfg->gesture_hold = MAXVAL(xf86SetIntOption(opts, "GestureClickTime", DEFAULT_GESTURE_HOLD), 1);
 	cfg->gesture_wait = MAXVAL(xf86SetIntOption(opts, "GestureWaitTime", DEFAULT_GESTURE_WAIT), 0);
 	cfg->scroll_dist = MAXVAL(xf86SetIntOption(opts, "ScrollDistance", DEFAULT_SCROLL_DIST), 1);
@@ -146,10 +146,10 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->swipe_dn_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeDownButton", DEFAULT_SWIPE_DN_BTN), 0, 32) - 1;
 	cfg->swipe_lt_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeLeftButton", DEFAULT_SWIPE_LT_BTN), 0, 32) - 1;
 	cfg->swipe_rt_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeRightButton", DEFAULT_SWIPE_RT_BTN), 0, 32) - 1;
-	cfg->scale_dist = SQRVAL(MAXVAL(xf86SetIntOption(opts, "ScaleDistance", DEFAULT_SCALE_DIST), 1));
+	cfg->scale_dist = MAXVAL(xf86SetIntOption(opts, "ScaleDistance", DEFAULT_SCALE_DIST), 1);
 	cfg->scale_up_btn = CLAMPVAL(xf86SetIntOption(opts, "ScaleUpButton", DEFAULT_SCALE_UP_BTN), 0, 32) - 1;
 	cfg->scale_dn_btn = CLAMPVAL(xf86SetIntOption(opts, "ScaleDownButton", DEFAULT_SCALE_DN_BTN), 0, 32) - 1;
-	cfg->rotate_dist = SQRVAL(MAXVAL(xf86SetIntOption(opts, "RotateDistance", DEFAULT_ROTATE_DIST), 1));
+	cfg->rotate_dist = MAXVAL(xf86SetIntOption(opts, "RotateDistance", DEFAULT_ROTATE_DIST), 1);
 	cfg->rotate_lt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateLeftButton", DEFAULT_ROTATE_LT_BTN), 0, 32) - 1;
 	cfg->rotate_rt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateRightButton", DEFAULT_ROTATE_RT_BTN), 0, 23) - 1;
 	cfg->drag_enable = xf86SetBoolOption(opts, "TapDragEnable", DEFAULT_DRAG_ENABLE);
