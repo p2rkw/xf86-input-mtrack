@@ -476,6 +476,40 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
+	else if (property == mprops.rotate_dist) {
+		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 1)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->rotate_dist = ivals32[0];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set rotate distance to %d\n",
+				cfg->rotate_dist);
+#endif
+		}
+	}
+	else if (property == mprops.rotate_buttons) {
+		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->rotate_lt_btn = ivals8[0];
+			cfg->rotate_rt_btn = ivals8[1];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set rotate buttons to %d %d\n",
+				cfg->rotate_lt_btn, cfg->rotate_rt_btn);
+#endif
+		}
+	}
+
 	return Success;
 }
 
