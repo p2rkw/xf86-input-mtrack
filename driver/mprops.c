@@ -162,8 +162,8 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[0] = cfg->rotate_dist;
 	mprops.rotate_dist = atom_init_integer(local->dev, MTRACK_PROP_ROTATE_DIST, 1, ivals, 32);
 
-	ivals[0] = cfg->rotate_lt_btn + 1;
-	ivals[1] = cfg->rotate_rt_btn + 1;
+	ivals[0] = cfg->rotate_lt_btn;
+	ivals[1] = cfg->rotate_rt_btn;
 	mprops.rotate_buttons = atom_init_integer(local->dev, MTRACK_PROP_SCALE_BUTTONS, 2, ivals, 8);
 
 	ivals[0] = cfg->drag_enable;

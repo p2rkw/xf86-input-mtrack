@@ -63,8 +63,8 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->scale_up_btn = DEFAULT_SCALE_UP_BTN;
 	cfg->scale_dn_btn = DEFAULT_SCALE_DN_BTN;
 	cfg->rotate_dist = SQRVAL(DEFAULT_ROTATE_DIST);
-	cfg->rotate_lt_btn = DEFAULT_ROTATE_LT_BTN - 1;
-	cfg->rotate_rt_btn = DEFAULT_ROTATE_RT_BTN - 1;
+	cfg->rotate_lt_btn = DEFAULT_ROTATE_LT_BTN;
+	cfg->rotate_rt_btn = DEFAULT_ROTATE_RT_BTN;
 	cfg->drag_enable = DEFAULT_DRAG_ENABLE;
 	cfg->drag_timeout = DEFAULT_DRAG_TIMEOUT;
 	cfg->sensitivity = DEFAULT_SENSITIVITY;
@@ -150,8 +150,8 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->scale_up_btn = CLAMPVAL(xf86SetIntOption(opts, "ScaleUpButton", DEFAULT_SCALE_UP_BTN), 0, 32);
 	cfg->scale_dn_btn = CLAMPVAL(xf86SetIntOption(opts, "ScaleDownButton", DEFAULT_SCALE_DN_BTN), 0, 32);
 	cfg->rotate_dist = MAXVAL(xf86SetIntOption(opts, "RotateDistance", DEFAULT_ROTATE_DIST), 1);
-	cfg->rotate_lt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateLeftButton", DEFAULT_ROTATE_LT_BTN), 0, 32) - 1;
-	cfg->rotate_rt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateRightButton", DEFAULT_ROTATE_RT_BTN), 0, 23) - 1;
+	cfg->rotate_lt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateLeftButton", DEFAULT_ROTATE_LT_BTN), 0, 32);
+	cfg->rotate_rt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateRightButton", DEFAULT_ROTATE_RT_BTN), 0, 23);
 	cfg->drag_enable = xf86SetBoolOption(opts, "TapDragEnable", DEFAULT_DRAG_ENABLE);
 	cfg->drag_timeout = MAXVAL(xf86SetIntOption(opts, "TapDragTime", DEFAULT_DRAG_TIMEOUT), 1);
 	cfg->sensitivity = MAXVAL(xf86SetRealOption(opts, "Sensitivity", DEFAULT_SENSITIVITY), 0);
