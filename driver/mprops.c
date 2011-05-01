@@ -137,10 +137,10 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[0] = cfg->scroll_dist;
 	mprops.scroll_dist = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_DIST, 1, ivals, 32);
 
-	ivals[0] = cfg->scroll_up_btn + 1;
-	ivals[1] = cfg->scroll_dn_btn + 1;
-	ivals[2] = cfg->scroll_lt_btn + 1;
-	ivals[3] = cfg->scroll_rt_btn + 1;
+	ivals[0] = cfg->scroll_up_btn;
+	ivals[1] = cfg->scroll_dn_btn;
+	ivals[2] = cfg->scroll_lt_btn;
+	ivals[3] = cfg->scroll_rt_btn;
 	mprops.scroll_buttons = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_BUTTONS, 4, ivals, 8);
 
 	ivals[0] = cfg->swipe_dist;
