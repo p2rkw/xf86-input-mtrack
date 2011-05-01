@@ -101,8 +101,8 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[2] = cfg->button_expire;
 	mprops.button_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_SETTINGS, 3, ivals, 16);
 
-	ivals[0] = cfg->button_1touch + 1;
-	ivals[1] = cfg->button_2touch + 1;
+	ivals[0] = cfg->button_1touch;
+	ivals[1] = cfg->button_2touch;
 	mprops.button_emulate = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE, 2, ivals, 8);
 
 	ivals[0] = cfg->tap_hold;
@@ -244,11 +244,11 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		if (!checkonly) {
-			cfg->button_1touch = ivals8[0] - 1;
-			cfg->button_2touch = ivals8[1] - 1;
+			cfg->button_1touch = ivals8[0];
+			cfg->button_2touch = ivals8[1];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set button emulation to %d %d\n",
-				cfg->button_1touch + 1, cfg->button_2touch + 1);
+				cfg->button_1touch, cfg->button_2touch);
 #endif
 		}
 	}

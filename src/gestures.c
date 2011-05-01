@@ -181,9 +181,9 @@ static void buttons_update(struct Gestures* gs,
 				touching--;
 
 			if (touching == 1 && cfg->button_1touch > 0)
-				trigger_button_emulation(gs, cfg->button_1touch);
+				trigger_button_emulation(gs, cfg->button_1touch - 1);
 			else if (touching == 2 && cfg->button_2touch > 0)
-				trigger_button_emulation(gs, cfg->button_2touch);
+				trigger_button_emulation(gs, cfg->button_2touch - 1);
 		}
 	}
 }
