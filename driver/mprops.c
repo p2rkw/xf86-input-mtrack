@@ -288,6 +288,23 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
+	else if (property == mprops.thumb_detect) {
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BOOL(ivals8[0]) || !VALID_BOOL(ivals8[0]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->ignore_thumb = ivals8[0];
+			cfg->disable_on_thumb = ivals8[1];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set thumb detect to %d %d\n",
+				cfg->ignore_thumb, cfg->disable_on_thumb);
+#endif
+		}
+	}
 
 	return Success;
 }
