@@ -389,6 +389,25 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
+	else if (property == mprops.scroll_buttons) {
+		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->scroll_up_btn = ivals8[0];
+			cfg->scroll_dn_btn = ivals8[1];
+			cfg->scroll_lt_btn = ivals8[2];
+			cfg->scroll_rt_btn = ivals8[3];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set scroll buttons to %d %d %d %d\n",
+				cfg->scroll_up_btn, cfg->scroll_dn_btn, cfg->scroll_lt_btn, cfg->scroll_rt_btn);
+#endif
+		}
+	}
 
 	return Success;
 }
