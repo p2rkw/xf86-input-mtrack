@@ -323,6 +323,39 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
+	else if (property == mprops.palm_detect) {
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BOOL(ivals8[0]) || !VALID_BOOL(ivals8[1]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->ignore_palm = ivals8[0];
+			cfg->disable_on_palm = ivals8[1];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set palm detect to %d %d\n",
+				cfg->ignore_palm cfg->disable_on_palm);
+#endif
+		}
+	}
+	else if (property == mprops.palm_size) {
+		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t)prop->data;
+		if (ivals32[0] < 0)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->palm_size = ivals32[0];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set palm size to %d\n",
+				cfg->palm_size);
+#endif
+		}
+	}
 
 	return Success;
 }
