@@ -171,7 +171,7 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->drag_timeout;
 	ivals[2] = cfg->drag_wait;
 	ivals[3] = cfg->drag_dist;
-	mprops.drag_settings = atom_init_integer(local->dev, MTRACK_PROP_DRAG_SETTINGS, 2, ivals, 32);
+	mprops.drag_settings = atom_init_integer(local->dev, MTRACK_PROP_DRAG_SETTINGS, 4, ivals, 32);
 }
 
 int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly) {

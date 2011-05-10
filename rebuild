@@ -1,4 +1,4 @@
 #!/bin/sh
 make clean
-CFLAGS="-DDEBUG_GESTURES" make
+CFLAGS="-DDEBUG_GESTURES -DDEBUG_DRIVER -DDEBUG_PROPS" make
 
