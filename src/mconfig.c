@@ -154,6 +154,8 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->rotate_rt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateRightButton", DEFAULT_ROTATE_RT_BTN), 0, 23);
 	cfg->drag_enable = xf86SetBoolOption(opts, "TapDragEnable", DEFAULT_DRAG_ENABLE);
 	cfg->drag_timeout = MAXVAL(xf86SetIntOption(opts, "TapDragTime", DEFAULT_DRAG_TIMEOUT), 1);
+	cfg->drag_wait = MAXVAL(xf86SetIntOption(opts, "TapDragWait", DEFAULT_DRAG_WAIT), 0);
+	cfg->drag_dist = MAXVAL(xf86SetIntOption(opts, "TapDragDist", DEFAULT_DRAG_DIST), 0);
 	cfg->sensitivity = MAXVAL(xf86SetRealOption(opts, "Sensitivity", DEFAULT_SENSITIVITY), 0);
 }
 

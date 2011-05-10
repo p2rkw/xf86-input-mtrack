@@ -81,7 +81,7 @@
 #define MTRACK_PROP_ROTATE_DIST "Trackpad Rotate Distance"
 // int, 2 values - left button, right button
 #define MTRACK_PROP_ROTATE_BUTTONS "Trackpad Rotate Buttons"
-// int, 2 values - enable, timeout
+// int, 4 values - enable, timeout, wait, dist
 #define MTRACK_PROP_DRAG_SETTINGS "Trackpad Drag Settings"
 
 struct MProps {

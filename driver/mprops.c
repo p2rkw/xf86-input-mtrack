@@ -169,7 +169,9 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 
 	ivals[0] = cfg->drag_enable;
 	ivals[1] = cfg->drag_timeout;
-	mprops.drag_settings = atom_init_integer(local->dev, MTRACK_PROP_DRAG_SETTINGS, 2, ivals, 16);
+	ivals[2] = cfg->drag_wait;
+	ivals[3] = cfg->drag_dist;
+	mprops.drag_settings = atom_init_integer(local->dev, MTRACK_PROP_DRAG_SETTINGS, 2, ivals, 32);
 }
 
 int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly) {
@@ -336,7 +338,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->disable_on_palm = ivals8[1];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set palm detect to %d %d\n",
-				cfg->ignore_palm cfg->disable_on_palm);
+				cfg->ignore_palm, cfg->disable_on_palm);
 #endif
 		}
 	}
@@ -506,6 +508,25 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set rotate buttons to %d %d\n",
 				cfg->rotate_lt_btn, cfg->rotate_rt_btn);
+#endif
+		}
+	}
+	else if (property == mprops.drag_settings) {
+		if (prop->size != 4 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (!VALID_BOOL(ivals32[0]) || ivals32[1] < 1 || ivals32[2] < 0 || ivals32[3] < 0)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->drag_enable = ivals32[0];
+			cfg->drag_timeout = ivals32[1];
+			cfg->drag_wait = ivals32[2];
+			cfg->drag_dist = ivals32[3];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set drag settings to %d %d %d %d\n",
+				cfg->drag_enable, cfg->drag_timeout, cfg->drag_wait, cfg->drag_dist);
 #endif
 		}
 	}

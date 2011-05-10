@@ -38,7 +38,8 @@
 #define GS_SCALE 4
 #define GS_ROTATE 5
 #define GS_DRAG_READY 6
-#define GS_DRAG_ACTIVE 7
+#define GS_DRAG_WAIT 7
+#define GS_DRAG_ACTIVE 8
 
 struct Gestures {
 	/* Taps, physical buttons, and gestures will trigger
@@ -66,7 +67,10 @@ struct Gestures {
 	int move_dist;
 	int move_dir;
 	int move_drag;
+	int move_drag_dx;
+	int move_drag_dy;
 	mstime_t move_wait;
+	mstime_t move_drag_wait;
 	mstime_t move_drag_expire;
 };
 

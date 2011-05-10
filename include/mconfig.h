@@ -64,7 +64,9 @@
 #define DEFAULT_ROTATE_LT_BTN 14
 #define DEFAULT_ROTATE_RT_BTN 15
 #define DEFAULT_DRAG_ENABLE 1
-#define DEFAULT_DRAG_TIMEOUT 200
+#define DEFAULT_DRAG_TIMEOUT 250
+#define DEFAULT_DRAG_WAIT 200
+#define DEFAULT_DRAG_DIST 400
 #define DEFAULT_SENSITIVITY 1.0
 
 #define MCFG_NONE 0
@@ -129,6 +131,8 @@ struct MConfig {
 	int rotate_rt_btn;		// Button to use for rotate right. >= 0, 0 is none
 	int drag_enable;		// Enable tap-to-drag? 0 or 1
 	int drag_timeout;		// How long to wait for a move after tapping? > 0
+	int drag_wait;			// How long to wait before triggering button down? >= 0
+	int drag_dist;			// How far is the finger allowed to move during wait time? >= 0
 	double sensitivity;		// Mouse movement multiplier. >= 0
 };
 
