@@ -88,9 +88,6 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 		}
 	}
 
-	ivals[0] = MTRACK_PROP_VERSION;
-	mprops.api = atom_init_integer(local->dev, MTRACK_PROP_API, 1, ivals, 32);
-
 	ivals[0] = cfg->trackpad_disable;
 	mprops.trackpad_disable = atom_init_integer(local->dev, MTRACK_PROP_TRACKPAD_DISABLE, 1, ivals, 8);
 
@@ -183,11 +180,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	uint32_t* ivals32;
 	float* fvals;
 
-	if (property == mprops.api) {
-		xf86Msg(X_ERROR, "mtrack: Changing the properties API value is not allowed!");
-		return BadMatch;
-	}
-	else if (property == mprops.trackpad_disable) {
+	if (property == mprops.trackpad_disable) {
 		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 

@@ -22,11 +22,6 @@
 #ifndef MTRACK_PROPS_H
 #define MTRACK_PROPS_H
 
-/* Needs to be incremented every time property atoms are
- * added/removed/reordered.
- */
-#define MTRACK_PROP_VERSION 1
-
 #include <xorg-server.h>
 #include "xf86Module.h"
 
@@ -41,8 +36,6 @@
 #define XATOM_FLOAT "FLOAT"
 #endif
 
-// int, 1 value
-#define MTRACK_PROP_API "Trackpad Properties Version"
 // int, 1 value
 #define MTRACK_PROP_TRACKPAD_DISABLE "Trackpad Disable Input"
 // float, 1 value
