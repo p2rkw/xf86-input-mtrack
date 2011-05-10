@@ -100,7 +100,7 @@ static void trigger_drag_ready(struct Gestures* gs,
 #endif
 }
 
-static void trigger_drag_start(struct Gestures* gs,
+static int trigger_drag_start(struct Gestures* gs,
 			const struct MConfig* cfg,
 			const struct HWState* hs,
 			int dx, int dy)
@@ -141,6 +141,7 @@ static void trigger_drag_start(struct Gestures* gs,
 #endif
 		}
 	}
+	return gs->move_drag != GS_DRAG_WAIT;
 }
 
 static void trigger_drag_stop(struct Gestures* gs, int force)
@@ -301,16 +302,17 @@ static void trigger_move(struct Gestures* gs,
 			int dx, int dy)
 {
 	if ((gs->move_type == GS_MOVE || hs->evtime >= gs->move_wait) && (dx != 0 || dy != 0)) {
-		trigger_drag_start(gs, cfg, hs, dx, dy);
-		gs->move_dx = (int)(dx*cfg->sensitivity);
-		gs->move_dy = (int)(dy*cfg->sensitivity);
-		gs->move_type = GS_MOVE;
-		gs->move_wait = 0;
-		gs->move_dist = 0;
-		gs->move_dir = TR_NONE;
+		if (trigger_drag_start(gs, cfg, hs, dx, dy)) {
+			gs->move_dx = (int)(dx*cfg->sensitivity);
+			gs->move_dy = (int)(dy*cfg->sensitivity);
+			gs->move_type = GS_MOVE;
+			gs->move_wait = 0;
+			gs->move_dist = 0;
+			gs->move_dir = TR_NONE;
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_move: %d, %d\n", dx, dy);
+			xf86Msg(X_INFO, "trigger_move: %d, %d\n", dx, dy);
 #endif
+		}
 	}
 }
 
