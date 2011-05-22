@@ -1,0 +1,6 @@
+
+#undef DEBUG_GESTURES
+#undef DEBUG_MTSTATE
+#undef DEBUG_PROPS
+#undef DEBUG_DRIVER
+
