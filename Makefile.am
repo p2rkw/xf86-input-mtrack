@@ -1,17 +1,17 @@
 SOURCES_COMMON = \
-	@srcdir@/src/capabilities.c \
-	@srcdir@/src/gestures.c \
-	@srcdir@/src/hwstate.c \
-	@srcdir@/src/mconfig.c \
-	@srcdir@/src/mtouch.c \
-	@srcdir@/src/mtstate.c \
-	@srcdir@/src/trig.c
+	$(srcdir)/src/capabilities.c \
+	$(srcdir)/src/gestures.c \
+	$(srcdir)/src/hwstate.c \
+	$(srcdir)/src/mconfig.c \
+	$(srcdir)/src/mtouch.c \
+	$(srcdir)/src/mtstate.c \
+	$(srcdir)/src/trig.c
 
 @DRIVER_NAME@_drv_la_LTLIBRARIES = @DRIVER_NAME@_drv.la
 @DRIVER_NAME@_drv_la_LDFLAGS = -module -avoid-version
 @DRIVER_NAME@_drv_la_SOURCES = $(SOURCES_COMMON) \
-	@srcdir@/driver/mtrack.c \
-	@srcdir@/driver/mprops.c
+	$(srcdir)/driver/mtrack.c \
+	$(srcdir)/driver/mprops.c
 @DRIVER_NAME@_drv_ladir = @inputdir@
 
 bin_PROGRAMS = mtrack-test

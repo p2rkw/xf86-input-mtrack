@@ -4,6 +4,7 @@ AC_INIT([xf86-input-mtrack],
 	[0.2.0],
 	[https://bugs.freedesktop.org/enter_bug.cgi?product=xorg],
 	[xf86-input-mtrack])
+AC_CONFIG_MACRO_DIR([m4])
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_HEADERS([config.h])
 AC_CONFIG_AUX_DIR(.)
@@ -90,7 +91,6 @@ fi
 # Everything else
 AC_PROG_CC
 AC_PROG_INSTALL
-AC_PROG_RANLIB
-AC_CONFIG_FILES([Makefile src/Makefile])
+AC_CONFIG_FILES([Makefile])
 AC_OUTPUT
 
