@@ -168,7 +168,7 @@ static void buttons_update(struct Gestures* gs,
 			const struct HWState* hs,
 			struct MTState* ms)
 {
-	if (!cfg->button_enable)
+	if (!cfg->button_enable || cfg->trackpad_disable >= 3)
 		return;
 
 	static bitmask_t button_prev = 0U;
@@ -224,7 +224,7 @@ static void tapping_update(struct Gestures* gs,
 			const struct HWState* hs,
 			struct MTState* ms)
 {
-	if (cfg->tap_1touch < 1 && cfg->tap_2touch < 1 && cfg->tap_3touch < 1)
+	if ((cfg->tap_1touch < 1 && cfg->tap_2touch < 1 && cfg->tap_3touch < 1) || cfg->trackpad_disable >= 1)
 		return;
 
 	int i, n, dist, released_max;
@@ -529,17 +529,17 @@ static void moving_update(struct Gestures* gs,
 
 	// Determine gesture type.
 	if (count == 0) {
-		if (btn_count > 0)
+		if (btn_count >= 1 && cfg->trackpad_disable < 2)
 			trigger_move(gs, cfg, hs, dx, dy);
-		else
+		else if (btn_count < 1)
 			trigger_reset(gs);
 	}
-	else if (count == 1) {
+	else if (count == 1 && cfg->trackpad_disable < 2) {
 		dx += touches[0]->dx;
 		dy += touches[0]->dy;
 		trigger_move(gs, cfg, hs, dx, dy);
 	}
-	else if (count == 2) {
+	else if (count == 2 && cfg->trackpad_disable < 1) {
 		// scroll, scale, or rotate
 		if ((dir = get_scroll_dir(touches[0], touches[1])) != TR_NONE) {
 			if (dir == TR_DIR_LT || dir == TR_DIR_RT)
@@ -557,7 +557,7 @@ static void moving_update(struct Gestures* gs,
 			trigger_scale(gs, cfg, hs, dist/2, dir);
 		}
 	}
-	else if (count == 3) {
+	else if (count == 3 && cfg->trackpad_disable < 1) {
 		if ((dir = get_swipe_dir(touches[0], touches[1], touches[2])) != TR_NONE) {
 			if (dir == TR_DIR_LT || dir == TR_DIR_RT)
 				dist = touches[0]->dx + touches[1]->dx + touches[2]->dx;

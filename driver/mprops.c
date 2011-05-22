@@ -185,7 +185,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_BOOL(ivals8[0]))
+		if (ivals8[0] < 0 || ivals8[0] > 3)
 			return BadMatch;
 
 		if (!checkonly) {

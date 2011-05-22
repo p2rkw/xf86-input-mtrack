@@ -193,7 +193,7 @@ static void touches_update(struct MTState* ms,
 			const struct MConfig* cfg,
 			const struct HWState* hs)
 {
-	int i, n;
+	int i, n, disable = 0;
 	// Release missing touches.
 	foreach_bit(i, ms->touch_used) {
 		if (find_finger(hs, ms->touch[i].tracking_id) == -1)
@@ -213,10 +213,7 @@ static void touches_update(struct MTState* ms,
 
 		if (n >= 0) {
 			// Track and invalidate thumb and palm touches.
-			// Trackpad disabling happens here, too.
 			if (!GETBIT(ms->touch[n].state, MT_INVALID)) {
-				if (cfg->trackpad_disable)
-					SETBIT(ms->touch[n].state, MT_INVALID);
 				if (is_thumb(cfg, &hs->data[i])) {
 					if (cfg->ignore_thumb)
 						SETBIT(ms->touch[n].state, MT_INVALID);
@@ -230,20 +227,19 @@ static void touches_update(struct MTState* ms,
 			}
 			if (GETBIT(ms->touch[n].state, MT_THUMB)) {
 				SETBIT(ms->state, MT_THUMB);
-				if (cfg->disable_on_thumb) {
-					touches_invalidate(ms);
-					break;
-				}
+				if (cfg->disable_on_thumb)
+					disable = 1;
 			}
 			if (GETBIT(ms->touch[n].state, MT_PALM)) {
 				SETBIT(ms->state, MT_PALM);
-				if (cfg->disable_on_palm) {
-					touches_invalidate(ms);
-					break;
-				}
+				if (cfg->disable_on_palm)
+					disable = 1;
 			}
 		}
 	}
+
+	if (disable)
+		touches_invalidate(ms);
 }
 
 /* Remove released touches.

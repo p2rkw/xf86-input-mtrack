@@ -122,7 +122,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->palm_size = CLAMPVAL(xf86SetIntOption(opts, "PalmSize", DEFAULT_PALM_SIZE), 0, 100);
 
 	// Configure Gestures
-	cfg->trackpad_disable = xf86SetBoolOption(opts, "TrackpadDisable", DEFAULT_TRACKPAD_DISABLE);;
+	cfg->trackpad_disable = CLAMPVAL(xf86SetIntOption(opts, "TrackpadDisable", DEFAULT_TRACKPAD_DISABLE), 0, 3);
 	cfg->button_enable = xf86SetBoolOption(opts, "ButtonEnable", DEFAULT_BUTTON_ENABLE);
 	cfg->button_integrated = xf86SetBoolOption(opts, "ButtonIntegrated", DEFAULT_BUTTON_INTEGRATED);
 	cfg->button_expire = MAXVAL(xf86SetIntOption(opts, "ButtonTouchExpire", DEFAULT_BUTTON_EXPIRE), 0);
