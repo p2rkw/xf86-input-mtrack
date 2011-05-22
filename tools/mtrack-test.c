@@ -20,7 +20,7 @@
  *
  **************************************************************************/
 
-#include <mtouch.h>
+#include "mtouch.h"
 #include <fcntl.h>
 #include <stdarg.h>
 

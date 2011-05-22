@@ -23,7 +23,7 @@
 #define MTRACK_PROPS_H
 
 #include <xorg-server.h>
-#include "xf86Module.h"
+#include <xf86Module.h>
 
 #include <X11/Xatom.h>
 #include <xf86.h>

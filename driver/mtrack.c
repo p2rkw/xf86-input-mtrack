@@ -23,6 +23,7 @@
 #include "mtouch.h"
 #include "mprops.h"
 
+#include <xf86Module.h>
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
 #include <X11/Xatom.h>
 #include <xserver-properties.h>
@@ -319,7 +320,7 @@ static InputDriverRec MTRACK = {
 	0
 };
 
-static XF86ModuleVersionInfo VERSION = {
+static XF86ModuleVersionInfo moduleVersion = {
 	"mtrack",
 	MODULEVENDORSTRING,
 	MODINFOSTRING1,
@@ -338,4 +339,4 @@ static pointer setup(pointer module, pointer options, int *errmaj, int *errmin)
 	return module;
 }
 
-XF86ModuleData mtrackModuleData = {&VERSION, &setup, NULL };
+XF86ModuleData mtrackModuleData = {&moduleVersion, &setup, NULL };
