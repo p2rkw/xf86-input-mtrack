@@ -1,3 +1,0 @@
-#!/bin/sh
-sudo ./bin/src/test /dev/input/event6
-
