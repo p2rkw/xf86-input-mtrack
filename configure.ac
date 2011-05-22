@@ -13,6 +13,7 @@ AM_INIT_AUTOMAKE([foreign])
 AM_MAINTAINER_MODE
 
 # Initialize libtool
+AC_DISABLE_STATIC
 AC_PROG_LIBTOOL
 
 # Initialize X.Org macros 1.8 or later for MAN_SUBSTS set by XORG_MANPAGE_SECTIONS
@@ -32,22 +33,19 @@ DRIVER_NAME=mtrack
 AC_SUBST([DRIVER_NAME])
 
 # configure option for module install directory
-AC_ARG_WITH(xorg-module-dir,
-            AC_HELP_STRING([--with-xorg-module-dir=DIR],
-                           [Default xorg module directory [[default=$libdir/xorg/modules]]]),
-            [moduledir="$withval"],
-            [moduledir="$libdir/xorg/modules"])
+AC_ARG_WITH(xorg-module-dir, AC_HELP_STRING([--with-xorg-module-dir=DIR],
+	[Default xorg module directory [[default=$libdir/xorg/modules]]]),
+	[moduledir="$withval"],
+	[moduledir="$libdir/xorg/modules"])
 inputdir=${moduledir}/input
 AC_SUBST(inputdir)
 
-# configure option to enable gesture debugging
-AC_ARG_ENABLE(debug-gestures, AS_HELP_STRING([--enable-debug-gestures],
-                                    [Enable gesture debugging (default: disabled)]),
-                                    [DEBUG_GESTURES=yes],
-									[DEBUG_GESTURES=no])
-if test "x$DEBUG_GESTURES" = xyes; then
-   AC_DEFINE(DEBUG_GESTURES, 1, [Enable gesture debugging.])
-fi
+# configure option to build extra tools
+AC_ARG_ENABLE(tools, AC_HELP_STRING([--enable-tools],
+	[Build extra tools (default: disabled)]),
+	[ENABLE_TOOLS=yes],
+	[ENABLE_TOOLS=no])
+AM_CONDITIONAL([BUILD_TOOLS], [test "x$ENABLE_TOOLS" = xyes])
 
 # configure option to enable multitouch state debugging
 AC_ARG_ENABLE(debug-mtstate, AS_HELP_STRING([--enable-debug-mtstate],
@@ -93,6 +91,6 @@ fi
 AC_PROG_CC
 AC_PROG_INSTALL
 AC_PROG_RANLIB
-AC_CONFIG_FILES([Makefile src/Makefile driver/Makefile tools/Makefile])
+AC_CONFIG_FILES([Makefile src/Makefile])
 AC_OUTPUT
 
