@@ -226,11 +226,21 @@ static void tapping_update(struct Gestures* gs,
 			const struct HWState* hs,
 			struct MTState* ms)
 {
-	if ((cfg->tap_1touch < 1 && cfg->tap_2touch < 1 && cfg->tap_3touch < 1) || cfg->trackpad_disable >= 1)
+	int i, n, dist, released_max;
+
+	if (cfg->trackpad_disable >= 1)
 		return;
 
-	int i, n, dist, released_max;
-	released_max = MAXVAL(MAXVAL(cfg->tap_1touch, cfg->tap_2touch), MAXVAL(cfg->tap_3touch, cfg->tap_4touch));
+	if (cfg->tap_4touch > 0)
+		released_max = 4;
+	else if (cfg->tap_3touch > 0)
+		released_max = 3;
+	else if (cfg->tap_2touch > 0)
+		released_max = 2;
+	else if (cfg->tap_1touch > 0)
+		released_max = 1;
+	else
+		return;
 
 	if (gs->tap_time_down != 0 && hs->evtime >= gs->tap_time_down + cfg->tap_timeout) {
 		gs->tap_time_down = 0;
@@ -381,7 +391,7 @@ static void trigger_swipe(struct Gestures* gs,
 		gs->move_dist += ABSVAL(dist);
 		gs->move_dir = dir;
 		if (isfour) {
-			if (gs->move_dist >= cfg->swipe4_dist) {
+			if (cfg->swipe4_dist > 0 && gs->move_dist >= cfg->swipe4_dist) {
 				gs->move_dist = MODVAL(gs->move_dist, cfg->swipe4_dist);
 				if (dir == TR_DIR_UP)
 					trigger_button_click(gs, cfg->swipe4_up_btn - 1, hs->evtime + cfg->gesture_hold);
@@ -397,7 +407,7 @@ static void trigger_swipe(struct Gestures* gs,
 #endif
 		}
 		else {
-			if (gs->move_dist >= cfg->swipe_dist) {
+			if (cfg->swipe_dist > 0 && gs->move_dist >= cfg->swipe_dist) {
 				gs->move_dist = MODVAL(gs->move_dist, cfg->swipe_dist);
 				if (dir == TR_DIR_UP)
 					trigger_button_click(gs, cfg->swipe_up_btn - 1, hs->evtime + cfg->gesture_hold);

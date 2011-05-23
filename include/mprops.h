@@ -67,9 +67,9 @@
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SWIPE_BUTTONS "Trackpad Swipe Buttons"
 // int, 1 value - distance before a swipe event is triggered
-#define MTRACK_PROP_SWIPE4_DIST "Trackpad Swipe Distance"
+#define MTRACK_PROP_SWIPE4_DIST "Trackpad Swipe4 Distance"
 // int, 4 values - up button, down button, left button, right button
-#define MTRACK_PROP_SWIPE4_BUTTONS "Trackpad Swipe Buttons"
+#define MTRACK_PROP_SWIPE4_BUTTONS "Trackpad Swipe4 Buttons"
 // int, 1 value - distance before a scale event is triggered
 #define MTRACK_PROP_SCALE_DIST "Trackpad Scale Distance"
 // int, 2 values - up button, down button

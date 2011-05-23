@@ -243,7 +243,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		}
 	}
 	else if (property == mprops.button_emulate) {
-		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
+		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals8 = (uint8_t*)prop->data;
@@ -279,7 +279,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		}
 	}
 	else if (property == mprops.tap_emulate) {
-		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER)
+		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals8 = (uint8_t*)prop->data;
