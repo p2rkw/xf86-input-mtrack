@@ -339,4 +339,4 @@ static pointer setup(pointer module, pointer options, int *errmaj, int *errmin)
 	return module;
 }
 
-XF86ModuleData mtrackModuleData = {&moduleVersion, &setup, NULL };
+_X_EXPORT XF86ModuleData mtrackModuleData = {&moduleVersion, &setup, NULL };
