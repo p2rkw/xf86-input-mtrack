@@ -83,12 +83,13 @@ Percentage represented by an integer. Defaults to 70.
 **ThumbSize** - 
 The minimum size of what's considered a thumb. It is expected that a thumb
 will be larger than other fingers. This is represented as a percentage of the
-touchpad height. Integer value. Defaults to 25.
+maximum touch value and is dependent on the trackpad hardware. Integer value.
+Defaults to 25.
 
 **PalmSize** - 
 The minimum size of what's considered a palm. Palms are expected to be very
-large on the trackpad. This is an integer value representing a percentage of the
-height of the trackpad. Defaults to 40.
+large on the trackpad. This is represented as a percentage of the maximum touch
+value and is dependent on the trackpad hardware. Integer value. Defaults to 40.
 
 **ButtonEnable** - 
 Whether or not to enable the physical buttons on or near the trackpad. Boolean
