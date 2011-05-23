@@ -100,6 +100,15 @@ have a one-piece trackpad like on newer MacBooks, this should be set to true.
 Button emulation depends on this value being correct. Boolean value. Defaults
 to true.
 
+**ButtonZonesEnable** -
+Whether or not to enable button zones. If button zones are enabled then the
+trackpad will be split into one, two, or three vertical zones. Clicking the
+integrated button in one of these zones will send the button event for
+ClickFinger1, ClickFinger2, or ClickFinger3. The driver will only add zones for
+those ClickFinger values that are enabled. So setting ClickFinger1 to 0 and
+enabling the other two will create two zones, one for ClickFinger2 and one for
+ClickFinger3. Boolean value. Defaults to false.
+
 **ButtonTouchExpire** - 
 How long (in ms) to consider a touching finger as part of button emulation. A
 value of 0 will not expire touches. Integer value. Defaults to 100.
