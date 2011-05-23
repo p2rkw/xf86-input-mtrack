@@ -41,9 +41,11 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->button_expire = DEFAULT_BUTTON_EXPIRE;
 	cfg->button_1touch = DEFAULT_BUTTON_1TOUCH;
 	cfg->button_2touch = DEFAULT_BUTTON_2TOUCH;
+	cfg->button_3touch = DEFAULT_BUTTON_3TOUCH;
 	cfg->tap_1touch = DEFAULT_TAP_1TOUCH;
 	cfg->tap_2touch = DEFAULT_TAP_2TOUCH;
 	cfg->tap_3touch = DEFAULT_TAP_3TOUCH;
+	cfg->tap_4touch = DEFAULT_TAP_4TOUCH;
 	cfg->tap_timeout = DEFAULT_TAP_TIMEOUT;
 	cfg->tap_hold = DEFAULT_TAP_HOLD;
 	cfg->tap_dist = DEFAULT_TAP_DIST;
@@ -59,6 +61,11 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->swipe_dn_btn = DEFAULT_SWIPE_DN_BTN;
 	cfg->swipe_lt_btn = DEFAULT_SWIPE_LT_BTN;
 	cfg->swipe_rt_btn = DEFAULT_SWIPE_RT_BTN;
+	cfg->swipe4_dist = DEFAULT_SWIPE4_DIST;
+	cfg->swipe4_up_btn = DEFAULT_SWIPE4_UP_BTN;
+	cfg->swipe4_dn_btn = DEFAULT_SWIPE4_DN_BTN;
+	cfg->swipe4_lt_btn = DEFAULT_SWIPE4_LT_BTN;
+	cfg->swipe4_rt_btn = DEFAULT_SWIPE4_RT_BTN;
 	cfg->scale_dist = DEFAULT_SCALE_DIST;
 	cfg->scale_up_btn = DEFAULT_SCALE_UP_BTN;
 	cfg->scale_dn_btn = DEFAULT_SCALE_DN_BTN;
@@ -128,9 +135,11 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->button_expire = MAXVAL(xf86SetIntOption(opts, "ButtonTouchExpire", DEFAULT_BUTTON_EXPIRE), 0);
 	cfg->button_1touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger1", DEFAULT_BUTTON_1TOUCH), 0, 32);
 	cfg->button_2touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger2", DEFAULT_BUTTON_2TOUCH), 0, 32);
+	cfg->button_3touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger3", DEFAULT_BUTTON_3TOUCH), 0, 32);
 	cfg->tap_1touch = CLAMPVAL(xf86SetIntOption(opts, "TapButton1", DEFAULT_TAP_1TOUCH), 0, 32);
 	cfg->tap_2touch = CLAMPVAL(xf86SetIntOption(opts, "TapButton2", DEFAULT_TAP_2TOUCH), 0, 32);
 	cfg->tap_3touch = CLAMPVAL(xf86SetIntOption(opts, "TapButton3", DEFAULT_TAP_3TOUCH), 0, 32);
+	cfg->tap_4touch = CLAMPVAL(xf86SetIntOption(opts, "TapButton4", DEFAULT_TAP_4TOUCH), 0, 32);
 	cfg->tap_hold = MAXVAL(xf86SetIntOption(opts, "ClickTime", DEFAULT_TAP_HOLD), 1);
 	cfg->tap_timeout = MAXVAL(xf86SetIntOption(opts, "MaxTapTime", DEFAULT_TAP_TIMEOUT), 1);
 	cfg->tap_dist = MAXVAL(xf86SetIntOption(opts, "MaxTapMove", DEFAULT_TAP_DIST), 1);
@@ -146,6 +155,11 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->swipe_dn_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeDownButton", DEFAULT_SWIPE_DN_BTN), 0, 32);
 	cfg->swipe_lt_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeLeftButton", DEFAULT_SWIPE_LT_BTN), 0, 32);
 	cfg->swipe_rt_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeRightButton", DEFAULT_SWIPE_RT_BTN), 0, 32);
+	cfg->swipe4_dist = MAXVAL(xf86SetIntOption(opts, "Swipe4Distance", DEFAULT_SWIPE4_DIST), 1);
+	cfg->swipe4_up_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4UpButton", DEFAULT_SWIPE4_UP_BTN), 0, 32);
+	cfg->swipe4_dn_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4DownButton", DEFAULT_SWIPE4_DN_BTN), 0, 32);
+	cfg->swipe4_lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4LeftButton", DEFAULT_SWIPE4_LT_BTN), 0, 32);
+	cfg->swipe4_rt_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4RightButton", DEFAULT_SWIPE4_RT_BTN), 0, 32);
 	cfg->scale_dist = MAXVAL(xf86SetIntOption(opts, "ScaleDistance", DEFAULT_SCALE_DIST), 1);
 	cfg->scale_up_btn = CLAMPVAL(xf86SetIntOption(opts, "ScaleUpButton", DEFAULT_SCALE_UP_BTN), 0, 32);
 	cfg->scale_dn_btn = CLAMPVAL(xf86SetIntOption(opts, "ScaleDownButton", DEFAULT_SCALE_DN_BTN), 0, 32);
