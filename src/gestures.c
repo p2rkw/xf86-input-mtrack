@@ -172,7 +172,7 @@ static void buttons_update(struct Gestures* gs,
 		return;
 
 	static bitmask_t button_prev = 0U;
-	int i, down, emulate, touching, latest;
+	int i, down, emulate, touching;
 	down = 0;
 	emulate = GETBIT(hs->button, 0) && !GETBIT(button_prev, 0);
 
@@ -189,34 +189,82 @@ static void buttons_update(struct Gestures* gs,
 	button_prev = hs->button;
 
 	if (down) {
+		int earliest, latest;
 		gs->move_type = GS_NONE;
 		gs->move_wait = hs->evtime + cfg->gesture_wait;
+		earliest = -1;
 		latest = -1;
 		foreach_bit(i, ms->touch_used) {
 			if (GETBIT(ms->touch[i].state, MT_INVALID))
 				continue;
 			if (cfg->button_integrated && !GETBIT(ms->touch[i].flags, GS_BUTTON))
 				SETBIT(ms->touch[i].flags, GS_BUTTON);
+			if (earliest == -1 || ms->touch[i].down < ms->touch[earliest].down)
+				earliest = i;
 			if (latest == -1 || ms->touch[i].down > ms->touch[latest].down)
 				latest = i;
 		}
 
-		if (emulate && latest >= 0) {
-			touching = 0;
-			foreach_bit(i, ms->touch_used) {
-				if (cfg->button_expire == 0 || ms->touch[latest].down < ms->touch[i].down + cfg->button_expire)
-					touching++;
+		if (emulate) {
+			if (cfg->button_zones && earliest >= 0) {
+				int zones, left, right, pos;
+				double width;
+
+				zones = 0;
+				if (cfg->button_1touch > 0)
+					zones++;
+				if (cfg->button_2touch > 0)
+					zones++;
+				if (cfg->button_3touch > 0)
+					zones++;
+
+				if (zones > 0) {
+					width = ((double)cfg->pad_width)/((double)zones);
+					pos = cfg->pad_width / 2 + ms->touch[earliest].x;
+#ifdef DEBUG_GESTURES
+					xf86Msg(X_INFO, "buttons_update: pad width %d, zones %d, zone width %f, x %d\n",
+						cfg->pad_width, zones, width, pos);
+#endif
+					for (i = 0; i < zones; i++) {
+						left = width*i;
+						right = width*(i+1);
+						if (pos >= left && pos <= right) {
+#ifdef DEBUG_GESTURES
+							xf86Msg(X_INFO, "buttons_update: button %d, left %d, right %d (found)\n", i, left, right);
+#endif
+							break;
+						}
+#ifdef DEBUG_GESTURES
+						else
+							xf86Msg(X_INFO, "buttons_update: button %d, left %d, right %d\n", i, left, right);
+#endif
+					}
+
+					if (i == 0)
+						trigger_button_emulation(gs, cfg->button_1touch - 1);
+					else if (i == 1)
+						trigger_button_emulation(gs, cfg->button_2touch - 1);
+					else
+						trigger_button_emulation(gs, cfg->button_3touch - 1);
+				}
 			}
+			else if (latest >= 0) {
+				touching = 0;
+				foreach_bit(i, ms->touch_used) {
+					if (cfg->button_expire == 0 || ms->touch[latest].down < ms->touch[i].down + cfg->button_expire)
+						touching++;
+				}
 
-			if (cfg->button_integrated)
-				touching--;
+				if (cfg->button_integrated)
+					touching--;
 
-			if (touching == 1 && cfg->button_1touch > 0)
-				trigger_button_emulation(gs, cfg->button_1touch - 1);
-			else if (touching == 2 && cfg->button_2touch > 0)
-				trigger_button_emulation(gs, cfg->button_2touch - 1);
-			else if (touching == 3 && cfg->button_3touch > 0)
-				trigger_button_emulation(gs, cfg->button_3touch - 1);
+				if (touching == 1 && cfg->button_1touch > 0)
+					trigger_button_emulation(gs, cfg->button_1touch - 1);
+				else if (touching == 2 && cfg->button_2touch > 0)
+					trigger_button_emulation(gs, cfg->button_2touch - 1);
+				else if (touching == 3 && cfg->button_3touch > 0)
+					trigger_button_emulation(gs, cfg->button_3touch - 1);
+			}
 		}
 	}
 }
