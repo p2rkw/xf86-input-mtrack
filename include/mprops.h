@@ -40,6 +40,8 @@
 #define MTRACK_PROP_TRACKPAD_DISABLE "Trackpad Disable Input"
 // float, 1 value
 #define MTRACK_PROP_SENSITIVITY "Trackpad Sensitivity"
+// int, 2 values - finger low, finger high
+#define MTRACK_PROP_PRESSURE "Trackpad Touch Pressure"
 // int, 3 values - enable buttons, has integrated button,
 //   emulation touch expiration, enable button zones
 #define MTRACK_PROP_BUTTON_SETTINGS "Trackpad Button Settings"
@@ -90,6 +92,7 @@ struct MProps {
 	Atom api;
 	Atom trackpad_disable;
 	Atom sensitivity;
+	Atom pressure;
 	Atom button_settings;
 	Atom button_emulate;
 	Atom tap_settings;

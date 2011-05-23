@@ -94,6 +94,10 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	fvals[0] = (float)cfg->sensitivity;
 	mprops.sensitivity = atom_init_float(local->dev, MTRACK_PROP_SENSITIVITY, 1, fvals, mprops.float_type);
 
+	ivals[0] = cfg->touch_down;
+	ivals[1] = cfg->touch_up;
+	mprops.pressure = atom_init_integer(local->dev, MTRACK_PROP_PRESSURE, 2, ivals, 8);
+
 	ivals[0] = cfg->button_enable;
 	ivals[1] = cfg->button_integrated;
 	ivals[2] = cfg->button_expire;
@@ -222,6 +226,23 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->sensitivity = fvals[0];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set sensitivity to %f\n", cfg->sensitivity);
+#endif
+		}
+	}
+	else if (property == mprops.pressure) {
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER) 
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_PCNT(ivals8[0]) || !VALID_PCNT(ivals8[1]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->touch_down = ivals8[0];
+			cfg->touch_up = ivals8[1];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set touch pressure to %d %d\n",
+				cfg->touch_down, cfg->touch_up);
 #endif
 		}
 	}
