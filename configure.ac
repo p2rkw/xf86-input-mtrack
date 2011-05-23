@@ -48,6 +48,15 @@ AC_ARG_ENABLE(tools, AC_HELP_STRING([--enable-tools],
 	[ENABLE_TOOLS=no])
 AM_CONDITIONAL([BUILD_TOOLS], [test "x$ENABLE_TOOLS" = xyes])
 
+# configure option to enable gesture ate debugging
+AC_ARG_ENABLE(debug-gestures, AS_HELP_STRING([--enable-debug-gestures],
+                                    [Enable gesture debugging (default: disabled)]),
+                                    [DEBUG_GESTURES=yes],
+									[DEBUG_GESTURES=no])
+if test "x$DEBUG_GESTURES" = xyes; then
+   AC_DEFINE(DEBUG_GESTURES, 1, [Enable gesture debugging.])
+fi
+
 # configure option to enable multitouch state debugging
 AC_ARG_ENABLE(debug-mtstate, AS_HELP_STRING([--enable-debug-mtstate],
                                     [Enable multitouch state debugging (default: disabled)]),
