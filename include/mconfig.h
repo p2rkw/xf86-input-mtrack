@@ -36,6 +36,7 @@
 #define DEFAULT_PALM_SIZE 40
 #define DEFAULT_BUTTON_ENABLE 1
 #define DEFAULT_BUTTON_INTEGRATED 1
+#define DEFAULT_BUTTON_ZONES 0
 #define DEFAULT_BUTTON_1TOUCH 3
 #define DEFAULT_BUTTON_2TOUCH 2
 #define DEFAULT_BUTTON_3TOUCH 0
@@ -110,9 +111,13 @@ struct MConfig {
 	int button_enable;		// Enable physical buttons? 0 or 1
 	int button_integrated;	// Is the button under the touchpad? 0 or 1
 	int button_expire;		// How long to consider a touch for button emulation. >= 0
-	int button_1touch;		// What button to emulate when one (extra) finger is on the pad? 0 to 32
-	int button_2touch;		// What button to emulate when two (extra) fingers are on the pad? 0 to 32
-	int button_3touch;		// What button to emulate when three (extra) fingers are on the pad? 0 to 32	
+	int button_zones;		// Use button zones for emulation?
+	int button_1touch;		// What button to emulate when one finger is on the
+							// pad or the first zone is clicked? 0 to 32
+	int button_2touch;		// What button to emulate when two fingers are on the
+							// pad or the second zone is clicked? 0 to 32
+	int button_3touch;		// What button to emulate when three fingers are on the
+							// pad or the third zone is clicked? 0 to 32
 	int tap_1touch;			// What button to emulate for one touch taps? 0 to 32
 	int tap_2touch;			// What button to emulate for two touch taps? 0 to 32
 	int tap_3touch;			// What button to emulate for three touch taps? 0 to 32
