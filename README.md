@@ -106,12 +106,15 @@ value of 0 will not expire touches. Integer value. Defaults to 100.
 
 **ClickFinger1** - 
 Which button to emulate when one finger is touching the trackpad during a
-click. Integer value. A value of 0 disables one-touch emulation. Defaults
-to 3.
+click. Integer value. A value of 0 disables one-touch emulation. Defaults to 3.
 
 **ClickFinger2** - 
 Which button to emulate when two fingers are touching the trackpad during a
 click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 2.
+
+**ClickFinger3** - 
+Which button to emulate when three fingers are touching the trackpad during a
+click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 0.
 
 **TapButton1** - 
 Which button to emulate for one-finger tapping. Integer value. A value of 0
@@ -119,11 +122,15 @@ disables one-finger tapping. Defaults to 1.
 
 **TapButton2** - 
 Which button to emulate for two-finger tapping. Integer value. A value of 0
-disabled two-finger tapping. Defaults to 3.
+disables two-finger tapping. Defaults to 3.
 
 **TapButton3** - 
 Which button to emulate for three-finger tapping. Integer value. A value of 0
-disabled three-finger tapping. Defaults to 2.
+disables three-finger tapping. Defaults to 2.
+
+**TapButton4** - 
+Which button to emulate for four-finger tapping. Integer value. A value of 0
+disables three-finger tapping. Defaults to 0.
 
 **ClickTime** - 
 When tapping, how much time to hold down the emulated button. Integer value
@@ -188,6 +195,26 @@ value. A value of 0 disables swiping left. Defaults to 10.
 For three finger swiping. The button that is triggered by swiping right. Integer
 value. A value of 0 disables swiping right. Defaults to 11.
 
+**Swipe4Distance** - 
+For four finger swiping. How far you must move your fingers before a button
+click is triggered. Integer value. Defaults to 700.
+
+**Swipe4UpButton** - 
+For four finger swiping. The button that is triggered by swiping up. Integer
+value. A value of 0 disables swiping up. Defaults to 8.
+
+**Swipe4DownButton** - 
+For four finger swiping. The button that is triggered by swiping down. Integer
+value. A value of 0 disables swiping down. Defaults to 9.
+
+**Swipe4LeftButton** - 
+For four finger swiping. The button that is triggered by swiping left. Integer
+value. A value of 0 disables swiping left. Defaults to 10.
+
+**Swipe4RightButton** - 
+For four finger swiping. The button that is triggered by swiping right. Integer
+value. A value of 0 disables swiping right. Defaults to 11.
+
 **ScaleDistance** - 
 For pinch scaling. How far you must move your fingers before a button click is
 triggered. Integer value. Defaults to 150.
@@ -231,7 +258,6 @@ Defaults to 40.
 How far the finger is allowed to move during drag wait time. If the finger
 moves farther than this distance during the wait time then dragging will be
 canceled and pointer movement will resume. Integer value. Defaults to 200.
-
 
 [1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt     "Kernel Multitouch Protocol"
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"
