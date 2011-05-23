@@ -228,7 +228,7 @@ static void tapping_update(struct Gestures* gs,
 		return;
 
 	int i, n, dist, released_max;
-	released_max = MAXVAL(cfg->tap_1touch, MAXVAL(cfg->tap_2touch, cfg->tap_3touch)) - 1;
+	released_max = MAXVAL(cfg->tap_1touch, MAXVAL(cfg->tap_2touch, cfg->tap_3touch));
 
 	if (gs->tap_time_down != 0 && hs->evtime >= gs->tap_time_down + cfg->tap_timeout) {
 		gs->tap_time_down = 0;
@@ -245,12 +245,18 @@ static void tapping_update(struct Gestures* gs,
 				if (GETBIT(ms->touch[i].flags, GS_TAP)) {
 					CLEARBIT(ms->touch[i].flags, GS_TAP);
 					gs->tap_touching--;
+#ifdef DEBUG_GESTURES
+					xf86Msg(X_INFO, "tapping_update: tap_touching-- (%d): invalid or button\n", gs->tap_touching);
+#endif
 				}
 			}
 			else {
 				if (GETBIT(ms->touch[i].state, MT_NEW)) {
 					SETBIT(ms->touch[i].flags, GS_TAP);
 					gs->tap_touching++;
+#ifdef DEBUG_GESTURES
+					xf86Msg(X_INFO, "tapping_update: tap_touching++ (%d): new touch\n", gs->tap_touching);
+#endif
 					if (gs->tap_time_down == 0)
 						gs->tap_time_down = hs->evtime;
 				}
@@ -260,10 +266,17 @@ static void tapping_update(struct Gestures* gs,
 					if (dist >= SQRVAL(cfg->tap_dist)) {
 						CLEARBIT(ms->touch[i].flags, GS_TAP);
 						gs->tap_touching--;
+#ifdef DEBUG_GESTURES
+					xf86Msg(X_INFO, "tapping_update: tap_touching-- (%d): moved too far\n", gs->tap_touching);
+#endif
 					}
 					else if (GETBIT(ms->touch[i].state, MT_RELEASED)) {
 						gs->tap_touching--;
 						gs->tap_released++;
+#ifdef DEBUG_GESTURES
+					xf86Msg(X_INFO, "tapping_update: tap_touching-- (%d): released\n", gs->tap_touching);
+					xf86Msg(X_INFO, "tapping_update: tap_released++ (%d) (max %d): released\n", gs->tap_released, released_max);
+#endif
 					}
 				}
 			}
