@@ -61,11 +61,11 @@ percentage represented as an integer. Default is 5.
 
 **IgnoreThumb** - 
 Whether or not to ignore touches that are determined to be thumbs. Boolean
-value. Defaults to true.
+value. Defaults to false.
 
 **IgnorePalm** - 
 Whether or not to ignore touches that are determined to be palms. Boolean
-value. Defaults to true.
+value. Defaults to false.
 
 **DisableOnThumb** - 
 Whether or not to disable the entire trackpad when a thumb is touching. Boolean
@@ -73,7 +73,7 @@ value. Defaults to false.
 
 **DisableOnPalm** - 
 Whether or not to disable the entire trackpad when a palm is touching. Boolean
-value. Defaults to true.
+value. Defaults to false.
 
 **ThumbRatio** - 
 The width/length ratio of what's considered a thumb. It is expected that a
@@ -144,7 +144,7 @@ disables three-finger tapping. Defaults to 0.
 
 **ClickTime** - 
 When tapping, how much time to hold down the emulated button. Integer value
-representing milliseconds. Defaults to 100.
+representing milliseconds. Defaults to 50.
 
 **MaxTapTime** - 
 The amount of time to wait for a tap to release before counting it as a move.
@@ -167,7 +167,7 @@ gestures. Integer value representing milliseconds. Defaults to 100.
 
 **ScrollDistance** - 
 For two finger scrolling. How far you must move your fingers before a button
-click is triggered. Integer value. Defaults to 400.
+click is triggered. Integer value. Defaults to 150.
 
 **ScrollUpButton** - 
 For two finger scrolling. The button that is triggered by scrolling up. Integer
