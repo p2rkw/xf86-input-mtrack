@@ -14,7 +14,7 @@ SOURCES_COMMON = \
 	$(srcdir)/driver/mprops.c
 @DRIVER_NAME@_drv_ladir = @inputdir@
 
-bin_PROGRAMS = mtrack-test
+noinst_PROGRAMS = mtrack-test
 mtrack_test_SOURCES = $(SOURCES_COMMON) \
 	$(srcdir)/tools/mtrack-test.c
 mtrack_test_CFLAGS = $(AM_CFLAGS)
