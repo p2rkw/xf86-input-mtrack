@@ -86,7 +86,7 @@ fi
 
 
 # configure option to enable all debugging
-AC_ARG_ENABLE(debug-all, AS_HELP_STRING([--enable-debug],
+AC_ARG_ENABLE(debug, AS_HELP_STRING([--enable-debug],
                                     [Enable all debugging (default: disabled)]),
                                     [DEBUG_ALL=$enableval],
 									[DEBUG_ALL=no])
