@@ -1,3 +1,23 @@
+xserver-xorg-input-mtrack (0.2.0) unstable; urgency=low
+
+  * Now built via autoconf/automake.
+  * Fully configurable via XInput.
+  * Trackpad can now be disabled on keystroke via an external daemon.
+  * Four finger tapping/swiping added.
+  * Button zones added, a new button emulation method.
+  * Tap-to-drag fixed.
+  * Three finger tapping responsiveness fixed.
+
+ -- Ryan Bourgeois <sadpengu@ubdev>  Thu, 26 May 2011 09:44:43 -0500
+
+xserver-xorg-input-mtrack (0.1.1) unstable; urgency=low
+
+  * Bugfix release.
+  * Disabling tapping no longer (wrongly) disables pointer movement.
+  * Button emulation set to ignore "old" touches. What consitutes an old touch can be adjusted with the ButtonTouchExpire option.
+
+ -- Ryan Bourgeois <bluedragonx@gmail.com>  Thu, 28 Apr 2011 01:14:58 -0500
+
 xserver-xorg-input-mtrack (0.1.0) unstable; urgency=low
 
   * Initial release.
