@@ -21,7 +21,9 @@
  **************************************************************************/
 
 #include "mtouch.h"
+#include "mprops.h"
 
+#include <xf86Module.h>
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
 #include <X11/Xatom.h>
 #include <xserver-properties.h>
@@ -48,17 +50,6 @@ static void pointer_control(DeviceIntPtr dev, PtrCtrl *ctrl)
 #if DEBUG_DRIVER
 	xf86Msg(X_INFO, "pointer_control\n");
 #endif
-}
-
-static int pointer_property(DeviceIntPtr dev,
-			    Atom property,
-			    XIPropertyValuePtr prop,
-			    BOOL checkonly)
-{
-#if DEBUG_DRIVER
-	xf86Msg(X_INFO, "pointer_property\n");
-#endif
-	return Success;
 }
 
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
@@ -162,8 +153,8 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 				   1, 0, 1);
 #endif
 	xf86InitValuatorDefaults(dev, 1);
-
-	XIRegisterPropertyHandler(dev, pointer_property, NULL, NULL);
+	mprops_init(&mt->cfg, local);
+	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
 	return Success;
 }
@@ -329,7 +320,7 @@ static InputDriverRec MTRACK = {
 	0
 };
 
-static XF86ModuleVersionInfo VERSION = {
+static XF86ModuleVersionInfo moduleVersion = {
 	"mtrack",
 	MODULEVENDORSTRING,
 	MODINFOSTRING1,
@@ -348,4 +339,4 @@ static pointer setup(pointer module, pointer options, int *errmaj, int *errmin)
 	return module;
 }
 
-XF86ModuleData mtrackModuleData = {&VERSION, &setup, NULL };
+_X_EXPORT XF86ModuleData mtrackModuleData = {&moduleVersion, &setup, NULL };

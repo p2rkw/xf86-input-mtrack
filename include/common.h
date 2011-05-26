@@ -23,7 +23,11 @@
 #ifndef COMMON_H
 #define COMMON_H
 
-#include "xorg-server.h"
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <xorg-server.h>
 #include <xf86.h>
 #include <xf86_OSproc.h>
 #include <xf86Xinput.h>

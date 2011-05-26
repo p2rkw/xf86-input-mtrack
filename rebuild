@@ -1,4 +1,0 @@
-#!/bin/sh
-make clean
-CFLAGS="-DDEBUG_GESTURES" make
-
