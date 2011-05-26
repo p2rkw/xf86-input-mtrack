@@ -2,6 +2,7 @@ xserver-xorg-input-mtrack (0.2.0) unstable; urgency=low
 
   * Now built via autoconf/automake.
   * Fully configurable via XInput.
+  * Sensitivify now configurable.
   * Trackpad can now be disabled on keystroke via an external daemon.
   * Four finger tapping/swiping added.
   * Button zones added, a new button emulation method.
