@@ -33,6 +33,7 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->thumb_ratio = DEFAULT_THUMB_RATIO;
 	cfg->thumb_size = DEFAULT_THUMB_SIZE;
 	cfg->palm_size = DEFAULT_PALM_SIZE;
+	cfg->bottom_edge = DEFAULT_BOTTOM_EDGE;
 
 	// Configure Gestures
 	cfg->trackpad_disable = DEFAULT_TRACKPAD_DISABLE;
@@ -84,7 +85,7 @@ void mconfig_init(struct MConfig* cfg,
 	cfg->touch_minor = caps->has_abs[MTDEV_TOUCH_MINOR];
 	cfg->pad_width = get_cap_xsize(caps);
 	cfg->pad_height = get_cap_ysize(caps);
-
+	
 	if (caps->has_abs[MTDEV_TOUCH_MAJOR] && caps->has_abs[MTDEV_WIDTH_MAJOR]) {
 		cfg->touch_type = MCFG_SCALE;
 		cfg->touch_min = caps->abs[MTDEV_TOUCH_MAJOR].minimum;
@@ -128,6 +129,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->thumb_ratio = CLAMPVAL(xf86SetIntOption(opts, "ThumbRatio", DEFAULT_THUMB_RATIO), 0, 100);
 	cfg->thumb_size = CLAMPVAL(xf86SetIntOption(opts, "ThumbSize", DEFAULT_THUMB_SIZE), 0, 100);
 	cfg->palm_size = CLAMPVAL(xf86SetIntOption(opts, "PalmSize", DEFAULT_PALM_SIZE), 0, 100);
+	cfg->bottom_edge = CLAMPVAL(xf86SetIntOption(opts, "BottomEdge", DEFAULT_BOTTOM_EDGE), 0, 100);
 
 	// Configure Gestures
 	cfg->trackpad_disable = CLAMPVAL(xf86SetIntOption(opts, "TrackpadDisable", DEFAULT_TRACKPAD_DISABLE), 0, 3);

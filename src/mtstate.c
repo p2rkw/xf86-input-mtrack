@@ -74,7 +74,7 @@ static int is_thumb(const struct MConfig* cfg,
 	int pct = percentage(min, max);
 	int size = touch_range_ratio(cfg, hw->touch_major);
 
-	if (percentage(min, max) > cfg->thumb_ratio && size > cfg->thumb_size) {
+	if (pct > cfg->thumb_ratio && size > cfg->thumb_size) {
 #if DEBUG_MTSTATE
 		xf86Msg(X_INFO, "is_thumb: yes %d > %d && %d > %d\n",
 			pct, cfg->thumb_ratio, size, cfg->thumb_size);
@@ -212,29 +212,31 @@ static void touches_update(struct MTState* ms,
 			n = touch_append(ms, &hs->data[i]);
 
 		if (n >= 0) {
-			// Track and invalidate thumb and palm touches.
-			if (!GETBIT(ms->touch[n].state, MT_INVALID)) {
-				if (is_thumb(cfg, &hs->data[i])) {
-					if (cfg->ignore_thumb)
-						SETBIT(ms->touch[n].state, MT_INVALID);
-					SETBIT(ms->touch[n].state, MT_THUMB);
-				}
-				if (is_palm(cfg, &hs->data[i])) {
-					if (cfg->ignore_palm)
-						SETBIT(ms->touch[n].state, MT_INVALID);
-					SETBIT(ms->touch[n].state, MT_PALM);
-				}
+			// Track and invalidate thumb, palm, and bottom edge touches.
+			if (is_thumb(cfg, &hs->data[i]))
+				SETBIT(ms->touch[n].state, MT_THUMB);
+			else
+				CLEARBIT(ms->touch[n].state, MT_THUMB);
+			
+			if (is_palm(cfg, &hs->data[i]))
+				SETBIT(ms->touch[n].state, MT_PALM);
+			else
+				CLEARBIT(ms->touch[n].state, MT_PALM);
+			
+			if (ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100) {
+				if (GETBIT(ms->touch[n].state, MT_NEW))
+					SETBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
 			}
-			if (GETBIT(ms->touch[n].state, MT_THUMB)) {
-				SETBIT(ms->state, MT_THUMB);
-				if (cfg->disable_on_thumb)
-					disable = 1;
-			}
-			if (GETBIT(ms->touch[n].state, MT_PALM)) {
-				SETBIT(ms->state, MT_PALM);
-				if (cfg->disable_on_palm)
-					disable = 1;
-			}
+			else
+				CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+			
+			MODBIT(ms->touch[n].state, MT_INVALID,
+				GETBIT(ms->touch[n].state, MT_THUMB) && cfg->ignore_thumb ||
+				GETBIT(ms->touch[n].state, MT_PALM) && cfg->ignore_palm ||
+				GETBIT(ms->touch[n].state, MT_BOTTOM_EDGE));
+			
+			disable |= cfg->disable_on_thumb && GETBIT(ms->touch[n].state, MT_THUMB);
+			disable |= cfg->disable_on_palm && GETBIT(ms->touch[n].state, MT_PALM);
 		}
 	}
 
