@@ -74,7 +74,7 @@ static int is_thumb(const struct MConfig* cfg,
 	int pct = percentage(min, max);
 	int size = touch_range_ratio(cfg, hw->touch_major);
 
-	if (pct > cfg->thumb_ratio && size > cfg->thumb_size) {
+	if (pct < cfg->thumb_ratio && size > cfg->thumb_size) {
 #if DEBUG_MTSTATE
 		xf86Msg(X_INFO, "is_thumb: yes %d > %d && %d > %d\n",
 			pct, cfg->thumb_ratio, size, cfg->thumb_size);
