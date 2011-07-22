@@ -32,6 +32,7 @@
 #define MT_INVALID 2
 #define MT_THUMB 3
 #define MT_PALM 4
+#define MT_BOTTOM_EDGE 5
 
 struct Touch {
 	bitmask_t state;
