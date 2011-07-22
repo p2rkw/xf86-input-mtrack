@@ -34,6 +34,7 @@
 #define DEFAULT_THUMB_RATIO 70
 #define DEFAULT_THUMB_SIZE 25
 #define DEFAULT_PALM_SIZE 40
+#define DEFAULT_BOTTOM_EDGE 10
 #define DEFAULT_BUTTON_ENABLE 1
 #define DEFAULT_BUTTON_INTEGRATED 1
 #define DEFAULT_BUTTON_ZONES 0
@@ -103,6 +104,7 @@ struct MConfig {
 	int thumb_ratio;	// Ratio of width to length that makes a touch a thumb. 0 - 100
 	int thumb_size;		// Minimum touch size for a thumb. 0 - 100
 	int palm_size;		// Minimum touch size for a palm. 0 - 100
+	int bottom_edge;		// Percent of bottom of trackpad to ignore for new touches. 0 - 100
 
 	/* Used by Gestures */
 
