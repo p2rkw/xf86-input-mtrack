@@ -100,15 +100,17 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 
 	ivals[0] = cfg->button_enable;
 	ivals[1] = cfg->button_integrated;
+	mprops.button_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_SETTINGS, 2, ivals, 8);
+
+	ivals[0] = cfg->button_zones;
+	ivals[1] = cfg->button_move;
 	ivals[2] = cfg->button_expire;
-	ivals[3] = cfg->button_zones;
-	ivals[4] = cfg->button_move;
-	mprops.button_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_SETTINGS, 5, ivals, 16);
+	mprops.button_emulate_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_SETTINGS, 3, ivals, 16);
 
 	ivals[0] = cfg->button_1touch;
 	ivals[1] = cfg->button_2touch;
 	ivals[2] = cfg->button_3touch;
-	mprops.button_emulate = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE, 3, ivals, 8);
+	mprops.button_emulate_values = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_VALUES, 3, ivals, 8);
 
 	ivals[0] = cfg->tap_hold;
 	ivals[1] = cfg->tap_timeout;
@@ -248,26 +250,41 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		}
 	}
 	else if (property == mprops.button_settings) {
-		if (prop->size != 4 || prop->format != 16 || prop->type != XA_INTEGER) 
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER) 
 			return BadMatch;
 
-		ivals16 = (uint16_t*)prop->data;
-		if (!VALID_BOOL(ivals16[0]) || !VALID_BOOL(ivals16[1]) || ivals16[2] < 0 || !VALID_BOOL(ivals16[3]) || !VALID_BOOL(ivals16[4]))
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BOOL(ivals16[0]) || !VALID_BOOL(ivals16[1]))
 			return BadMatch;
 
 		if (!checkonly) {
-			cfg->button_enable = ivals16[0];
-			cfg->button_integrated = ivals16[1];
-			cfg->button_expire = ivals16[2];
-			cfg->button_zones = ivals16[3];
-			cfg->button_move = ivals16[4];
+			cfg->button_enable = ivals8[0];
+			cfg->button_integrated = ivals8[1];
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set button settings to %d %d %d %d %d\n",
-				cfg->button_enable, cfg->button_integrated, cfg->button_expire, cfg->button_zones, cfg->button_move);
+			xf86Msg(X_INFO, "mtrack: set button settings to %d %d\n",
+				cfg->button_enable, cfg->button_integrated);
 #endif
 		}
 	}
-	else if (property == mprops.button_emulate) {
+	else if (property == mprops.button_emulate_settings) {
+		if (prop->size != 3 || prop->format != 16 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals16 = (uint16_t*)prop->data;
+		if (!VALID_BOOL(ivals16[0]) || !VALID_BOOL(ivals16[1]) || ivals16[2] < 0)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->button_zones = ivals16[0];
+			cfg->button_move = ivals16[1];
+			cfg->button_expire = ivals16[2];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set button emulate settings to %d %d %d\n",
+				cfg->button_zones, cfg->button_move, cfg->button_expire);
+#endif
+		}
+	}
+	else if (property == mprops.button_emulate_values) {
 		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
