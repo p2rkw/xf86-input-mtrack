@@ -189,7 +189,7 @@ static void buttons_update(struct Gestures* gs,
 	button_prev = hs->button;
 
 	if (down) {
-		int earliest, latest;
+		int earliest, latest, moving = 0;
 		gs->move_type = GS_NONE;
 		gs->move_wait = hs->evtime + cfg->gesture_wait;
 		earliest = -1;
@@ -251,7 +251,7 @@ static void buttons_update(struct Gestures* gs,
 			else if (latest >= 0) {
 				touching = 0;
 				foreach_bit(i, ms->touch_used) {
-					if (cfg->button_expire == 0 || ms->touch[latest].down < ms->touch[i].down + cfg->button_expire)
+					if (cfg->button_move || cfg->button_expire == 0 || ms->touch[latest].down < ms->touch[i].down + cfg->button_expire)
 						touching++;
 				}
 
