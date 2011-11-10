@@ -107,7 +107,7 @@ Button emulation depends on this value being correct. Boolean value. Defaults
 to true.
 
 **ButtonMoveEmulate**
-Whether or not to count the moving finger when emulating button clicks. Boolean value. Defaults to false.
+Whether or not to count the moving finger when emulating button clicks. Useful to disable if you use two hands on trackpad. Boolean value. Defaults to true.
 
 **ButtonZonesEnable** -
 Whether or not to enable button zones. If button zones are enabled then the
