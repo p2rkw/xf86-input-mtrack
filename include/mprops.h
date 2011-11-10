@@ -42,8 +42,8 @@
 #define MTRACK_PROP_SENSITIVITY "Trackpad Sensitivity"
 // int, 2 values - finger low, finger high
 #define MTRACK_PROP_PRESSURE "Trackpad Touch Pressure"
-// int, 3 values - enable buttons, has integrated button,
-//   emulation touch expiration, enable button zones
+// int, 5 values - enable buttons, has integrated button,
+//   emulation touch expiration, enable button zones, button move emulation
 #define MTRACK_PROP_BUTTON_SETTINGS "Trackpad Button Settings"
 // int, 2 values - button to emulate with 1 touch, 2 touches, 3 touches
 #define MTRACK_PROP_BUTTON_EMULATE "Trackpad Button Emulation"

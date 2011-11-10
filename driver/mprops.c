@@ -102,7 +102,8 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->button_integrated;
 	ivals[2] = cfg->button_expire;
 	ivals[3] = cfg->button_zones;
-	mprops.button_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_SETTINGS, 4, ivals, 16);
+	ivals[4] = cfg->button_move;
+	mprops.button_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_SETTINGS, 5, ivals, 16);
 
 	ivals[0] = cfg->button_1touch;
 	ivals[1] = cfg->button_2touch;
@@ -251,7 +252,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		ivals16 = (uint16_t*)prop->data;
-		if (!VALID_BOOL(ivals16[0]) || !VALID_BOOL(ivals16[1]) || ivals16[2] < 0 || !VALID_BOOL(ivals16[3]))
+		if (!VALID_BOOL(ivals16[0]) || !VALID_BOOL(ivals16[1]) || ivals16[2] < 0 || !VALID_BOOL(ivals16[3]) || !VALID_BOOL(ivals16[4]))
 			return BadMatch;
 
 		if (!checkonly) {
@@ -259,9 +260,10 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->button_integrated = ivals16[1];
 			cfg->button_expire = ivals16[2];
 			cfg->button_zones = ivals16[3];
+			cfg->button_move = ivals16[4];
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set button settings to %d %d %d %d\n",
-				cfg->button_enable, cfg->button_integrated, cfg->button_expire, cfg->button_zones);
+			xf86Msg(X_INFO, "mtrack: set button settings to %d %d %d %d %d\n",
+				cfg->button_enable, cfg->button_integrated, cfg->button_expire, cfg->button_zones, cfg->button_move);
 #endif
 		}
 	}

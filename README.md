@@ -106,6 +106,9 @@ have a one-piece trackpad like on newer MacBooks, this should be set to true.
 Button emulation depends on this value being correct. Boolean value. Defaults
 to true.
 
+**ButtonMoveEmulate**
+Whether or not to count the moving finger when emulating button clicks. Boolean value. Defaults to false.
+
 **ButtonZonesEnable** -
 Whether or not to enable button zones. If button zones are enabled then the
 trackpad will be split into one, two, or three vertical zones. Clicking the
