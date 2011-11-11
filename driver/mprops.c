@@ -188,6 +188,10 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[2] = cfg->drag_wait;
 	ivals[3] = cfg->drag_dist;
 	mprops.drag_settings = atom_init_integer(local->dev, MTRACK_PROP_DRAG_SETTINGS, 4, ivals, 32);
+
+	ivals[0] = cfg->axis_x_invert;
+	ivals[1] = cfg->axis_y_invert;
+	mprops.axis_invert = atom_init_integer(local->dev, MTRACK_PROP_AXIS_INVERT, 2, ivals, 8);
 }
 
 int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly) {
@@ -610,6 +614,23 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set drag settings to %d %d %d %d\n",
 				cfg->drag_enable, cfg->drag_timeout, cfg->drag_wait, cfg->drag_dist);
+#endif
+		}
+	}
+	else if (property == mprops.axis_invert) {
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BOOL(ivals8[0]) || !VALID_BOOL(ivals8[1]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->axis_x_invert = ivals8[0];
+			cfg->axis_y_invert = ivals8[1];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set axis inversion to %d %d\n",
+				cfg->axis_x_invert, cfg->axis_y_invert);
 #endif
 		}
 	}

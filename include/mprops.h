@@ -84,6 +84,8 @@
 #define MTRACK_PROP_ROTATE_BUTTONS "Trackpad Rotate Buttons"
 // int, 4 values - enable, timeout, wait, dist
 #define MTRACK_PROP_DRAG_SETTINGS "Trackpad Drag Settings"
+// int, 2 values - invert x axis, invert y axis
+#define MTRACK_PROP_AXIS_INVERT "Trackpad Axis Inversion"
 
 struct MProps {
 	// Properties Config
@@ -115,6 +117,7 @@ struct MProps {
 	Atom rotate_dist;
 	Atom rotate_buttons;
 	Atom drag_settings;
+	Atom axis_invert;
 };
 
 void mprops_init(struct MConfig* cfg, InputInfoPtr local);

@@ -77,6 +77,8 @@
 #define DEFAULT_DRAG_TIMEOUT 350
 #define DEFAULT_DRAG_WAIT 40
 #define DEFAULT_DRAG_DIST 200
+#define DEFAULT_AXIS_X_INVERT 0
+#define DEFAULT_AXIS_Y_INVERT 0
 #define DEFAULT_SENSITIVITY 1.0
 
 #define MCFG_NONE 0
@@ -106,6 +108,8 @@ struct MConfig {
 	int thumb_size;		// Minimum touch size for a thumb. 0 - 100
 	int palm_size;		// Minimum touch size for a palm. 0 - 100
 	int bottom_edge;		// Percent of bottom of trackpad to ignore for new touches. 0 - 100
+	int axis_x_invert;	// Whether or not to invert the x axis. 0 or 1.
+	int axis_y_invert;	// Whether or not to invert the y axis. 0 or 1.
 
 	/* Used by Gestures */
 
