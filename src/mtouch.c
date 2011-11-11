@@ -74,7 +74,7 @@ int read_packet(struct MTouch *mt, int fd)
 	int ret = hwstate_modify(&mt->hs, &mt->dev, fd, &mt->caps);
 	if (ret <= 0)
 		return ret;
-	mtstate_extract(&mt->state, &mt->cfg, &mt->hs);
+	mtstate_extract(&mt->state, &mt->cfg, &mt->hs, &mt->caps);
 	gestures_extract(&mt->gs, &mt->cfg, &mt->hs, &mt->state);
 	return 1;
 }

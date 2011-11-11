@@ -26,6 +26,7 @@
 #include "common.h"
 #include "mconfig.h"
 #include "hwstate.h"
+#include "capabilities.h"
 
 #define MT_NEW 0
 #define MT_RELEASED 1
@@ -59,7 +60,8 @@ void mtstate_init(struct MTState* ms);
  */
 void mtstate_extract(struct MTState* ms,
 			const struct MConfig* cfg,
-			const struct HWState* hs);
+			const struct HWState* hs,
+			const struct Capabilities* caps);
 
 #endif
 
