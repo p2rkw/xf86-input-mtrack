@@ -277,6 +277,12 @@ How far the finger is allowed to move during drag wait time. If the finger
 moves farther than this distance during the wait time then dragging will be
 canceled and pointer movement will resume. Integer value. Defaults to 200.
 
+**AxisXInvert**
+Whether or not to invert the X axis. Boolean value. Defaults to false.
+
+**AxisYInvert**
+Whether or not to invert the Y axis. Boolean value. Defaults to false.
+
 [1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt     "Kernel Multitouch Protocol"
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"
 [3]: http://bitmath.org/code/multitouch/                                        "xf86-input-multitouch website"
