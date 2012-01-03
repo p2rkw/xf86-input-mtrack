@@ -69,11 +69,21 @@ static inline void timercp(struct timeval* dest, struct timeval* src)
 	memcpy(dest, src, sizeof(timeval));
 }
 
+static inline mstime_t timertoms(struct timeval* tv)
+{
+	return (mstime_t)(tv->sec*1000) + (mstime_t)(tv->tv_usec/1000);
+}
+
+static inline void timerfromms(struct timeval* tv, mstime_t ms)
+{
+	tv->tv_sec = (time_t)(ms/1000);
+	tv->tv_usec = (suseconds_t)((ms%1000)*1000);
+}
+
 static inline void timeraddms(struct timeval* tv, mstime_t ms)
 {
 	struct timeval src;
-	src.tv_sec = (time_t)(ms/1000);
-	src.tv_usec = (suseconds_t)((ms%1000)*1000);
+	timerfromms(&src, ms);
 	timeradd(&src, tv, tv);
 }
 
