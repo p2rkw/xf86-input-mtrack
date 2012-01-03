@@ -80,11 +80,11 @@ static inline void timerfromms(struct timeval* tv, mstime_t ms)
 	tv->tv_usec = (suseconds_t)((ms%1000)*1000);
 }
 
-static inline void timeraddms(struct timeval* tv, mstime_t ms)
+static inline void timeraddms(struct timeval* a, mstime_t b, &dest)
 {
-	struct timeval src;
-	timerfromms(&src, ms);
-	timeradd(&src, tv, tv);
+	struct timeval tv;
+	timerfromms(&tv, b);
+	timeradd(a, &tv, dest);
 }
 
 static inline int clamp15(int x)
