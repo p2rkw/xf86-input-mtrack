@@ -34,6 +34,7 @@
 #include <errno.h>
 #include <mtdev-mapping.h>
 #include <stdint.h>
+#include <sys/time.h>
 
 #define DIM_FINGER 32
 #define DIM_TOUCHES 32
@@ -57,6 +58,24 @@ typedef unsigned int bitmask_t;
 #define MODVAL(x, y) ((x) - ((int)((x) / (y))) * (y))
 #define SQRVAL(x) ((x) * (x))
 #define CLAMPVAL(x, min, max) MAXVAL(MINVAL(x, max), min)
+
+static inline void microtime(struct timeval* tv)
+{
+	gettimeofday(tv, NULL);
+}
+
+static inline void timercp(struct timeval* dest, struct timeval* src)
+{
+	memcpy(dest, src, sizeof(timeval));
+}
+
+static inline void timeraddms(struct timeval* tv, mstime_t ms)
+{
+	struct timeval src;
+	src.tv_sec = (time_t)(ms/1000);
+	src.tv_usec = (suseconds_t)((ms%1000)*1000);
+	timeradd(&src, tv, tv);
+}
 
 static inline int clamp15(int x)
 {
