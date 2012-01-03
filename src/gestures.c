@@ -684,10 +684,11 @@ static void moving_update(struct Gestures* gs,
 	}
 }
 
-static void dragging_update(struct Gestures* gs,
-			const struct HWState* hs)
+static void dragging_update(struct MTouch* mt)
 {
-	if (gs->move_drag == GS_DRAG_READY && hs->evtime > gs->move_drag_expire) {
+	struct Gestures* gs = &mt->gs;
+
+	if (gs->move_drag == GS_DRAG_READY && mt->hs.evtime > gs->move_drag_expire) {
 #ifdef DEBUG_GESTURES
 		xf86Msg(X_INFO, "dragging_update: drag expired\n");
 #endif
