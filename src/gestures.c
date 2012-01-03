@@ -26,6 +26,7 @@
  **************************************************************************/
 
 #include "gestures.h"
+#include "mtouch.h"
 #include "trig.h"
 #include <poll.h>
 
@@ -713,16 +714,18 @@ static void delayed_update(struct Gestures* gs,
 		gs->button_delayed_ms = gs->button_delayed_time - hs->evtime;
 }
 
-void gestures_init(struct Gestures* gs)
+void gestures_init(struct MTouch* mt)
 {
-	memset(gs, 0, sizeof(struct Gestures));
+	memset(&mt->gs, 0, sizeof(struct Gestures));
 }
 
-void gestures_extract(struct Gestures* gs,
-			const struct MConfig* cfg,
-			const struct HWState* hs,
-			struct MTState* ms)
+void gestures_extract(struct MTouch* mt)
 {
+	struct Gestures* gs = &mt->gs;
+	const struct MConfig* cfg = &mt->cfg;
+	const struct HWState* hs = &mt->hs;
+	struct MTState* ms = &mt->state;
+
 	dragging_update(gs, hs);
 	buttons_update(gs, cfg, hs, ms);
 	tapping_update(gs, cfg, hs, ms);
@@ -730,9 +733,12 @@ void gestures_extract(struct Gestures* gs,
 	delayed_update(gs, hs);
 }
 
-int gestures_delayed(struct Gestures* gs,
-			struct mtdev* dev, int fd)
+int gestures_delayed(struct MTouch* mt)
 {
+	struct Gestures* gs = &mt->gs;
+	struct mtdev* dev = &mt->dev;
+	int fd = mt->fd;
+
 	if (gs->button_delayed_time > 0) {
 		if (mtdev_empty(dev) && mtdev_idle(dev, fd, gs->button_delayed_ms)) {
 #ifdef DEBUG_GESTURES

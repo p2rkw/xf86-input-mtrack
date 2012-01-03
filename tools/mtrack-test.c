@@ -85,12 +85,12 @@ static void loop_device(int fd)
 
 	//while (!mtdev_idle(&mt.dev, fd, 5000)) {
 	while (1) {
-		while (read_packet(&mt, fd) > 0)
+		while (mtouch_read(&mt) > 0)
 			print_gestures(&mt.gs);
-		if (has_delayed(&mt, fd))
+		if (mtouch_delayed(&mt))
 			print_gestures(&mt.gs);
 	}
-	mtouch_close(&mt, fd);
+	mtouch_close(&mt);
 }
 
 int main(int argc, char *argv[])

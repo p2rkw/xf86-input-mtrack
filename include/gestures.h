@@ -28,6 +28,8 @@
 #include "hwstate.h"
 #include "mtstate.h"
 
+struct MTouch;
+
 #define GS_TAP 0
 #define GS_BUTTON 1
 
@@ -75,13 +77,9 @@ struct Gestures {
 };
 
 
-void gestures_init(struct Gestures* gs);
-void gestures_extract(struct Gestures* gs,
-			const struct MConfig* cfg,
-			const struct HWState* hs,
-			struct MTState* ms);
-int gestures_delayed(struct Gestures* gs,
-			struct mtdev* dev, int fd);
+void gestures_init(struct MTouch* mt);
+void gestures_extract(struct MTouch* mt);
+int gestures_delayed(struct MTouch* mt);
 
 #endif
 

@@ -179,7 +179,7 @@ static int device_off(LocalDevicePtr local)
 {
 	struct MTouch *mt = local->private;
 	xf86RemoveEnabledDevice(local);
-	if (mtouch_close(mt, local->fd))
+	if (mtouch_close(mt))
 		xf86Msg(X_WARNING, "mtrack: cannot ungrab device\n");
 	xf86CloseSerial(local->fd);
 	return Success;
@@ -222,9 +222,9 @@ static void handle_gestures(LocalDevicePtr local,
 static void read_input(LocalDevicePtr local)
 {
 	struct MTouch *mt = local->private;
-	while (read_packet(mt, local->fd) > 0)
+	while (mtouch_read(mt) > 0)
 		handle_gestures(local, &mt->gs);
-	if (has_delayed(mt, local->fd))
+	if (mtouch_delayed(mt))
 		handle_gestures(local, &mt->gs);
 }
 
