@@ -271,17 +271,21 @@ static void touches_clean(struct MTState* ms)
 }
 
 #if DEBUG_MTSTATE
-void mtstate_output(const struct MTState* ms)
+static void mtstate_output(const struct MTState* ms,
+			const struct HWState* hs)
 {
 	int i, n;
 	char* type;
 	struct timeval tv;
 	n = bitcount(ms->touch_used);
-	//if (bitcount(ms->touch_used) > 0)
-	//	xf86Msg(X_INFO, "mtstate: %d touches at event time is %llu\n", n, timertoms(&hs->evtime));
+	if (bitcount(ms->touch_used) > 0) {
+		microtime(&tv);
+		xf86Msg(X_INFO, "mtstate: %d touches at event time %llu (rt %llu)\n",
+			n, timertoms(&hs->evtime), timertoms(&tv));
+	}
 	foreach_bit(i, ms->touch_used) {
 		if (GETBIT(ms->touch[i].state, MT_RELEASED)) {
-			timersub(&ms->evtime, &ms->touch[i].down, &tv);
+			timersub(&hs->evtime, &ms->touch[i].down, &tv);
 			xf86Msg(X_INFO, "  released p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
 						ms->touch[i].direction, timertoms(&ms->touch[i].down), timertoms(&tv));
@@ -292,7 +296,7 @@ void mtstate_output(const struct MTState* ms)
 						ms->touch[i].direction, timertoms(&ms->touch[i].down));
 		}
 		else if (GETBIT(ms->touch[i].state, MT_INVALID)) {
-			timersub(&ms->evtime, &ms->touch[i].down, &tv);
+			timersub(&hs->evtime, &ms->touch[i].down, &tv);
 			xf86Msg(X_INFO, "  invalid  p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
 						ms->touch[i].direction, timertoms(&ms->touch[i].down), timertoms(&tv));
@@ -323,7 +327,7 @@ void mtstate_extract(struct MTState* ms,
 	touches_update(ms, cfg, hs, caps);
 
 #if DEBUG_MTSTATE
-	mtstate_output(ms);
+	mtstate_output(ms, hs);
 #endif
 }
 
