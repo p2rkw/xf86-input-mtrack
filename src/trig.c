@@ -21,47 +21,16 @@
 
 #include "trig.h"
 #include "common.h"
+#include <math.h>
 
-/* Determine the angle of a vector within the given quadrant.
- * All this really does is calculate the slope in relation to
- * which quadrant it is in.
- */
-static double trig_quadrant_angle(int quadrant, double dx, double dy) {
-	dx = ABSVAL(dx);
-	dy = ABSVAL(dy);
-	if (quadrant == 1 || quadrant == 3)
-		return dx < dy ? 2-dx/dy : dy/dx;
-	else
-		return dy < dx ? 2-dy/dx : dx/dy;
-}
-
-int trig_quadrant(double dx, double dy)
-{
-	if (dx > 0 && dy < 0)
-		return 0;
-	else if (dx > 0 && dy > 0)
-		return 1;
-	else if (dx < 0 && dy > 0)
-		return 2;
-	else if (dx < 0 && dy < 0)
-		return 3;
-	else
-		return -1;
-}
-
-double trig_direction(double dx, double dy)
-{
-	int qn;
-	if (dx == 0 && dy == 0)
-		return TR_NONE;
-	else if (dx == 0)
-		return (dy < 0) ? 0 : 4;
-	else if (dy == 0)
-		return (dx > 0) ? 2 : 6;
-	else {
-		qn = trig_quadrant(dx, dy);
-		return qn*2 + trig_quadrant_angle(qn, dx, dy);
+double trig_direction(double dx, double dy) {
+	double angle = TR_NONE;
+	if (dx != 0 || dy != 0) {
+		angle = (atan2(dx, dy*-1)/M_PI)*4;
+		if (angle < 0)
+			angle = 8 + angle;
 	}
+	return angle;
 }
 
 int trig_generalize(double dir)
@@ -111,4 +80,3 @@ int trig_angles_cmp(double a1, double a2)
 	else
 		return -1;
 }
-

@@ -33,11 +33,6 @@
 #define TR_DIR_DN 4
 #define TR_DIR_LT 6
 
-/* Determine in which quadrant a point lies. Counts from 0. Returns
- * TR_NONE if the point lies at the origin.
- */
-int trig_quadrant(double x, double y);
-
 /* Determine the direction of a vector. This uses the slope of the
  * vector to approximate the angle, as such it is only accurate at
  * increments of 45 degrees. This is sufficient for our uses.

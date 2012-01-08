@@ -25,6 +25,7 @@ XORG_DEFAULT_OPTIONS
 
 # Checks for libraries.
 AC_CHECK_LIB([mtdev], [mtdev_open])
+AC_CHECK_LIB([m], [atan2])
 
 # Obtain compiler/linker options for the mtrack driver dependencies
 PKG_CHECK_MODULES(XORG, [xorg-server >= 1.7] xproto inputproto $REQUIRED_MODULES)
