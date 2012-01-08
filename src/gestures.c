@@ -746,16 +746,24 @@ void gestures_extract(struct MTouch* mt)
 	delayed_update(&mt->gs);
 }
 
+static int gestures_sleep(struct MTouch* mt, const struct timeval* sleep)
+{
+	if (mtdev_empty(&mt->dev)) {
+		mtdev_idle(&mt->dev, mt->fd, timertoms(sleep));
+		microtime(&mt->gs.time);
+		return 1;
+	}
+	return 0;
+}
+
 int gestures_delayed(struct MTouch* mt)
 {
-	struct timeval epoch;
 	struct Gestures* gs = &mt->gs;
-	struct mtdev* dev = &mt->dev;
-	int fd = mt->fd;
+	struct timeval epoch;
 	timerclear(&epoch);
 
 	if (timercmp(&gs->button_delayed_time, &epoch, >)) {
-		if (mtdev_empty(dev) && mtdev_idle(dev, fd, timertoms(&gs->button_delayed_delta))) {
+		if (gestures_sleep(mt, &gs->button_delayed_delta)) {
 #ifdef DEBUG_GESTURES
 			xf86Msg(X_INFO, "gestures_delayed: %d up, timer expired\n", gs->button_delayed);
 #endif
