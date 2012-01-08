@@ -59,21 +59,22 @@ struct Gestures {
 	 */
 	int button_emulate;
 	int button_delayed;
-	mstime_t button_delayed_time;
-	int button_delayed_ms;
+	struct timeval button_delayed_time;
+	struct timeval button_delayed_delta;
 
-	mstime_t tap_time_down;
 	int tap_touching;
 	int tap_released;
+	struct timeval tap_time_down;
+
 	int move_type;
 	int move_dist;
 	int move_dir;
 	int move_drag;
 	int move_drag_dx;
 	int move_drag_dy;
-	mstime_t move_wait;
-	mstime_t move_drag_wait;
-	mstime_t move_drag_expire;
+	struct timeval move_wait;
+	struct timeval move_drag_wait;
+	struct timeval move_drag_expire;
 };
 
 

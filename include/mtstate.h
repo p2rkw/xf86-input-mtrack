@@ -38,16 +38,15 @@
 struct Touch {
 	bitmask_t state;
 	bitmask_t flags;
-	mstime_t down;
 	double direction;
 	int tracking_id;
 	int x, y, dx, dy;
 	int total_dx, total_dy;
+	struct timeval down;
 };
 
 struct MTState {
 	bitmask_t state;
-	mstime_t evtime;
 	struct Touch touch[DIM_TOUCHES];
 	bitmask_t touch_used;
 };
