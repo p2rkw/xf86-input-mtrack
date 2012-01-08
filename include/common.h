@@ -70,7 +70,7 @@ static inline void microtime(struct timeval* tv)
  */
 static inline void timercp(struct timeval* dest, struct timeval* src)
 {
-	memcpy(dest, src, sizeof(timeval));
+	memcpy(dest, src, sizeof(struct timeval));
 }
 
 /* Convert a timeval to milliseconds since the epoch. Truncates additional
@@ -78,7 +78,7 @@ static inline void timercp(struct timeval* dest, struct timeval* src)
  */
 static inline mstime_t timertoms(struct timeval* tv)
 {
-	return (mstime_t)(tv->sec*1000) + (mstime_t)(tv->tv_usec/1000);
+	return (mstime_t)(tv->tv_sec*1000) + (mstime_t)(tv->tv_usec/1000);
 }
 
 /* Convert a value in milliseconds to a timeval and place the value in tv.
@@ -91,7 +91,7 @@ static inline void timerfromms(struct timeval* tv, mstime_t ms)
 
 /* Add milliseconds to a timeval and place the resulting value in dest.
  */
-static inline void timeraddms(struct timeval* a, mstime_t b, &dest)
+static inline void timeraddms(struct timeval* a, mstime_t b, struct timeval* dest)
 {
 	struct timeval tv;
 	timerfromms(&tv, b);
