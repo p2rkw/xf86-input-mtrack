@@ -62,10 +62,14 @@ double trig_angles_sub(double a1, double a2)
 
 double trig_angles_acute(double a1, double a2)
 {
+	double angle;
 	if (a1 > a2)
-		return trig_angles_sub(a1, a2);
+		angle = trig_angles_sub(a1, a2);
 	else
-		return trig_angles_sub(a2, a1);
+		angle = trig_angles_sub(a2, a1);
+	if (angle > 4)
+		angle = 8 - angle;
+	return angle;
 }
 
 int trig_angles_cmp(double a1, double a2)
