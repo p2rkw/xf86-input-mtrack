@@ -416,6 +416,7 @@ static void trigger_scroll(struct Gestures* gs,
 		gs->move_type = GS_SCROLL;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
+		gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 
 		if (gs->move_dist >= cfg->scroll_dist) {
@@ -450,6 +451,7 @@ static void trigger_swipe(struct Gestures* gs,
 		gs->move_type = GS_SWIPE;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
+		gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		timeraddms(&gs->time, cfg->gesture_hold, &tv_tmp);
 
@@ -503,6 +505,7 @@ static void trigger_scale(struct Gestures* gs,
 		gs->move_type = GS_SCALE;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
+		gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= scale_dist_sqr) {
 			gs->move_dist = MODVAL(gs->move_dist, scale_dist_sqr);
@@ -533,6 +536,7 @@ static void trigger_rotate(struct Gestures* gs,
 		gs->move_type = GS_ROTATE;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
+		gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= rotate_dist_sqr) {
 			gs->move_dist = MODVAL(gs->move_dist, rotate_dist_sqr);
