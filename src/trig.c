@@ -62,6 +62,11 @@ int trig_generalize(double dir)
 		return TR_DIR_UP;
 }
 
+double trig_pythagorean(double x, double y)
+{
+	return sqrt(x*x + y*y);
+}
+
 double trig_angles_add(double a1, double a2)
 {
 	double a = MODVAL(a1 + a2, 8.0);

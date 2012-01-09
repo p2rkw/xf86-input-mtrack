@@ -51,6 +51,10 @@ double trig_direction(double dx, double dy);
  */
 int trig_generalize(double dir);
 
+/* Calculate the hypotenuse of a triangle.
+ */
+double trig_pythagorean(double x, double y);
+
 /* Add two angles.
  */
 double trig_angles_add(double a1, double a2);
