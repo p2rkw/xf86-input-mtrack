@@ -28,7 +28,6 @@
 #include "gestures.h"
 #include "mtouch.h"
 #include "trig.h"
-#include <poll.h>
 
 #define IS_VALID_BUTTON(x) (x >= 0 && x <= 31)
 
