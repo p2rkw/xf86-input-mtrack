@@ -388,12 +388,13 @@ static void trigger_move(struct Gestures* gs,
 {
 	if ((gs->move_type == GS_MOVE || !timercmp(&gs->time, &gs->move_wait, <)) && (dx != 0 || dy != 0)) {
 		if (trigger_drag_start(gs, cfg, dx, dy)) {
+			suseconds_t dt = timertomicro(&gs->dt);
 			gs->move_dx = (int)(dx*cfg->sensitivity);
 			gs->move_dy = (int)(dy*cfg->sensitivity);
 			gs->move_type = GS_MOVE;
 			gs->move_dist = 0;
 			gs->move_dir = TR_NONE;
-			gs->move_speed = hypot(gs->move_dx, gs->move_dy)/timertomicro(&gs->dt);
+			gs->move_speed = hypot(gs->move_dx, gs->move_dy)/(dt == 0 ? 1 : dt);
 			timerclear(&gs->move_wait);
 #ifdef DEBUG_GESTURES
 			xf86Msg(X_INFO, "trigger_move: %d, %d (speed %f)\n",
@@ -410,14 +411,15 @@ static void trigger_scroll(struct Gestures* gs,
 	if (gs->move_type == GS_SCROLL || !timercmp(&gs->time, &gs->move_wait, <)) {
 		struct timeval tv_tmp;
 		trigger_drag_stop(gs, 1);
+		suseconds_t dt = timertomicro(&gs->dt);
 		if (gs->move_type != GS_SCROLL || gs->move_dir != dir)
 			gs->move_dist = 0;
 		gs->move_dx = 0;
 		gs->move_dy = 0;
 		gs->move_type = GS_SCROLL;
-		gs->move_dist += (int)ABSVAL(dist);
+		gs->move_dist += (int)dist;
 		gs->move_dir = dir;
-		gs->move_speed = dist/timertomicro(&gs->dt);
+		gs->move_speed = dist/(dt == 0 ? 1 : dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 
 		if (gs->move_dist >= cfg->scroll_dist) {
@@ -446,14 +448,15 @@ static void trigger_swipe(struct Gestures* gs,
 	if (gs->move_type == GS_SWIPE || !timercmp(&gs->time, &gs->move_wait, <)) {
 		struct timeval tv_tmp;
 		trigger_drag_stop(gs, 1);
+		suseconds_t dt = timertomicro(&gs->dt);
 		if (gs->move_type != GS_SWIPE || gs->move_dir != dir)
 			gs->move_dist = 0;
 		gs->move_dx = 0;
 		gs->move_dy = 0;
 		gs->move_type = GS_SWIPE;
-		gs->move_dist += (int)ABSVAL(dist);
+		gs->move_dist += (int)dist;
 		gs->move_dir = dir;
-		gs->move_speed = dist/timertomicro(&gs->dt);
+		gs->move_speed = dist/(dt == 0 ? 1 : dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		timeraddms(&gs->time, cfg->gesture_hold, &tv_tmp);
 
@@ -501,14 +504,15 @@ static void trigger_scale(struct Gestures* gs,
 	if (gs->move_type == GS_SCALE || !timercmp(&gs->time, &gs->move_wait, <)) {
 		struct timeval tv_tmp;
 		trigger_drag_stop(gs, 1);
+		suseconds_t dt = timertomicro(&gs->dt);
 		if (gs->move_type != GS_SCALE || gs->move_dir != dir)
 			gs->move_dist = 0;
 		gs->move_dx = 0;
 		gs->move_dy = 0;
 		gs->move_type = GS_SCALE;
-		gs->move_dist += (int)ABSVAL(dist);
+		gs->move_dist += (int)dist;
 		gs->move_dir = dir;
-		gs->move_speed = dist/timertomicro(&gs->dt);
+		gs->move_speed = dist/(dt == 0 ? 1 : dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= cfg->scale_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->scale_dist);
@@ -532,14 +536,15 @@ static void trigger_rotate(struct Gestures* gs,
 	if (gs->move_type == GS_ROTATE || !timercmp(&gs->time, &gs->move_wait, <)) {
 		struct timeval tv_tmp;
 		trigger_drag_stop(gs, 1);
+		suseconds_t dt = timertomicro(&gs->dt);
 		if (gs->move_type != GS_ROTATE || gs->move_dir != dir)
 			gs->move_dist = 0;
 		gs->move_dx = 0;
 		gs->move_dy = 0;
 		gs->move_type = GS_ROTATE;
-		gs->move_dist += (int)ABSVAL(dist);
+		gs->move_dist += (int)dist;
 		gs->move_dir = dir;
-		gs->move_speed = dist/timertomicro(&gs->dt);
+		gs->move_speed = dist/(dt == 0 ? 1 : dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= cfg->rotate_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->rotate_dist);
@@ -679,7 +684,7 @@ static void moving_update(struct Gestures* gs,
 			dist = hypot(
 				touches[0]->dx + touches[1]->dx,
 				touches[0]->dy + touches[1]->dy);
-			trigger_scroll(gs, cfg, dist/2, dir);
+			trigger_scroll(gs, cfg, ABSVAL(dist/2), dir);
 		}
 		else if ((dir = get_rotate_dir(touches[0], touches[1])) != TR_NONE) {
 			dist = ABSVAL(hypot(touches[0]->dx, touches[0]->dy)) +
@@ -697,7 +702,7 @@ static void moving_update(struct Gestures* gs,
 			dist = hypot(
 				touches[0]->dx + touches[1]->dx + touches[2]->dx,
 				touches[0]->dy + touches[1]->dy + touches[2]->dy);
-			trigger_swipe(gs, cfg, dist/3, dir, 0);
+			trigger_swipe(gs, cfg, ABSVAL(dist/3), dir, 0);
 		}
 	}
 	else if (count == 4 && cfg->trackpad_disable < 1) {
@@ -705,7 +710,7 @@ static void moving_update(struct Gestures* gs,
 			dist = hypot(
 				touches[0]->dx + touches[1]->dx + touches[2]->dx + touches[3]->dx,
 				touches[0]->dy + touches[1]->dy + touches[2]->dy + touches[3]->dy);
-			trigger_swipe(gs, cfg, dist/4, dir, 1);
+			trigger_swipe(gs, cfg, ABSVAL(dist/4), dir, 1);
 		}
 	}
 }
