@@ -58,6 +58,9 @@
 #define DEFAULT_SCROLL_LT_BTN 6
 #define DEFAULT_SCROLL_RT_BTN 7
 #define DEFAULT_SCROLL_HOLD 20
+#define DEFAULT_SCROLL_COAST_ENABLE 0
+#define DEFAULT_SCROLL_COAST_SPEED 50
+#define DEFAULT_SCROLL_COAST_DECEL 10
 #define DEFAULT_SWIPE_DIST 700
 #define DEFAULT_SWIPE_UP_BTN 8
 #define DEFAULT_SWIPE_DN_BTN 9
@@ -175,6 +178,9 @@ struct MConfig {
 		int lt_btn;		// Button to use for swipe left. >= 0, 0 is none
 		int rt_btn;		// Button to use for swipe right. >= 0, 0 is none
 	} scroll, swipe3, swipe4/*, swipe5*/;
+	int scroll_coast_enable;	// Whether or not to enable scroll coasting. 0 or 1
+	int scroll_coast_speed;		// What speed to start scroll coasting at. >= 0
+	int scroll_coast_decel;		// Amount to decelerate during scroll coasting. >= 0, 0 disables
 	int scale_dist;			// Distance needed to trigger a button. >= 0, 0 disables
 	int scale_up_btn;		// Button to use for scale up. >= 0, 0 is none
 	int scale_dn_btn;		// Button to use for scale down. >= 0, 0 is none

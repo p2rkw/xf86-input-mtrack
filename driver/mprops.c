@@ -168,6 +168,14 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 
 	init_swipe_props(local->dev, &mprops.swipe4, &cfg->swipe4, MTRACK_PROP_SWIPE4_SETTINGS, MTRACK_PROP_SWIPE4_BUTTONS);
 
+	ivals[0] = cfg->scroll_coast_enable;
+	ivals[1] = cfg->scroll_coast_speed;
+	ivals[2] = cfg->scroll_coast_decel;
+	mprops.scroll_coast = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_COAST, 3, ivals, 32);
+
+	ivals[0] = cfg->swipe_dist;
+	mprops.swipe_dist = atom_init_integer(local->dev, MTRACK_PROP_SWIPE_DIST, 1, ivals, 32);
+
 	ivals[0] = cfg->scale_dist;
 	mprops.scale_dist = atom_init_integer(local->dev, MTRACK_PROP_SCALE_DIST, 1, ivals, 32);
 
@@ -543,6 +551,24 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	}
 	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe4, &cfg->swipe4, &error_code)) {
 		return error_code;
+	}
+	else if (property == mprops.scroll_coast) {
+		if (prop->size != 3 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (!VALID_BOOL(ivals32[0]) || ivals32[1] < 0 || ivals32[2] < 0)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->scroll_coast_enable = ivals32[0];
+			cfg->scroll_coast_speed = ivals32[1];
+			cfg->scroll_coast_decel = ivals32[2];
+#ifndef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set scroll coasting to %d %d %d\n",
+				cfg->scroll_coast_enable, cfg->scroll_coast_speed, cfg->scroll_coast_decel);
+#endif
+		}
 	}
 	else if (property == mprops.scale_dist) {
 		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
