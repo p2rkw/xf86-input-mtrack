@@ -396,7 +396,8 @@ static void trigger_move(struct Gestures* gs,
 			gs->move_speed = hypot(gs->move_dx, gs->move_dy)/timertomicro(&gs->dt);
 			timerclear(&gs->move_wait);
 #ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_move: %d, %d\n", dx, dy);
+			xf86Msg(X_INFO, "trigger_move: %d, %d (speed %f)\n",
+				gs->move_dx, gs->move_dy, gs->move_speed);
 #endif
 		}
 	}
@@ -432,7 +433,8 @@ static void trigger_scroll(struct Gestures* gs,
 				trigger_button_click(gs, cfg->scroll_rt_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_scroll: scrolling %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->scroll_dist);
+		xf86Msg(X_INFO, "trigger_scroll: scrolling %+f in direction %d (at %d of %d) (speed %f)\n",
+			dist, dir, gs->move_dist, cfg->scroll_dist, gs->move_speed);
 #endif
 	}
 }
@@ -468,7 +470,8 @@ static void trigger_swipe(struct Gestures* gs,
 					trigger_button_click(gs, cfg->swipe4_rt_btn - 1, &tv_tmp);
 			}
 #ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_swipe4: swiping %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->swipe_dist);
+			xf86Msg(X_INFO, "trigger_swipe4: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
+				dist, dir, gs->move_dist, cfg->swipe_dist, gs->move_speed);
 #endif
 		}
 		else {
@@ -515,7 +518,8 @@ static void trigger_scale(struct Gestures* gs,
 				trigger_button_click(gs, cfg->scale_dn_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_scale: scaling %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->scale_dist);
+		xf86Msg(X_INFO, "trigger_scale: scaling %+f in direction %d (at %d of %d) (speed %f)\n",
+			dist, dir, gs->move_dist, cfg->scale_dist, gs->move_speed);
 #endif
 	}
 }
@@ -545,7 +549,8 @@ static void trigger_rotate(struct Gestures* gs,
 				trigger_button_click(gs, cfg->rotate_rt_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_rotate: rotating %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, rotate_dist_sqr);
+		xf86Msg(X_INFO, "trigger_rotate: rotating %+f in direction %d (at %d of %d) (speed %f)\n",
+			dist, dir, gs->move_dist, cfg->rotate_dist, gs->move_speed);
 #endif
 	}
 }
