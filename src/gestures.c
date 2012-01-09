@@ -394,7 +394,7 @@ static void trigger_move(struct Gestures* gs,
 			gs->move_type = GS_MOVE;
 			gs->move_dist = 0;
 			gs->move_dir = TR_NONE;
-			gs->move_speed = hypot(gs->move_dx, gs->move_dy)/(dt == 0 ? 1 : dt);
+			gs->move_speed = (hypot(gs->move_dx, gs->move_dy) / (dt == 0 ? 1 : dt)) * 10000;
 			timerclear(&gs->move_wait);
 #ifdef DEBUG_GESTURES
 			xf86Msg(X_INFO, "trigger_move: %d, %d (speed %f)\n",
@@ -419,7 +419,7 @@ static void trigger_scroll(struct Gestures* gs,
 		gs->move_type = GS_SCROLL;
 		gs->move_dist += (int)dist;
 		gs->move_dir = dir;
-		gs->move_speed = dist/(dt == 0 ? 1 : dt);
+		gs->move_speed = (dist / (dt == 0 ? 1 : dt)) * 10000;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 
 		if (gs->move_dist >= cfg->scroll_dist) {
@@ -456,7 +456,7 @@ static void trigger_swipe(struct Gestures* gs,
 		gs->move_type = GS_SWIPE;
 		gs->move_dist += (int)dist;
 		gs->move_dir = dir;
-		gs->move_speed = dist/(dt == 0 ? 1 : dt);
+		gs->move_speed = (dist / (dt == 0 ? 1 : dt)) * 10000;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		timeraddms(&gs->time, cfg->gesture_hold, &tv_tmp);
 
@@ -512,7 +512,7 @@ static void trigger_scale(struct Gestures* gs,
 		gs->move_type = GS_SCALE;
 		gs->move_dist += (int)dist;
 		gs->move_dir = dir;
-		gs->move_speed = dist/(dt == 0 ? 1 : dt);
+		gs->move_speed = (dist / (dt == 0 ? 1 : dt)) * 10000;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= cfg->scale_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->scale_dist);
@@ -544,7 +544,7 @@ static void trigger_rotate(struct Gestures* gs,
 		gs->move_type = GS_ROTATE;
 		gs->move_dist += (int)dist;
 		gs->move_dir = dir;
-		gs->move_speed = dist/(dt == 0 ? 1 : dt);
+		gs->move_speed = (dist / (dt == 0 ? 1 : dt)) * 10000;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= cfg->rotate_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->rotate_dist);
