@@ -667,11 +667,8 @@ static void moving_update(struct Gestures* gs,
 	else if (count == 2 && cfg->trackpad_disable < 1) {
 		// scroll, scale, or rotate
 		if ((dir = get_scroll_dir(touches[0], touches[1])) != TR_NONE) {
-			if (dir == TR_DIR_LT || dir == TR_DIR_RT)
-				dist = touches[0]->dx + touches[1]->dx;
-			else
-				dist = touches[0]->dy + touches[1]->dy;
-			trigger_scroll(gs, cfg, dist/2, dir);
+			dist = (int)(trig_pythagorean(touches[0]->dx + touches[1]->dx, touches[0]->dy + touches[1]->dy)/2);
+			trigger_scroll(gs, cfg, dist, dir);
 		}
 		else if ((dir = get_rotate_dir(touches[0], touches[1])) != TR_NONE) {
 			dist = dist2(touches[0]->dx, touches[0]->dy) + dist2(touches[1]->dx, touches[1]->dy);
