@@ -77,6 +77,7 @@ struct Gestures {
 	int move_drag;
 	int move_drag_dx;
 	int move_drag_dy;
+	double move_speed;
 	struct timeval move_wait;
 	struct timeval move_drag_wait;
 	struct timeval move_drag_expire;

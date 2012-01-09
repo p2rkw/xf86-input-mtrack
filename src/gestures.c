@@ -393,6 +393,7 @@ static void trigger_move(struct Gestures* gs,
 			gs->move_type = GS_MOVE;
 			gs->move_dist = 0;
 			gs->move_dir = TR_NONE;
+			gs->move_speed = trig_pythagorean(gs->move_dx, gs->move_dy)/timertomicro(&gs->dt);
 			timerclear(&gs->move_wait);
 #ifdef DEBUG_GESTURES
 			xf86Msg(X_INFO, "trigger_move: %d, %d\n", dx, dy);
