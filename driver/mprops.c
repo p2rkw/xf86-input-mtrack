@@ -151,6 +151,11 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[3] = cfg->scroll_rt_btn;
 	mprops.scroll_buttons = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_BUTTONS, 4, ivals, 8);
 
+	ivals[0] = cfg->scroll_coast_enable;
+	ivals[1] = cfg->scroll_coast_speed;
+	ivals[2] = cfg->scroll_coast_decel;
+	mprops.scroll_coast = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_COAST, 3, ivals, 32);
+
 	ivals[0] = cfg->swipe_dist;
 	mprops.swipe_dist = atom_init_integer(local->dev, MTRACK_PROP_SWIPE_DIST, 1, ivals, 32);
 
@@ -459,6 +464,24 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set scroll buttons to %d %d %d %d\n",
 				cfg->scroll_up_btn, cfg->scroll_dn_btn, cfg->scroll_lt_btn, cfg->scroll_rt_btn);
+#endif
+		}
+	}
+	else if (property == mprops.scroll_coast) {
+		if (prop->size != 3 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (!VALID_BOOL(ivals32[0]) || ivals32[1] < 0 || ivals32[2] < 0)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->scroll_coast_enable = ivals32[0];
+			cfg->scroll_coast_speed = ivals32[1];
+			cfg->scroll_coast_decel = ivals32[2];
+#ifndef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set scroll coasting to %d %d %d\n",
+				cfg->scroll_coast_enable, cfg->scroll_coast_speed, cfg->scroll_coast_decel);
 #endif
 		}
 	}

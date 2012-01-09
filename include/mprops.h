@@ -66,6 +66,8 @@
 #define MTRACK_PROP_SCROLL_DIST "Trackpad Scroll Distance"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SCROLL_BUTTONS "Trackpad Scroll Buttons"
+// int, 3 values - enable coasting, coasting enable speed, decelaration amount
+#define MTRACK_PROP_SCROLL_COAST "Trackpad Scroll Coasting"
 // int, 1 value - distance before a swipe event is triggered
 #define MTRACK_PROP_SWIPE_DIST "Trackpad Swipe Distance"
 // int, 4 values - up button, down button, left button, right button
@@ -108,6 +110,7 @@ struct MProps {
 	Atom gesture_settings;
 	Atom scroll_dist;
 	Atom scroll_buttons;
+	Atom scroll_coast;
 	Atom swipe_dist;
 	Atom swipe_buttons;
 	Atom swipe4_dist;
