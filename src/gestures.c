@@ -603,17 +603,11 @@ static int get_swipe_dir(const struct Touch* t1,
 			const struct Touch* t2,
 			const struct Touch* t3)
 {
-	double d1, d2;
-	d1 = MINVAL(t1->direction, MINVAL(t2->direction, t3->direction));
-	d2 = MAXVAL(t1->direction, MAXVAL(t2->direction, t3->direction));
-	if (trig_angles_acute(d1, d2) < 2) {
-		double angles[3];
-		angles[0] = t1->direction;
-		angles[1] = t2->direction;
-		angles[2] = t3->direction;
-		return trig_generalize(trig_angles_avg(angles, 3));
-	}
-	return TR_NONE;
+	double angles[3];
+	angles[0] = t1->direction;
+	angles[1] = t2->direction;
+	angles[2] = t3->direction;
+	return trig_generalize(trig_angles_avg(angles, 3));
 }
 
 static int get_swipe4_dir(const struct Touch* t1,
@@ -621,12 +615,12 @@ static int get_swipe4_dir(const struct Touch* t1,
 			const struct Touch* t3,
 			const struct Touch* t4)
 {
-	double d1, d2;
-	d1 = MINVAL(MINVAL(t1->direction, t2->direction), MINVAL(t3->direction, t4->direction));
-	d2 = MAXVAL(MAXVAL(t1->direction, t2->direction), MAXVAL(t3->direction, t4->direction));
-	if (trig_angles_acute(d1, d2) < 2)
-		return trig_generalize(t1->direction);
-	return TR_NONE;
+	double angles[4];
+	angles[0] = t1->direction;
+	angles[1] = t2->direction;
+	angles[2] = t3->direction;
+	angles[3] = t4->direction;
+	return trig_generalize(trig_angles_avg(angles, 4));
 }
 
 static void moving_update(struct Gestures* gs,
