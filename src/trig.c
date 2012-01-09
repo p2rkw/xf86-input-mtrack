@@ -23,13 +23,28 @@
 #include "common.h"
 #include <math.h>
 
+/* Convert a radians value into an mtrack angle.
+ */
+static double trig_encode_radians(double radians) {
+	double angle = (radians / M_PI) * 4;
+	if (angle < 0)
+		angle = angle + 8;
+	return angle;
+}
+
+/* Convert an mtrack angle value into radians.
+ */
+static double trig_decode_radians(double angle) {
+	if (angle < 4)
+		return (angle * M_PI) / 4;
+	else
+		return ((8 - angle) * M_PI) / -4;
+}
+
 double trig_direction(double dx, double dy) {
 	double angle = TR_NONE;
-	if (dx != 0 || dy != 0) {
-		angle = (atan2(dx, dy*-1)/M_PI)*4;
-		if (angle < 0)
-			angle = 8 + angle;
-	}
+	if (dx != 0 || dy != 0)
+		return trig_encode_radians(atan2(dx, dy*-1));
 	return angle;
 }
 
@@ -70,6 +85,19 @@ double trig_angles_acute(double a1, double a2)
 	if (angle > 4)
 		angle = 8 - angle;
 	return angle;
+}
+
+double trig_angles_avg(double* angles, int len)
+{
+	int i;
+	double dx, dy, r;
+	dx = dy = 0;
+	for (i = 0; i < len; i++) {
+		r = trig_decode_radians(angles[i]);
+		dx += cos(r);
+		dy += sin(r);
+	}
+	return trig_encode_radians(atan2(dy, dx));
 }
 
 int trig_angles_cmp(double a1, double a2)
