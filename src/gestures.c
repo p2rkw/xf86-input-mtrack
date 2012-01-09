@@ -404,7 +404,7 @@ static void trigger_move(struct Gestures* gs,
 
 static void trigger_scroll(struct Gestures* gs,
 			const struct MConfig* cfg,
-			int dist, int dir)
+			double dist, int dir)
 {
 	if (gs->move_type == GS_SCROLL || !timercmp(&gs->time, &gs->move_wait, <)) {
 		struct timeval tv_tmp;
@@ -414,7 +414,7 @@ static void trigger_scroll(struct Gestures* gs,
 		gs->move_dx = 0;
 		gs->move_dy = 0;
 		gs->move_type = GS_SCROLL;
-		gs->move_dist += ABSVAL(dist);
+		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 
@@ -431,14 +431,14 @@ static void trigger_scroll(struct Gestures* gs,
 				trigger_button_click(gs, cfg->scroll_rt_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_scroll: scrolling %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->scroll_dist);
+		xf86Msg(X_INFO, "trigger_scroll: scrolling %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->scroll_dist);
 #endif
 	}
 }
 
 static void trigger_swipe(struct Gestures* gs,
 			const struct MConfig* cfg,
-			int dist, int dir, int isfour)
+			double dist, int dir, int isfour)
 {
 	if (gs->move_type == GS_SWIPE || !timercmp(&gs->time, &gs->move_wait, <)) {
 		struct timeval tv_tmp;
@@ -448,7 +448,7 @@ static void trigger_swipe(struct Gestures* gs,
 		gs->move_dx = 0;
 		gs->move_dy = 0;
 		gs->move_type = GS_SWIPE;
-		gs->move_dist += ABSVAL(dist);
+		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		timeraddms(&gs->time, cfg->gesture_hold, &tv_tmp);
@@ -466,7 +466,7 @@ static void trigger_swipe(struct Gestures* gs,
 					trigger_button_click(gs, cfg->swipe4_rt_btn - 1, &tv_tmp);
 			}
 #ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_swipe4: swiping %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->swipe_dist);
+			xf86Msg(X_INFO, "trigger_swipe4: swiping %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->swipe_dist);
 #endif
 		}
 		else {
@@ -482,7 +482,7 @@ static void trigger_swipe(struct Gestures* gs,
 					trigger_button_click(gs, cfg->swipe_rt_btn - 1, &tv_tmp);
 			}
 #ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_swipe: swiping %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->swipe_dist);
+			xf86Msg(X_INFO, "trigger_swipe: swiping %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->swipe_dist);
 #endif
 		}
 	}
@@ -490,7 +490,7 @@ static void trigger_swipe(struct Gestures* gs,
 
 static void trigger_scale(struct Gestures* gs,
 			const struct MConfig* cfg,
-			int dist, int dir)
+			double dist, int dir)
 {
 	if (gs->move_type == GS_SCALE || !timercmp(&gs->time, &gs->move_wait, <)) {
 		struct timeval tv_tmp;
@@ -501,7 +501,7 @@ static void trigger_scale(struct Gestures* gs,
 		gs->move_dx = 0;
 		gs->move_dy = 0;
 		gs->move_type = GS_SCALE;
-		gs->move_dist += ABSVAL(dist);
+		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= scale_dist_sqr) {
@@ -513,14 +513,14 @@ static void trigger_scale(struct Gestures* gs,
 				trigger_button_click(gs, cfg->scale_dn_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_scale: scaling %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, scale_dist_sqr);
+		xf86Msg(X_INFO, "trigger_scale: scaling %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, scale_dist_sqr);
 #endif
 	}
 }
 
 static void trigger_rotate(struct Gestures* gs,
 			const struct MConfig* cfg,
-			int dist, int dir)
+			double dist, int dir)
 {
 	if (gs->move_type == GS_ROTATE || !timercmp(&gs->time, &gs->move_wait, <)) {
 		struct timeval tv_tmp;
@@ -531,7 +531,7 @@ static void trigger_rotate(struct Gestures* gs,
 		gs->move_dx = 0;
 		gs->move_dy = 0;
 		gs->move_type = GS_ROTATE;
-		gs->move_dist += ABSVAL(dist);
+		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= rotate_dist_sqr) {
@@ -543,7 +543,7 @@ static void trigger_rotate(struct Gestures* gs,
 				trigger_button_click(gs, cfg->rotate_rt_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_rotate: rotating %+d in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, rotate_dist_sqr);
+		xf86Msg(X_INFO, "trigger_rotate: rotating %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, rotate_dist_sqr);
 #endif
 	}
 }
@@ -627,7 +627,8 @@ static void moving_update(struct Gestures* gs,
 			const struct MConfig* cfg,
 			struct MTState* ms)
 {
-	int i, count, btn_count, dx, dy, dist, dir;
+	int i, count, btn_count, dx, dy, dir;
+	double dist;
 	struct Touch* touches[4];
 	count = btn_count = 0;
 	dx = dy = 0;
@@ -667,10 +668,10 @@ static void moving_update(struct Gestures* gs,
 	else if (count == 2 && cfg->trackpad_disable < 1) {
 		// scroll, scale, or rotate
 		if ((dir = get_scroll_dir(touches[0], touches[1])) != TR_NONE) {
-			dist = (int)(trig_pythagorean(
+			dist = trig_pythagorean(
 				touches[0]->dx + touches[1]->dx,
-				touches[0]->dy + touches[1]->dy) / 2);
-			trigger_scroll(gs, cfg, dist, dir);
+				touches[0]->dy + touches[1]->dy);
+			trigger_scroll(gs, cfg, dist/2, dir);
 		}
 		else if ((dir = get_rotate_dir(touches[0], touches[1])) != TR_NONE) {
 			dist = dist2(touches[0]->dx, touches[0]->dy) + dist2(touches[1]->dx, touches[1]->dy);
@@ -683,18 +684,18 @@ static void moving_update(struct Gestures* gs,
 	}
 	else if (count == 3 && cfg->trackpad_disable < 1) {
 		if ((dir = get_swipe_dir(touches[0], touches[1], touches[2])) != TR_NONE) {
-			dist = (int)(trig_pythagorean(
+			dist = trig_pythagorean(
 				touches[0]->dx + touches[1]->dx + touches[2]->dx,
-				touches[0]->dy + touches[1]->dy + touches[2]->dy) / 3);
-			trigger_swipe(gs, cfg, dist, dir, 0);
+				touches[0]->dy + touches[1]->dy + touches[2]->dy);
+			trigger_swipe(gs, cfg, dist/3, dir, 0);
 		}
 	}
 	else if (count == 4 && cfg->trackpad_disable < 1) {
 		if ((dir = get_swipe4_dir(touches[0], touches[1], touches[2], touches[3])) != TR_NONE) {
-			dist = (int)(trig_pythagorean(
+			dist = trig_pythagorean(
 				touches[0]->dx + touches[1]->dx + touches[2]->dx + touches[3]->dx,
-				touches[0]->dy + touches[1]->dy + touches[2]->dy + touches[3]->dy) / 4);
-			trigger_swipe(gs, cfg, dist, dir, 1);
+				touches[0]->dy + touches[1]->dy + touches[2]->dy + touches[3]->dy);
+			trigger_swipe(gs, cfg, dist/4, dir, 1);
 		}
 	}
 }
