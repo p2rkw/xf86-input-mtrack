@@ -65,7 +65,7 @@ double trig_angles_acute(double a1, double a2);
 
 /* Average a collection of angles.
  */
-double trig_angles_avg(double* angles, int len)
+double trig_angles_avg(double* angles, int len);
 
 /* Compare two angles. Returns 0 if a1 == a2. Returns < 0 if a1 < a2.
  * Returns > 0 if a1 > a2.
