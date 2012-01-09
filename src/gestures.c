@@ -777,9 +777,8 @@ static int gestures_sleep(struct MTouch* mt, const struct timeval* sleep)
 		microtime(&later);
 		timersub(&later, &now, &delta);
 		timeradd(&mt->gs.time, &delta, &mt->gs.time);
-		timercp(&mt->gs.dt, &delta);
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "gestures_sleep: slept %lld\n", (long long)timertomicro(&mt->gs.dt));
+		xf86Msg(X_INFO, "gestures_sleep: slept %lld\n", (long long)timertomicro(&delta));
 #endif
 		return 1;
 	}

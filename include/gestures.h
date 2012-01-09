@@ -55,7 +55,8 @@ struct Gestures {
 	 */
 	int move_dx, move_dy;
 
-	/* Current time and time delta. Updated after each event and after sleeping.
+	/* Current time and time delta. Current time is updated after each event
+	 * and after sleeping. Delta is updated only after events.
 	 */
 	struct timeval time;
 	struct timeval dt;
