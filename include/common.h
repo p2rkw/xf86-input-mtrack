@@ -89,6 +89,13 @@ static inline void timerfromms(struct timeval* tv, const mstime_t ms)
 	tv->tv_usec = (suseconds_t)((ms%1000)*1000);
 }
 
+/* Convert a timeval to microseconds.
+ */
+static inline suseconds_t timertomicro(const struct timeval* tv)
+{
+	return tv->tv_sec * 1000000 + tv->tv_usec;
+}
+
 /* Add milliseconds to a timeval and place the resulting value in dest.
  */
 static inline void timeraddms(const struct timeval* a, const mstime_t b, struct timeval* dest)
