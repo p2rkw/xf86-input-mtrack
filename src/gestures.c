@@ -667,7 +667,9 @@ static void moving_update(struct Gestures* gs,
 	else if (count == 2 && cfg->trackpad_disable < 1) {
 		// scroll, scale, or rotate
 		if ((dir = get_scroll_dir(touches[0], touches[1])) != TR_NONE) {
-			dist = (int)(trig_pythagorean(touches[0]->dx + touches[1]->dx, touches[0]->dy + touches[1]->dy)/2);
+			dist = (int)(trig_pythagorean(
+				touches[0]->dx + touches[1]->dx,
+				touches[0]->dy + touches[1]->dy) / 2);
 			trigger_scroll(gs, cfg, dist, dir);
 		}
 		else if ((dir = get_rotate_dir(touches[0], touches[1])) != TR_NONE) {
@@ -681,20 +683,18 @@ static void moving_update(struct Gestures* gs,
 	}
 	else if (count == 3 && cfg->trackpad_disable < 1) {
 		if ((dir = get_swipe_dir(touches[0], touches[1], touches[2])) != TR_NONE) {
-			if (dir == TR_DIR_LT || dir == TR_DIR_RT)
-				dist = touches[0]->dx + touches[1]->dx + touches[2]->dx;
-			else
-				dist = touches[0]->dy + touches[1]->dy + touches[2]->dy;
-			trigger_swipe(gs, cfg, dist/3, dir, 0);
+			dist = (int)(trig_pythagorean(
+				touches[0]->dx + touches[1]->dx + touches[2]->dx,
+				touches[0]->dy + touches[1]->dy + touches[2]->dy) / 3);
+			trigger_swipe(gs, cfg, dist, dir, 0);
 		}
 	}
 	else if (count == 4 && cfg->trackpad_disable < 1) {
 		if ((dir = get_swipe4_dir(touches[0], touches[1], touches[2], touches[3])) != TR_NONE) {
-			if (dir == TR_DIR_LT || dir == TR_DIR_RT)
-				dist = touches[0]->dx + touches[1]->dx + touches[2]->dx + touches[3]->dx;
-			else
-				dist = touches[0]->dy + touches[1]->dy + touches[2]->dy + touches[2]->dy;
-			trigger_swipe(gs, cfg, dist/4, dir, 1);
+			dist = (int)(trig_pythagorean(
+				touches[0]->dx + touches[1]->dx + touches[2]->dx + touches[3]->dx,
+				touches[0]->dy + touches[1]->dy + touches[2]->dy + touches[3]->dy) / 4);
+			trigger_swipe(gs, cfg, dist, dir, 1);
 		}
 	}
 }
