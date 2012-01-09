@@ -487,7 +487,8 @@ static void trigger_swipe(struct Gestures* gs,
 					trigger_button_click(gs, cfg->swipe_rt_btn - 1, &tv_tmp);
 			}
 #ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_swipe: swiping %+f in direction %d (at %d of %d)\n", dist, dir, gs->move_dist, cfg->swipe_dist);
+			xf86Msg(X_INFO, "trigger_swipe: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
+				dist, dir, gs->move_dist, cfg->swipe_dist, gs->move_speed);
 #endif
 		}
 	}
