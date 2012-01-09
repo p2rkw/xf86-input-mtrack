@@ -755,6 +755,10 @@ void gestures_init(struct MTouch* mt)
 void gestures_extract(struct MTouch* mt)
 {
 	timersub(&mt->hs.evtime, &mt->gs.time, &mt->gs.dt);
+#ifdef DEBUG_GESTURES
+	xf86Msg(X_INFO, "gestures_extract: slept %lld (from %lld to %lld)\n",
+		(long long)timertomicro(&mt->gs.dt), (long long)timertomicro(&mt->gs.time), (long long)timertomicro(&mt->hs.evtime));
+#endif
 	timercp(&mt->gs.time, &mt->hs.evtime);
 
 	dragging_update(&mt->gs);
@@ -767,11 +771,16 @@ void gestures_extract(struct MTouch* mt)
 static int gestures_sleep(struct MTouch* mt, const struct timeval* sleep)
 {
 	if (mtdev_empty(&mt->dev)) {
-		struct timeval now;
-		mtdev_idle(&mt->dev, mt->fd, timertoms(sleep));
+		struct timeval now, later, delta;
 		microtime(&now);
-		timersub(&now, &mt->gs.time, &mt->gs.dt);
-		timercp(&mt->gs.time, &now);
+		mtdev_idle(&mt->dev, mt->fd, timertoms(sleep));
+		microtime(&later);
+		timersub(&later, &now, &delta);
+		timeradd(&mt->gs.time, &delta, &mt->gs.time);
+		timercp(&mt->gs.dt, &delta);
+#ifdef DEBUG_GESTURES
+		xf86Msg(X_INFO, "gestures_sleep: slept %lld\n", (long long)timertomicro(&mt->gs.dt));
+#endif
 		return 1;
 	}
 	return 0;
