@@ -59,6 +59,7 @@ struct Gestures {
 	 * and after sleeping. Delta is updated only after events.
 	 */
 	struct timeval time;
+	struct timeval evtime;
 	struct timeval dt;
 
 	/* Internal state tracking. Not for direct access.

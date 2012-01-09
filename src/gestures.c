@@ -754,12 +754,16 @@ void gestures_init(struct MTouch* mt)
 
 void gestures_extract(struct MTouch* mt)
 {
-	timersub(&mt->hs.evtime, &mt->gs.time, &mt->gs.dt);
+	struct timeval epoch;
+	timerclear(&epoch);
+
+	timersub(&mt->hs.evtime, &mt->gs.evtime, &mt->gs.dt);
 #ifdef DEBUG_GESTURES
 	xf86Msg(X_INFO, "gestures_extract: slept %lld (from %lld to %lld)\n",
 		(long long)timertomicro(&mt->gs.dt), (long long)timertomicro(&mt->gs.time), (long long)timertomicro(&mt->hs.evtime));
 #endif
 	timercp(&mt->gs.time, &mt->hs.evtime);
+	timercp(&mt->gs.evtime, &mt->hs.evtime);
 
 	dragging_update(&mt->gs);
 	buttons_update(&mt->gs, &mt->cfg, &mt->hs, &mt->state);
