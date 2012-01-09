@@ -740,6 +740,7 @@ void gestures_init(struct MTouch* mt)
 
 void gestures_extract(struct MTouch* mt)
 {
+	timersub(&mt->hs.evtime, &mt->gs.time, &mt->gs.dt);
 	timercp(&mt->gs.time, &mt->hs.evtime);
 
 	dragging_update(&mt->gs);
@@ -752,8 +753,11 @@ void gestures_extract(struct MTouch* mt)
 static int gestures_sleep(struct MTouch* mt, const struct timeval* sleep)
 {
 	if (mtdev_empty(&mt->dev)) {
+		struct timeval now;
 		mtdev_idle(&mt->dev, mt->fd, timertoms(sleep));
-		microtime(&mt->gs.time);
+		microtime(&now);
+		timersub(&now, &mt->gs.time, &mt->gs.dt);
+		timercp(&mt->gs.time, &now);
 		return 1;
 	}
 	return 0;

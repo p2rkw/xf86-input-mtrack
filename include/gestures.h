@@ -55,9 +55,10 @@ struct Gestures {
 	 */
 	int move_dx, move_dy;
 
-	/* Current time. Updated after each event and after sleeping.
+	/* Current time and time delta. Updated after each event and after sleeping.
 	 */
 	struct timeval time;
+	struct timeval dt;
 
 	/* Internal state tracking. Not for direct access.
 	 */
