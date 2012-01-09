@@ -676,13 +676,13 @@ static void moving_update(struct Gestures* gs,
 			trigger_scroll(gs, cfg, dist/2, dir);
 		}
 		else if ((dir = get_rotate_dir(touches[0], touches[1])) != TR_NONE) {
-			dist = hypot(touches[0]->dx + touches[1]->dx,
-				touches[0]->dy + touches[1]->dy);
+			dist = ABSVAL(hypot(touches[0]->dx, touches[0]->dy)) +
+				ABSVAL(hypot(touches[1]->dx, touches[1]->dy));
 			trigger_rotate(gs, cfg, dist/2, dir);
 		}
 		else if ((dir = get_scale_dir(touches[0], touches[1])) != TR_NONE) {
-			dist = hypot(touches[0]->dx + touches[1]->dx,
-				touches[0]->dy + touches[1]->dy);
+			dist = ABSVAL(hypot(touches[0]->dx, touches[0]->dy)) +
+				ABSVAL(hypot(touches[1]->dx, touches[1]->dy));
 			trigger_scale(gs, cfg, dist/2, dir);
 		}
 	}
