@@ -224,7 +224,7 @@ static void read_input(LocalDevicePtr local)
 	struct MTouch *mt = local->private;
 	while (mtouch_read(mt) > 0)
 		handle_gestures(local, &mt->gs);
-	if (mtouch_delayed(mt))
+	while (mtouch_delayed(mt))
 		handle_gestures(local, &mt->gs);
 }
 
