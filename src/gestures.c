@@ -414,9 +414,10 @@ static void trigger_scroll(struct Gestures* gs,
 		gs->move_dx = 0;
 		gs->move_dy = 0;
 		gs->move_type = GS_SCROLL;
-		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		gs->move_dist += ABSVAL(dist);
 		gs->move_dir = dir;
+		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
+
 		if (gs->move_dist >= cfg->scroll_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->scroll_dist);
 			timeraddms(&gs->time, cfg->gesture_hold, &tv_tmp);
@@ -561,8 +562,12 @@ static void trigger_reset(struct Gestures* gs)
 static int get_scroll_dir(const struct Touch* t1,
 			const struct Touch* t2)
 {
-	if (trig_angles_acute(t1->direction, t2->direction) < 2.0)
-		return trig_generalize(t1->direction);
+	if (trig_angles_acute(t1->direction, t2->direction) < 2.0) {
+		double angles[2];
+		angles[0] = t1->direction;
+		angles[1] = t2->direction;
+		return trig_generalize(trig_angles_avg(angles, 2));
+	}
 	return TR_NONE;
 }
 
@@ -601,8 +606,13 @@ static int get_swipe_dir(const struct Touch* t1,
 	double d1, d2;
 	d1 = MINVAL(t1->direction, MINVAL(t2->direction, t3->direction));
 	d2 = MAXVAL(t1->direction, MAXVAL(t2->direction, t3->direction));
-	if (trig_angles_acute(d1, d2) < 2)
-		return trig_generalize(t1->direction);
+	if (trig_angles_acute(d1, d2) < 2) {
+		double angles[3];
+		angles[0] = t1->direction;
+		angles[1] = t2->direction;
+		angles[2] = t3->direction;
+		return trig_generalize(trig_angles_avg(angles, 3));
+	}
 	return TR_NONE;
 }
 
