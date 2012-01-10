@@ -752,7 +752,7 @@ static struct timeval* delayed_wake(struct Gestures* gs)
 static void delayed_update(struct Gestures* gs,
 		const struct MConfig* cfg)
 {
-	if (!timercmp(&gs->button_wake, &gs->time, >)) {
+	if (!timercmp(&gs->button_wake, &gs->epoch, ==) && !timercmp(&gs->button_wake, &gs->time, >)) {
 #ifdef DEBUG_GESTURES
 		xf86Msg(X_INFO, "delayed_update: delay expired, triggering %d up (time %lld, wake %lld)\n",
 			gs->button_delayed, timertoms(&gs->time), timertoms(&gs->button_wake));
@@ -762,7 +762,7 @@ static void delayed_update(struct Gestures* gs,
 		timerclear(&gs->button_wake);
 	}
 
-	if (!timercmp(&gs->coast_wake, &gs->time, >)) {
+	if (!timercmp(&gs->coast_wake, &gs->epoch, ==) && !timercmp(&gs->coast_wake, &gs->time, >)) {
 #ifdef DEBUG_GESTURES
 		xf86Msg(X_INFO, "delayed_update: delay expired, coasting (time %lld, wake %lld)\n",
 			timertoms(&gs->time), timertoms(&gs->coast_wake));
@@ -775,8 +775,9 @@ static void delayed_update(struct Gestures* gs,
 				trigger_scroll(gs, cfg, dist, gs->move_dir);
 			}
 		}
-		else
+		else {
 			gs->coast_speed = 0;
+		}
 
 		if (gs->coast_speed > 0)
 			timeraddms(&gs->time, GS_COAST_TICK, &gs->coast_wake);
@@ -814,7 +815,7 @@ static int gestures_sleep(struct MTouch* mt, const struct timeval* sleep)
 	if (mtdev_empty(&mt->dev)) {
 		struct timeval now, later, delta;
 		microtime(&now);
-		mtdev_idle(&mt->dev, mt->fd, timertoms(sleep));
+		mtdev_idle(&mt->dev, mt->fd, timertoms(sleep) + 1);
 		microtime(&later);
 		timersub(&later, &now, &delta);
 		timeradd(&mt->gs.time, &delta, &mt->gs.time);
