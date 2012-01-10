@@ -30,6 +30,9 @@
 
 struct MTouch;
 
+// Coast tick time in milliseconds.
+#define GS_COAST_TICK 10
+
 #define GS_TAP 0
 #define GS_BUTTON 1
 
@@ -58,21 +61,31 @@ struct Gestures {
 	/* Current time and time delta. Current time is updated after each event
 	 * and after sleeping. Delta is updated only after events.
 	 */
+	struct timeval epoch;
 	struct timeval time;
-	struct timeval evtime;
 	struct timeval dt;
+	struct timeval evtime;
+	struct timeval evdt;
 
-	/* Internal state tracking. Not for direct access.
+	/* Button state tracking.
 	 */
 	int button_emulate;
 	int button_delayed;
-	struct timeval button_delayed_time;
-	struct timeval button_delayed_delta;
+	struct timeval button_wake;
 
+	/* Coast tracking. Arr!
+	 */
+	double coast_speed;
+	struct timeval coast_wake;
+
+	/* Tap tracking.
+	 */
 	int tap_touching;
 	int tap_released;
 	struct timeval tap_time_down;
 
+	/* Movement and moving gesture tracking.
+	 */
 	int move_type;
 	int move_dist;
 	int move_dir;
