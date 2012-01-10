@@ -754,7 +754,8 @@ static void delayed_update(struct Gestures* gs,
 {
 	if (!timercmp(&gs->button_wake, &gs->time, <)) {
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "delayed_update: delay expired, triggering %d up\n", gs->button_delayed);
+		xf86Msg(X_INFO, "delayed_update: delay expired, triggering %d up (time %lld, wake %lld)\n",
+			gs->button_delayed, timertoms(&gs->time), timertoms(&gs->button_wake));
 #endif
 		trigger_button_up(gs, gs->button_delayed);
 		gs->button_delayed = 0;
@@ -763,7 +764,8 @@ static void delayed_update(struct Gestures* gs,
 
 	if (!timercmp(&gs->coast_wake, &gs->time, <)) {
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "delayed_update: delay expired, coasting\n");
+		xf86Msg(X_INFO, "delayed_update: delay expired, coasting (time %lld, wake %lld)\n",
+			timertoms(&gs->time), timertoms(&gs->coast_wake));
 #endif
 		double dist;
 		if (gs->move_type == GS_SCROLL) {
