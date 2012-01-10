@@ -752,7 +752,7 @@ static struct timeval* delayed_wake(struct Gestures* gs)
 static void delayed_update(struct Gestures* gs,
 		const struct MConfig* cfg)
 {
-	if (!timercmp(&gs->button_wake, &gs->time, <)) {
+	if (!timercmp(&gs->button_wake, &gs->time, >)) {
 #ifdef DEBUG_GESTURES
 		xf86Msg(X_INFO, "delayed_update: delay expired, triggering %d up (time %lld, wake %lld)\n",
 			gs->button_delayed, timertoms(&gs->time), timertoms(&gs->button_wake));
@@ -762,7 +762,7 @@ static void delayed_update(struct Gestures* gs,
 		timerclear(&gs->button_wake);
 	}
 
-	if (!timercmp(&gs->coast_wake, &gs->time, <)) {
+	if (!timercmp(&gs->coast_wake, &gs->time, >)) {
 #ifdef DEBUG_GESTURES
 		xf86Msg(X_INFO, "delayed_update: delay expired, coasting (time %lld, wake %lld)\n",
 			timertoms(&gs->time), timertoms(&gs->coast_wake));
