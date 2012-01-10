@@ -105,6 +105,13 @@ static inline void timeraddms(const struct timeval* a, const mstime_t b, struct 
 	timeradd(a, &tv, dest);
 }
 
+/* Return the pointer to the earlier time value.
+ */
+static inline struct timeval* timermin(struct timeval* a, struct timeval* b)
+{
+	return timercmp(a, b, >) ? b : a;
+}
+
 /* Clamp value to 15 bits.
  */
 static inline int clamp15(int x)
