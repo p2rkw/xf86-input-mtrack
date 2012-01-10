@@ -395,20 +395,24 @@ static void trigger_move(struct Gestures* gs,
 	}
 }
 
-static void trigger_coast(struct Gestures* gs,
+static int trigger_coast(struct Gestures* gs,
 			const struct MConfig* cfg)
 {
-	if (gs->move_speed <= 0)
-		return;
+	int res = 0;
 
-	if (gs->move_type == GS_SCROLL && cfg->scroll_coast_enable) {
-		gs->coast_speed = gs->move_speed;
-		timeraddms(&gs->time, GS_COAST_TICK, &gs->coast_wake);
+	if (gs->move_speed > 0) {
+		if (gs->move_type == GS_SCROLL && cfg->scroll_coast_enable) {
+			gs->coast_speed = gs->move_speed;
+			timeraddms(&gs->time, GS_COAST_TICK, &gs->coast_wake);
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_coast: starting coast at speed (%f) waking (%llu)\n",
-			gs->coast_speed, timertoms(&gs->coast_wake));
+			xf86Msg(X_INFO, "trigger_coast: starting coast at speed (%f) waking (%llu)\n",
+				gs->coast_speed, timertoms(&gs->coast_wake));
 #endif
+			res = 1;
+		}
 	}
+
+	return res;
 }
 
 static void trigger_scroll(struct Gestures* gs,
@@ -679,7 +683,7 @@ static void moving_update(struct Gestures* gs,
 	if (count == 0) {
 		if (btn_count >= 1 && cfg->trackpad_disable < 2)
 			trigger_move(gs, cfg, dx, dy);
-		else if (btn_count < 1)
+		else if (btn_count < 1 && !trigger_coast(gs, cfg))
 			trigger_reset(gs);
 	}
 	else if (count == 1 && cfg->trackpad_disable < 2) {
