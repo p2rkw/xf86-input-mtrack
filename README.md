@@ -5,8 +5,8 @@ An Xorg driver for multitouch trackpads. Supports any trackpad whose kernel
 driver uses the slotted multitouch protocol. For more information on the
 protocol see the [kernel documentation][1].
 
-This driver is compatible with Xorg server versions 1.7, 1.8, and 1.10. It
-requires the [mtdev][4] library to operate.
+This driver is compatible with Xorg server versions 1.7 to 1.12. It requires
+the [mtdev][4] library to operate.
 
 License
 -------
