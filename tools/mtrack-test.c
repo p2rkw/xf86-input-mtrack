@@ -32,17 +32,21 @@ void xf86Msg(int type, const char *format, ...)
 	va_end(args);
 }
 
-int xf86SetIntOption(pointer opts, const char *name, int deflt)
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) <= 13
+typedef XF86OptionPtr pointer;
+#endif
+
+int xf86SetIntOption(XF86OptionPtr opts, const char *name, int deflt)
 {
 	return deflt;
 }
 
-int xf86SetBoolOption(pointer opts, const char *name, int deflt)
+int xf86SetBoolOption(XF86OptionPtr opts, const char *name, int deflt)
 {
 	return deflt;
 }
 
-double xf86SetRealOption(pointer opts, const char *name, double deflt)
+double xf86SetRealOption(XF86OptionPtr opts, const char *name, double deflt)
 {
 	return deflt;
 }
