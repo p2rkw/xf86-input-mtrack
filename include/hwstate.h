@@ -38,8 +38,8 @@ struct HWState {
 	bitmask_t used;
 	bitmask_t slot;
 	bitmask_t button;
-	mstime_t evtime;
 	int max_x, max_y;
+	struct timeval evtime;
 };
 
 void hwstate_init(struct HWState *s,

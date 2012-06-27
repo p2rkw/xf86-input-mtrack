@@ -26,26 +26,27 @@
 #include "common.h"
 #include "mconfig.h"
 #include "hwstate.h"
+#include "capabilities.h"
 
 #define MT_NEW 0
 #define MT_RELEASED 1
 #define MT_INVALID 2
 #define MT_THUMB 3
 #define MT_PALM 4
+#define MT_BOTTOM_EDGE 5
 
 struct Touch {
 	bitmask_t state;
 	bitmask_t flags;
-	mstime_t down;
 	double direction;
 	int tracking_id;
 	int x, y, dx, dy;
 	int total_dx, total_dy;
+	struct timeval down;
 };
 
 struct MTState {
 	bitmask_t state;
-	mstime_t evtime;
 	struct Touch touch[DIM_TOUCHES];
 	bitmask_t touch_used;
 };
@@ -58,7 +59,8 @@ void mtstate_init(struct MTState* ms);
  */
 void mtstate_extract(struct MTState* ms,
 			const struct MConfig* cfg,
-			const struct HWState* hs);
+			const struct HWState* hs,
+			const struct Capabilities* caps);
 
 #endif
 

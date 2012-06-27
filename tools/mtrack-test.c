@@ -32,17 +32,21 @@ void xf86Msg(int type, const char *format, ...)
 	va_end(args);
 }
 
-int xf86SetIntOption(pointer opts, const char *name, int deflt)
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) <= 13
+typedef XF86OptionPtr pointer;
+#endif
+
+int xf86SetIntOption(XF86OptionPtr opts, const char *name, int deflt)
 {
 	return deflt;
 }
 
-int xf86SetBoolOption(pointer opts, const char *name, int deflt)
+int xf86SetBoolOption(XF86OptionPtr opts, const char *name, int deflt)
 {
 	return deflt;
 }
 
-double xf86SetRealOption(pointer opts, const char *name, double deflt)
+double xf86SetRealOption(XF86OptionPtr opts, const char *name, double deflt)
 {
 	return deflt;
 }
@@ -85,12 +89,12 @@ static void loop_device(int fd)
 
 	//while (!mtdev_idle(&mt.dev, fd, 5000)) {
 	while (1) {
-		while (read_packet(&mt, fd) > 0)
+		while (mtouch_read(&mt) > 0)
 			print_gestures(&mt.gs);
-		if (has_delayed(&mt, fd))
+		if (mtouch_delayed(&mt))
 			print_gestures(&mt.gs);
 	}
-	mtouch_close(&mt, fd);
+	mtouch_close(&mt);
 }
 
 int main(int argc, char *argv[])

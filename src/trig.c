@@ -21,47 +21,31 @@
 
 #include "trig.h"
 #include "common.h"
+#include <math.h>
 
-/* Determine the angle of a vector within the given quadrant.
- * All this really does is calculate the slope in relation to
- * which quadrant it is in.
+/* Convert a radians value into an mtrack angle.
  */
-static double trig_quadrant_angle(int quadrant, double dx, double dy) {
-	dx = ABSVAL(dx);
-	dy = ABSVAL(dy);
-	if (quadrant == 1 || quadrant == 3)
-		return dx < dy ? 2-dx/dy : dy/dx;
-	else
-		return dy < dx ? 2-dy/dx : dx/dy;
+static double trig_encode_radians(double radians) {
+	double angle = (radians / M_PI) * 4;
+	if (angle < 0)
+		angle = angle + 8;
+	return angle;
 }
 
-int trig_quadrant(double dx, double dy)
-{
-	if (dx > 0 && dy < 0)
-		return 0;
-	else if (dx > 0 && dy > 0)
-		return 1;
-	else if (dx < 0 && dy > 0)
-		return 2;
-	else if (dx < 0 && dy < 0)
-		return 3;
+/* Convert an mtrack angle value into radians.
+ */
+static double trig_decode_radians(double angle) {
+	if (angle < 4)
+		return (angle * M_PI) / 4;
 	else
-		return -1;
+		return ((8 - angle) * M_PI) / -4;
 }
 
-double trig_direction(double dx, double dy)
-{
-	int qn;
-	if (dx == 0 && dy == 0)
-		return TR_NONE;
-	else if (dx == 0)
-		return (dy < 0) ? 0 : 4;
-	else if (dy == 0)
-		return (dx > 0) ? 2 : 6;
-	else {
-		qn = trig_quadrant(dx, dy);
-		return qn*2 + trig_quadrant_angle(qn, dx, dy);
-	}
+double trig_direction(double dx, double dy) {
+	double angle = TR_NONE;
+	if (dx != 0 || dy != 0)
+		return trig_encode_radians(atan2(dx, dy*-1));
+	return angle;
 }
 
 int trig_generalize(double dir)
@@ -93,10 +77,27 @@ double trig_angles_sub(double a1, double a2)
 
 double trig_angles_acute(double a1, double a2)
 {
+	double angle;
 	if (a1 > a2)
-		return trig_angles_sub(a1, a2);
+		angle = trig_angles_sub(a1, a2);
 	else
-		return trig_angles_sub(a2, a1);
+		angle = trig_angles_sub(a2, a1);
+	if (angle > 4)
+		angle = 8 - angle;
+	return angle;
+}
+
+double trig_angles_avg(double* angles, int len)
+{
+	int i;
+	double dx, dy, r;
+	dx = dy = 0;
+	for (i = 0; i < len; i++) {
+		r = trig_decode_radians(angles[i]);
+		dx += cos(r);
+		dy += sin(r);
+	}
+	return trig_encode_radians(atan2(dy, dx));
 }
 
 int trig_angles_cmp(double a1, double a2)
@@ -111,4 +112,3 @@ int trig_angles_cmp(double a1, double a2)
 	else
 		return -1;
 }
-

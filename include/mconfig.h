@@ -34,12 +34,14 @@
 #define DEFAULT_THUMB_RATIO 70
 #define DEFAULT_THUMB_SIZE 25
 #define DEFAULT_PALM_SIZE 40
+#define DEFAULT_BOTTOM_EDGE 10
 #define DEFAULT_BUTTON_ENABLE 1
 #define DEFAULT_BUTTON_INTEGRATED 1
 #define DEFAULT_BUTTON_ZONES 0
 #define DEFAULT_BUTTON_1TOUCH 3
 #define DEFAULT_BUTTON_2TOUCH 2
 #define DEFAULT_BUTTON_3TOUCH 0
+#define DEFAULT_BUTTON_MOVE 1
 #define DEFAULT_BUTTON_EXPIRE 100
 #define DEFAULT_TAP_1TOUCH 1
 #define DEFAULT_TAP_2TOUCH 3
@@ -75,6 +77,8 @@
 #define DEFAULT_DRAG_TIMEOUT 350
 #define DEFAULT_DRAG_WAIT 40
 #define DEFAULT_DRAG_DIST 200
+#define DEFAULT_AXIS_X_INVERT 0
+#define DEFAULT_AXIS_Y_INVERT 0
 #define DEFAULT_SENSITIVITY 1.0
 
 #define MCFG_NONE 0
@@ -103,6 +107,9 @@ struct MConfig {
 	int thumb_ratio;	// Ratio of width to length that makes a touch a thumb. 0 - 100
 	int thumb_size;		// Minimum touch size for a thumb. 0 - 100
 	int palm_size;		// Minimum touch size for a palm. 0 - 100
+	int bottom_edge;		// Percent of bottom of trackpad to ignore for new touches. 0 - 100
+	int axis_x_invert;	// Whether or not to invert the x axis. 0 or 1.
+	int axis_y_invert;	// Whether or not to invert the y axis. 0 or 1.
 
 	/* Used by Gestures */
 
@@ -118,6 +125,8 @@ struct MConfig {
 							// pad or the second zone is clicked? 0 to 32
 	int button_3touch;		// What button to emulate when three fingers are on the
 							// pad or the third zone is clicked? 0 to 32
+	int button_move;		// Whether or not to count the moving touch towards button
+							// emulation.
 	int tap_1touch;			// What button to emulate for one touch taps? 0 to 32
 	int tap_2touch;			// What button to emulate for two touch taps? 0 to 32
 	int tap_3touch;			// What button to emulate for three touch taps? 0 to 32

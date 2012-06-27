@@ -74,7 +74,7 @@ static int is_thumb(const struct MConfig* cfg,
 	int pct = percentage(min, max);
 	int size = touch_range_ratio(cfg, hw->touch_major);
 
-	if (percentage(min, max) > cfg->thumb_ratio && size > cfg->thumb_size) {
+	if (pct < cfg->thumb_ratio && size > cfg->thumb_size) {
 #if DEBUG_MTSTATE
 		xf86Msg(X_INFO, "is_thumb: yes %d > %d && %d > %d\n",
 			pct, cfg->thumb_ratio, size, cfg->thumb_size);
@@ -127,19 +127,26 @@ static int find_touch(struct MTState* ms,
 /* Add a touch to the MTState.  Return the new index of the touch.
  */
 static int touch_append(struct MTState* ms,
-			const struct FingerState* fs)
+			const struct MConfig* cfg,
+			const struct Capabilities* caps,
+			const struct HWState* hs,
+			int fn)
 {
+	int x, y;
 	int n = firstbit(~ms->touch_used);
+	const struct FingerState* fs = &hs->data[fn];
 	if (n < 0)
 		xf86Msg(X_WARNING, "Too many touches to track. Ignoring touch %d.\n", fs->tracking_id);
 	else {
+		x = cfg->axis_x_invert ? get_cap_xflip(caps, fs->position_x) : fs->position_x;
+		y = cfg->axis_y_invert ? get_cap_yflip(caps, fs->position_y) : fs->position_y;
 		ms->touch[n].state = 0U;
 		ms->touch[n].flags = 0U;
-		ms->touch[n].down = ms->evtime;
+		timercp(&ms->touch[n].down, &hs->evtime);
 		ms->touch[n].direction = TR_NONE;
 		ms->touch[n].tracking_id = fs->tracking_id;
-		ms->touch[n].x = fs->position_x;
-		ms->touch[n].y = fs->position_y;
+		ms->touch[n].x = x;
+		ms->touch[n].y = y;
 		ms->touch[n].dx = 0;
 		ms->touch[n].dy = 0;
 		ms->touch[n].total_dx = 0;
@@ -153,15 +160,20 @@ static int touch_append(struct MTState* ms,
 /* Update a touch.
  */
 static void touch_update(struct MTState* ms,
+			const struct MConfig* cfg,
+			const struct Capabilities* caps,
 			const struct FingerState* fs,
 			int touch)
 {
-	ms->touch[touch].dx = fs->position_x - ms->touch[touch].x;
-	ms->touch[touch].dy = fs->position_y - ms->touch[touch].y;
+	int x, y;
+	x = cfg->axis_x_invert ? get_cap_xflip(caps, fs->position_x) : fs->position_x;
+	y = cfg->axis_y_invert ? get_cap_yflip(caps, fs->position_y) : fs->position_y;
+	ms->touch[touch].dx = x - ms->touch[touch].x;
+	ms->touch[touch].dy = y - ms->touch[touch].y;
 	ms->touch[touch].total_dx += ms->touch[touch].dx;
 	ms->touch[touch].total_dy += ms->touch[touch].dy;
-	ms->touch[touch].x = fs->position_x;
-	ms->touch[touch].y = fs->position_y;
+	ms->touch[touch].x = x;
+	ms->touch[touch].y = y;
 	ms->touch[touch].direction = trig_direction(ms->touch[touch].dx, ms->touch[touch].dy);
 	CLEARBIT(ms->touch[touch].state, MT_NEW);
 }
@@ -191,7 +203,8 @@ static void touches_invalidate(struct MTState* ms)
  */
 static void touches_update(struct MTState* ms,
 			const struct MConfig* cfg,
-			const struct HWState* hs)
+			const struct HWState* hs,
+			const struct Capabilities* caps)
 {
 	int i, n, disable = 0;
 	// Release missing touches.
@@ -199,6 +212,7 @@ static void touches_update(struct MTState* ms,
 		if (find_finger(hs, ms->touch[i].tracking_id) == -1)
 			touch_release(ms, i);
 	}
+
 	// Add and update touches.
 	foreach_bit(i, hs->used) {
 		n = find_touch(ms, hs->data[i].tracking_id);
@@ -206,35 +220,37 @@ static void touches_update(struct MTState* ms,
 			if (is_release(cfg, &hs->data[i]))
 				touch_release(ms, n);
 			else
-				touch_update(ms, &hs->data[i], n);
+				touch_update(ms, cfg, caps, &hs->data[i], n);
 		}
 		else if (is_touch(cfg, &hs->data[i]))
-			n = touch_append(ms, &hs->data[i]);
+			n = touch_append(ms, cfg, caps, hs, i);
 
 		if (n >= 0) {
-			// Track and invalidate thumb and palm touches.
-			if (!GETBIT(ms->touch[n].state, MT_INVALID)) {
-				if (is_thumb(cfg, &hs->data[i])) {
-					if (cfg->ignore_thumb)
-						SETBIT(ms->touch[n].state, MT_INVALID);
-					SETBIT(ms->touch[n].state, MT_THUMB);
-				}
-				if (is_palm(cfg, &hs->data[i])) {
-					if (cfg->ignore_palm)
-						SETBIT(ms->touch[n].state, MT_INVALID);
-					SETBIT(ms->touch[n].state, MT_PALM);
-				}
+			// Track and invalidate thumb, palm, and bottom edge touches.
+			if (is_thumb(cfg, &hs->data[i]))
+				SETBIT(ms->touch[n].state, MT_THUMB);
+			else
+				CLEARBIT(ms->touch[n].state, MT_THUMB);
+			
+			if (is_palm(cfg, &hs->data[i]))
+				SETBIT(ms->touch[n].state, MT_PALM);
+			else
+				CLEARBIT(ms->touch[n].state, MT_PALM);
+			
+			if (ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100) {
+				if (GETBIT(ms->touch[n].state, MT_NEW))
+					SETBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
 			}
-			if (GETBIT(ms->touch[n].state, MT_THUMB)) {
-				SETBIT(ms->state, MT_THUMB);
-				if (cfg->disable_on_thumb)
-					disable = 1;
-			}
-			if (GETBIT(ms->touch[n].state, MT_PALM)) {
-				SETBIT(ms->state, MT_PALM);
-				if (cfg->disable_on_palm)
-					disable = 1;
-			}
+			else
+				CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+			
+			MODBIT(ms->touch[n].state, MT_INVALID,
+				GETBIT(ms->touch[n].state, MT_THUMB) && cfg->ignore_thumb ||
+				GETBIT(ms->touch[n].state, MT_PALM) && cfg->ignore_palm ||
+				GETBIT(ms->touch[n].state, MT_BOTTOM_EDGE));
+			
+			disable |= cfg->disable_on_thumb && GETBIT(ms->touch[n].state, MT_THUMB);
+			disable |= cfg->disable_on_palm && GETBIT(ms->touch[n].state, MT_PALM);
 		}
 	}
 
@@ -255,33 +271,40 @@ static void touches_clean(struct MTState* ms)
 }
 
 #if DEBUG_MTSTATE
-void mtstate_output(const struct MTState* ms)
+static void mtstate_output(const struct MTState* ms,
+			const struct HWState* hs)
 {
 	int i, n;
 	char* type;
+	struct timeval tv;
 	n = bitcount(ms->touch_used);
-	//if (bitcount(ms->touch_used) > 0)
-	//	xf86Msg(X_INFO, "mtstate: %d touches at event time is %llu\n", n, ms->evtime);
+	if (bitcount(ms->touch_used) > 0) {
+		microtime(&tv);
+		xf86Msg(X_INFO, "mtstate: %d touches at event time %llu (rt %llu)\n",
+			n, timertoms(&hs->evtime), timertoms(&tv));
+	}
 	foreach_bit(i, ms->touch_used) {
 		if (GETBIT(ms->touch[i].state, MT_RELEASED)) {
+			timersub(&hs->evtime, &ms->touch[i].down, &tv);
 			xf86Msg(X_INFO, "  released p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
-						ms->touch[i].direction, ms->touch[i].down, ms->evtime - ms->touch[i].down);
+						ms->touch[i].direction, timertoms(&ms->touch[i].down), timertoms(&tv));
 		}
 		else if (GETBIT(ms->touch[i].state, MT_NEW)) {
 			xf86Msg(X_INFO, "  new      p(%d, %d) d(%+d, %+d) dir(%f) down(%llu)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
-						ms->touch[i].direction, ms->touch[i].down);
+						ms->touch[i].direction, timertoms(&ms->touch[i].down));
 		}
 		else if (GETBIT(ms->touch[i].state, MT_INVALID)) {
+			timersub(&hs->evtime, &ms->touch[i].down, &tv);
 			xf86Msg(X_INFO, "  invalid  p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
-						ms->touch[i].direction, ms->touch[i].down, ms->evtime - ms->touch[i].down);
+						ms->touch[i].direction, timertoms(&ms->touch[i].down), timertoms(&tv));
 		}
 		else {
 			xf86Msg(X_INFO, "  touching p(%d, %d) d(%+d, %+d) dir(%f) down(%llu)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
-						ms->touch[i].direction, ms->touch[i].down);
+						ms->touch[i].direction, timertoms(&ms->touch[i].down));
 		}
 	}
 }
@@ -295,16 +318,16 @@ void mtstate_init(struct MTState* ms)
 // Process changes in touch state.
 void mtstate_extract(struct MTState* ms,
 			const struct MConfig* cfg,
-			const struct HWState* hs)
+			const struct HWState* hs,
+			const struct Capabilities* caps)
 {
 	ms->state = 0;
-	ms->evtime = hs->evtime;
 
 	touches_clean(ms);
-	touches_update(ms, cfg, hs);
+	touches_update(ms, cfg, hs, caps);
 
 #if DEBUG_MTSTATE
-	mtstate_output(ms);
+	mtstate_output(ms, hs);
 #endif
 }
 

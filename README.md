@@ -91,6 +91,11 @@ The minimum size of what's considered a palm. Palms are expected to be very
 large on the trackpad. This is represented as a percentage of the maximum touch
 value and is dependent on the trackpad hardware. Integer value. Defaults to 40.
 
+**BottomEdge** -
+The size of an area at the bottom of the trackpad where new touches are ignored
+(fingers traveling into this area from above will still be tracked). This is
+represented as a percentage of the total trackpad height. Defaults to 10.
+
 **ButtonEnable** - 
 Whether or not to enable the physical buttons on or near the trackpad. Boolean
 value. Defaults to true.
@@ -100,6 +105,9 @@ Whether or not the physical buttons are integrated with the trackpad. If you
 have a one-piece trackpad like on newer MacBooks, this should be set to true.
 Button emulation depends on this value being correct. Boolean value. Defaults
 to true.
+
+**ButtonMoveEmulate**
+Whether or not to count the moving finger when emulating button clicks. Useful to disable if you use two hands on trackpad. Boolean value. Defaults to true.
 
 **ButtonZonesEnable** -
 Whether or not to enable button zones. If button zones are enabled then the
@@ -268,6 +276,12 @@ Defaults to 40.
 How far the finger is allowed to move during drag wait time. If the finger
 moves farther than this distance during the wait time then dragging will be
 canceled and pointer movement will resume. Integer value. Defaults to 200.
+
+**AxisXInvert**
+Whether or not to invert the X axis. Boolean value. Defaults to false.
+
+**AxisYInvert**
+Whether or not to invert the Y axis. Boolean value. Defaults to false.
 
 [1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt     "Kernel Multitouch Protocol"
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"

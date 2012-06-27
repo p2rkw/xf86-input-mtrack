@@ -28,6 +28,8 @@
 #include "hwstate.h"
 #include "mtstate.h"
 
+struct MTouch;
+
 #define GS_TAP 0
 #define GS_BUTTON 1
 
@@ -53,35 +55,38 @@ struct Gestures {
 	 */
 	int move_dx, move_dy;
 
+	/* Current time and time delta. Updated after each event and after sleeping.
+	 */
+	struct timeval time;
+	struct timeval dt;
+
 	/* Internal state tracking. Not for direct access.
 	 */
 	int button_emulate;
 	int button_delayed;
-	mstime_t button_delayed_time;
-	int button_delayed_ms;
+	struct timeval button_delayed_time;
+	struct timeval button_delayed_delta;
 
-	mstime_t tap_time_down;
 	int tap_touching;
 	int tap_released;
+	struct timeval tap_time_down;
+
 	int move_type;
 	int move_dist;
 	int move_dir;
 	int move_drag;
 	int move_drag_dx;
 	int move_drag_dy;
-	mstime_t move_wait;
-	mstime_t move_drag_wait;
-	mstime_t move_drag_expire;
+	double move_speed;
+	struct timeval move_wait;
+	struct timeval move_drag_wait;
+	struct timeval move_drag_expire;
 };
 
 
-void gestures_init(struct Gestures* gs);
-void gestures_extract(struct Gestures* gs,
-			const struct MConfig* cfg,
-			const struct HWState* hs,
-			struct MTState* ms);
-int gestures_delayed(struct Gestures* gs,
-			struct mtdev* dev, int fd);
+void gestures_init(struct MTouch* mt);
+void gestures_extract(struct MTouch* mt);
+int gestures_delayed(struct MTouch* mt);
 
 #endif
 

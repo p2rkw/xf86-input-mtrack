@@ -31,6 +31,7 @@
 #include "gestures.h"
 
 struct MTouch {
+	int fd;
 	struct mtdev dev;
 	struct Capabilities caps;
 	struct HWState hs;
@@ -39,11 +40,11 @@ struct MTouch {
 	struct Gestures gs;
 };
 
-int mtouch_configure(struct MTouch *mt, int fd);
-int mtouch_open(struct MTouch *mt, int fd);
-int mtouch_close(struct MTouch *mt, int fd);
+int mtouch_configure(struct MTouch* mt, int fd);
+int mtouch_open(struct MTouch* mt, int fd);
+int mtouch_close(struct MTouch* mt);
 
-int read_packet(struct MTouch *mt, int fd);
-int has_delayed(struct MTouch *mt, int fd);
+int mtouch_read(struct MTouch* mt);
+int mtouch_delayed(struct MTouch* mt);
 
 #endif

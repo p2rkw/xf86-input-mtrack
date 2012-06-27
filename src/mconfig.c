@@ -33,6 +33,7 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->thumb_ratio = DEFAULT_THUMB_RATIO;
 	cfg->thumb_size = DEFAULT_THUMB_SIZE;
 	cfg->palm_size = DEFAULT_PALM_SIZE;
+	cfg->bottom_edge = DEFAULT_BOTTOM_EDGE;
 
 	// Configure Gestures
 	cfg->trackpad_disable = DEFAULT_TRACKPAD_DISABLE;
@@ -84,7 +85,7 @@ void mconfig_init(struct MConfig* cfg,
 	cfg->touch_minor = caps->has_abs[MTDEV_TOUCH_MINOR];
 	cfg->pad_width = get_cap_xsize(caps);
 	cfg->pad_height = get_cap_ysize(caps);
-
+	
 	if (caps->has_abs[MTDEV_TOUCH_MAJOR] && caps->has_abs[MTDEV_WIDTH_MAJOR]) {
 		cfg->touch_type = MCFG_SCALE;
 		cfg->touch_min = caps->abs[MTDEV_TOUCH_MAJOR].minimum;
@@ -128,6 +129,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->thumb_ratio = CLAMPVAL(xf86SetIntOption(opts, "ThumbRatio", DEFAULT_THUMB_RATIO), 0, 100);
 	cfg->thumb_size = CLAMPVAL(xf86SetIntOption(opts, "ThumbSize", DEFAULT_THUMB_SIZE), 0, 100);
 	cfg->palm_size = CLAMPVAL(xf86SetIntOption(opts, "PalmSize", DEFAULT_PALM_SIZE), 0, 100);
+	cfg->bottom_edge = CLAMPVAL(xf86SetIntOption(opts, "BottomEdge", DEFAULT_BOTTOM_EDGE), 0, 100);
 
 	// Configure Gestures
 	cfg->trackpad_disable = CLAMPVAL(xf86SetIntOption(opts, "TrackpadDisable", DEFAULT_TRACKPAD_DISABLE), 0, 3);
@@ -138,6 +140,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->button_1touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger1", DEFAULT_BUTTON_1TOUCH), 0, 32);
 	cfg->button_2touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger2", DEFAULT_BUTTON_2TOUCH), 0, 32);
 	cfg->button_3touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger3", DEFAULT_BUTTON_3TOUCH), 0, 32);
+	cfg->button_move = xf86SetBoolOption(opts, "ButtonMoveEmulate", DEFAULT_BUTTON_MOVE);
 	cfg->tap_1touch = CLAMPVAL(xf86SetIntOption(opts, "TapButton1", DEFAULT_TAP_1TOUCH), 0, 32);
 	cfg->tap_2touch = CLAMPVAL(xf86SetIntOption(opts, "TapButton2", DEFAULT_TAP_2TOUCH), 0, 32);
 	cfg->tap_3touch = CLAMPVAL(xf86SetIntOption(opts, "TapButton3", DEFAULT_TAP_3TOUCH), 0, 32);
@@ -172,6 +175,8 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->drag_timeout = MAXVAL(xf86SetIntOption(opts, "TapDragTime", DEFAULT_DRAG_TIMEOUT), 1);
 	cfg->drag_wait = MAXVAL(xf86SetIntOption(opts, "TapDragWait", DEFAULT_DRAG_WAIT), 0);
 	cfg->drag_dist = MAXVAL(xf86SetIntOption(opts, "TapDragDist", DEFAULT_DRAG_DIST), 0);
+	cfg->axis_x_invert = xf86SetBoolOption(opts, "AxisXInvert", DEFAULT_AXIS_X_INVERT);
+	cfg->axis_y_invert = xf86SetBoolOption(opts, "AxisYInvert", DEFAULT_AXIS_Y_INVERT);
 	cfg->sensitivity = MAXVAL(xf86SetRealOption(opts, "Sensitivity", DEFAULT_SENSITIVITY), 0);
 }
 

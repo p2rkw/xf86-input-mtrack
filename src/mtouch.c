@@ -24,9 +24,10 @@
 
 static const int use_grab = 0;
 
-int mtouch_configure(struct MTouch *mt, int fd)
+int mtouch_configure(struct MTouch* mt, int fd)
 {
-	int rc = read_capabilities(&mt->caps, fd);
+	mt->fd = fd;
+	int rc = read_capabilities(&mt->caps, mt->fd);
 	if (rc < 0)
 		return rc;
 	output_capabilities(&mt->caps);
@@ -34,16 +35,17 @@ int mtouch_configure(struct MTouch *mt, int fd)
 }
 
 
-int mtouch_open(struct MTouch *mt, int fd)
+int mtouch_open(struct MTouch* mt, int fd)
 {
 	int ret;
-	ret = mtdev_open(&mt->dev, fd);
+	mt->fd = fd;
+	ret = mtdev_open(&mt->dev, mt->fd);
 	if (ret)
 		goto error;
 	mconfig_init(&mt->cfg, &mt->caps);
 	hwstate_init(&mt->hs, &mt->caps);
 	mtstate_init(&mt->state);
-	gestures_init(&mt->gs);
+	gestures_init(mt);
 	if (use_grab) {
 		SYSCALL(ret = ioctl(fd, EVIOCGRAB, 1));
 		if (ret)
@@ -57,11 +59,11 @@ int mtouch_open(struct MTouch *mt, int fd)
 }
 
 
-int mtouch_close(struct MTouch *mt, int fd)
+int mtouch_close(struct MTouch* mt)
 {
 	int ret;
 	if (use_grab) {
-		SYSCALL(ret = ioctl(fd, EVIOCGRAB, 0));
+		SYSCALL(ret = ioctl(mt->fd, EVIOCGRAB, 0));
 		if (ret)
 			xf86Msg(X_WARNING, "mtouch: ungrab failed\n");
 	}
@@ -69,18 +71,18 @@ int mtouch_close(struct MTouch *mt, int fd)
 	return 0;
 }
 
-int read_packet(struct MTouch *mt, int fd)
+int mtouch_read(struct MTouch* mt)
 {
-	int ret = hwstate_modify(&mt->hs, &mt->dev, fd, &mt->caps);
+	int ret = hwstate_modify(&mt->hs, &mt->dev, mt->fd, &mt->caps);
 	if (ret <= 0)
 		return ret;
-	mtstate_extract(&mt->state, &mt->cfg, &mt->hs);
-	gestures_extract(&mt->gs, &mt->cfg, &mt->hs, &mt->state);
+	mtstate_extract(&mt->state, &mt->cfg, &mt->hs, &mt->caps);
+	gestures_extract(mt);
 	return 1;
 }
 
-int has_delayed(struct MTouch *mt, int fd)
+int mtouch_delayed(struct MTouch* mt)
 {
-	return gestures_delayed(&mt->gs, &mt->dev, fd);
+	return gestures_delayed(mt);
 }
 
