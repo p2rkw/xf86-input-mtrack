@@ -8,6 +8,7 @@ protocol see the [kernel documentation][1].
 This driver is compatible with Xorg server versions 1.7 to 1.12. It requires
 the [mtdev][4] library to operate.
 
+
 License
 -------
 
@@ -17,14 +18,15 @@ License
 This software is licensed under the [GPLv2][2] and is a fork of the
 [xf86-input-multitouch][3] driver by Henrik Rydberg.
 
+
 Binaries
 --------
 
-* [Gentoo][5]
-* [Ubuntu][6]
-* [Arch][7]
+* Gentoo - Ebuilds are now included in portage. The latest evuilds can be found
+  in the [Fated Mariner][5] overlay. It is available as fm-overlay in layman.
+* Ubuntu - Starting with Precise packages are available in [Universe][6].
+* Arch - Available in [AUR][7]. Contributed and maintained by Mike Zackles.
 
-Arch package contributed and maintained by Mike Zackles.
 
 Configuration
 -------------
@@ -283,11 +285,12 @@ Whether or not to invert the X axis. Boolean value. Defaults to false.
 **AxisYInvert**
 Whether or not to invert the Y axis. Boolean value. Defaults to false.
 
-[1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt     "Kernel Multitouch Protocol"
-[2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"
-[3]: http://bitmath.org/code/multitouch/                                        "xf86-input-multitouch website"
-[4]: http://bitmath.org/code/mtdev/                                             "mtdev library website"
-[5]: http://www.dev.fatalmachine.org/xf86-input-mtrack/gentoo                   "Gentoo Ebuilds"
-[6]: http://www.dev.fatalmachine.org/xf86-input-mtrack/ubuntu                   "Ubuntu Packages"
-[7]: http://aur.archlinux.org/packages.php?ID=48505                             "Arch Package"
+
+[1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt                 "Kernel Multitouch Protocol"
+[2]: http://www.gnu.org/licenses/gpl-2.0.html                                               "GNU General Public License, version 2"
+[3]: http://bitmath.org/code/multitouch/                                                    "xf86-input-multitouch website"
+[4]: http://bitmath.org/code/mtdev/                                                         "mtdev library website"
+[5]: https://github.com/BlueDragonX/fm-overlay                                              "Fated Mariner Overlay"
+[6]: http://packages.ubuntu.com/search?searchon=names&keywords=xserver-xorg-input-mtrack    "Ubuntu Packages"
+[7]: http://aur.archlinux.org/packages.php?ID=48505                                         "Arch Package"
 
