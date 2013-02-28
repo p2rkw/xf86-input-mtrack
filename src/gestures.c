@@ -257,8 +257,11 @@ static void buttons_update(struct Gestures* gs,
 				struct timeval expire;
 				foreach_bit(i, ms->touch_used) {
 					timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
-					if (cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <))
+					if ((cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) &&
+                            !(GETBIT(ms->touch[i].state, MT_THUMB) && cfg->ignore_thumb) &&
+                            !(GETBIT(ms->touch[i].state, MT_PALM) && cfg->ignore_palm)) {
 						touching++;
+                    }
 				}
 
 				if (cfg->button_integrated)
