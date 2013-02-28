@@ -93,10 +93,10 @@ The minimum size of what's considered a palm. Palms are expected to be very
 large on the trackpad. This is represented as a percentage of the maximum touch
 value and is dependent on the trackpad hardware. Integer value. Defaults to 40.
 
-**BottomEdge** -
-The size of an area at the bottom of the trackpad where new touches are ignored
-(fingers traveling into this area from above will still be tracked). This is
-represented as a percentage of the total trackpad height. Defaults to 10.
+**EdgeSize** -
+The size of an area around the trackpad where new touches are ignored (fingers
+traveling into this area from above will still be tracked). This is represented
+as a percentage of the total trackpad height. Defaults to 10.
 
 **ButtonEnable** - 
 Whether or not to enable the physical buttons on or near the trackpad. Boolean
