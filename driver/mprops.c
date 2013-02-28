@@ -193,8 +193,8 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->axis_y_invert;
 	mprops.axis_invert = atom_init_integer(local->dev, MTRACK_PROP_AXIS_INVERT, 2, ivals, 8);
 
-	ivals[0] = cfg->bottom_edge;
-	mprops.bottom_edge = atom_init_integer(local->dev, MTRACK_PROP_BOTTOM_EDGE, 1, ivals, 8);
+	ivals[0] = cfg->edge_size;
+	mprops.edge_size = atom_init_integer(local->dev, MTRACK_PROP_EDGE_SIZE, 1, ivals, 8);
 }
 
 int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly) {
@@ -637,7 +637,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (property == mprops.bottom_edge) {
+	else if (property == mprops.edge_size) {
 		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
@@ -646,10 +646,10 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		if (!checkonly) {
-			cfg->bottom_edge = ivals8[0];
+			cfg->edge_size = ivals8[0];
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set bottom edge to %d\n",
-				cfg->bottom_edge);
+			xf86Msg(X_INFO, "mtrack: set edge size to %d\n",
+				cfg->edge_size);
 #endif
 		}
 	}
