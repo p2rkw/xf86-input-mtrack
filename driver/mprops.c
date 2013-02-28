@@ -192,6 +192,9 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[0] = cfg->axis_x_invert;
 	ivals[1] = cfg->axis_y_invert;
 	mprops.axis_invert = atom_init_integer(local->dev, MTRACK_PROP_AXIS_INVERT, 2, ivals, 8);
+
+	ivals[0] = cfg->bottom_edge;
+	mprops.bottom_edge = atom_init_integer(local->dev, MTRACK_PROP_BOTTOM_EDGE, 1, ivals, 8);
 }
 
 int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly) {
@@ -631,6 +634,22 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set axis inversion to %d %d\n",
 				cfg->axis_x_invert, cfg->axis_y_invert);
+#endif
+		}
+	}
+	else if (property == mprops.bottom_edge) {
+		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_PCNT(ivals8[0]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->bottom_edge = ivals8[0];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set bottom edge to %d\n",
+				cfg->bottom_edge);
 #endif
 		}
 	}
