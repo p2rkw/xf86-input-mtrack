@@ -93,10 +93,16 @@ static int is_thumb(const struct MConfig* cfg,
 static int is_palm(const struct MConfig* cfg,
 			const struct FingerState* hw)
 {
-	if (cfg->touch_type != MCFG_SCALE && cfg->touch_type != MCFG_SIZE)
+	int size;
+	if ((cfg->touch_type == MCFG_SCALE) || (cfg->touch_type == MCFG_SIZE)) {
+		size = hw->touch_major;
+	} else if (cfg->touch_type == MCFG_PRESSURE) {
+		size = hw->pressure;
+	} else {
 		return 0;
+	}
 
-	int size = touch_range_ratio(cfg, hw->touch_major);
+	size = touch_range_ratio(cfg, size);
 	if (size > cfg->palm_size) {
 #if DEBUG_MTSTATE
 		xf86Msg(X_INFO, "is_palm: yes %d > %d\n", size, cfg->palm_size);
