@@ -193,14 +193,17 @@ static void buttons_update(struct Gestures* gs,
 	button_prev = hs->button;
 
 	if (down) {
-		int earliest, latest, moving = 0;
+		int earliest, latest, lowest, moving = 0;
 		gs->move_type = GS_NONE;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		earliest = -1;
 		latest = -1;
+		lowest = -1;
 		foreach_bit(i, ms->touch_used) {
-			if (GETBIT(ms->touch[i].state, MT_INVALID))
+			if (!cfg->button_zones && GETBIT(ms->touch[i].state, MT_INVALID))
 				continue;
+			if (lowest == -1 || ms->touch[i].y > ms->touch[lowest].y)
+				lowest = i;
 			if (cfg->button_integrated && !GETBIT(ms->touch[i].flags, GS_BUTTON))
 				SETBIT(ms->touch[i].flags, GS_BUTTON);
 			if (earliest == -1 || timercmp(&ms->touch[i].down, &ms->touch[earliest].down, <))
@@ -210,7 +213,7 @@ static void buttons_update(struct Gestures* gs,
 		}
 
 		if (emulate) {
-			if (cfg->button_zones && earliest >= 0) {
+			if (cfg->button_zones && lowest >= 0) {
 				int zones, left, right, pos;
 				double width;
 
@@ -224,7 +227,7 @@ static void buttons_update(struct Gestures* gs,
 
 				if (zones > 0) {
 					width = ((double)cfg->pad_width)/((double)zones);
-					pos = cfg->pad_width / 2 + ms->touch[earliest].x;
+					pos = cfg->pad_width / 2 + ms->touch[lowest].x;
 #ifdef DEBUG_GESTURES
 					xf86Msg(X_INFO, "buttons_update: pad width %d, zones %d, zone width %f, x %d\n",
 						cfg->pad_width, zones, width, pos);
@@ -232,7 +235,7 @@ static void buttons_update(struct Gestures* gs,
 					for (i = 0; i < zones; i++) {
 						left = width*i;
 						right = width*(i+1);
-						if (pos >= left && pos <= right) {
+						if ((i == 0 || pos >= left) && (i == zones - 1 || pos <= right)) {
 #ifdef DEBUG_GESTURES
 							xf86Msg(X_INFO, "buttons_update: button %d, left %d, right %d (found)\n", i, left, right);
 #endif

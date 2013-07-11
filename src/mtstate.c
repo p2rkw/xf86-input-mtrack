@@ -154,8 +154,10 @@ static int touch_append(struct MTState* ms,
 	if (n < 0)
 		xf86Msg(X_WARNING, "Too many touches to track. Ignoring touch %d.\n", fs->tracking_id);
 	else {
-		x = cfg->axis_x_invert ? get_cap_xflip(caps, fs->position_x) : fs->position_x;
-		y = cfg->axis_y_invert ? get_cap_yflip(caps, fs->position_y) : fs->position_y;
+		x = get_cap_x(caps, fs->position_x);
+		y = get_cap_y(caps, fs->position_y);
+		x = cfg->axis_x_invert ? -x : x;
+		y = cfg->axis_y_invert ? -y : y;
 		ms->touch[n].state = 0U;
 		ms->touch[n].flags = 0U;
 		timercp(&ms->touch[n].down, &hs->evtime);
@@ -182,8 +184,10 @@ static void touch_update(struct MTState* ms,
 			int touch)
 {
 	int x, y;
-	x = cfg->axis_x_invert ? get_cap_xflip(caps, fs->position_x) : fs->position_x;
-	y = cfg->axis_y_invert ? get_cap_yflip(caps, fs->position_y) : fs->position_y;
+	x = get_cap_x(caps, fs->position_x);
+	y = get_cap_y(caps, fs->position_y);
+	x = cfg->axis_x_invert ? -x : x;
+	y = cfg->axis_y_invert ? -y : y;
 	ms->touch[touch].dx = x - ms->touch[touch].x;
 	ms->touch[touch].dy = y - ms->touch[touch].y;
 	ms->touch[touch].total_dx += ms->touch[touch].dx;
