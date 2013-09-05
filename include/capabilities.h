@@ -27,7 +27,7 @@
 
 struct Capabilities {
 	struct input_id devid;
-	char devname[32];
+	char devname[128];
 	int has_left, has_middle, has_right;
 	int has_mtdata, has_ibt;
 	int has_slot;
