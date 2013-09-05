@@ -86,7 +86,7 @@ int read_capabilities(struct Capabilities *cap, int fd)
 	SYSCALL(rc = ioctl(fd, EVIOCGID, &cap->devid));
 	if (rc < 0)
 		return rc;
-	SYSCALL(rc = ioctl(fd, EVIOCGNAME(sizeof(cap->devname)), cap->devname));
+	SYSCALL(rc = ioctl(fd, EVIOCGNAME(sizeof(cap->devname) - 1), cap->devname));
 	if (rc < 0)
 		return rc;
 	SYSCALL(rc = ioctl(fd, EVIOCGBIT(EV_SYN, sizeof(evbits)), evbits));
