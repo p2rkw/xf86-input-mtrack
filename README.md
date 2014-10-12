@@ -189,7 +189,7 @@ Integer value. A value of 0 disables scrolling down. Defaults to 5.
 For two finger scrolling. The button that is triggered by scrolling left.
 Integer value. A value of 0 disables scrolling left. Defaults to 6.
 
-**ScrollDownButton** - 
+**ScrollRightButton** - 
 For two finger scrolling. The button that is triggered by scrolling right.
 Integer value. A value of 0 disables scrolling right. Defaults to 7.
 
