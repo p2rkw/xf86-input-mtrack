@@ -85,8 +85,8 @@ static void trigger_button_click(struct Gestures* gs,
 		gs->button_delayed = button;
 		timercp(&gs->button_delayed_time, trigger_up_time);
 		timerclear(&gs->button_delayed_delta);
-#ifdef DEBUG_GESTRUES
-		xf86Msg(X_INFO, "trigger_button_click: %d placed in delayed mode\n");
+#ifdef DEBUG_GESTURES
+		xf86Msg(X_INFO, "trigger_button_click: %d placed in delayed mode\n", button);
 #endif
 	}
 #ifdef DEBUG_GESTURES
