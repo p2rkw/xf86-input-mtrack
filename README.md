@@ -255,7 +255,7 @@ value. A value of 0 disables rotation left. Defaults to 14.
 
 **RotateRightButton** - 
 For two finger rotation. The button that is triggered by rotating right. Integer
-value. A value of 0 disables rotation right. Defaults to 14.
+value. A value of 0 disables rotation right. Defaults to 15.
 
 **TapDragEnable** - 
 Whether or not to enable tap-to-drag functionality. Boolean value. Defaults to
