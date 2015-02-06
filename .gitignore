@@ -1,0 +1,14 @@
+*.la
+*.lo
+*.o
+.deps
+.dirstamp
+.libs
+Makefile
+autom4te.cache
+config.h
+config.log
+config.status
+libtool
+mtrack-test
+stamp-h1
