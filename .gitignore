@@ -1,6 +1,7 @@
 *.la
 *.lo
 *.o
+*.sw?
 .deps
 .dirstamp
 .libs
