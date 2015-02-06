@@ -26,6 +26,16 @@ Binaries
 
 Arch package contributed and maintained by Mike Zackles.
 
+Building and Installing
+-----------------------
+This is a standard autoconf package. So:
+
+    ./configure
+    make && make install
+
+It is likely that you will need to change system-dependent paths such as the
+xorg module directory. See `configure --help` for options.
+
 Configuration
 -------------
 
