@@ -17,15 +17,6 @@ License
 This software is licensed under the [GPLv2][2] and is a fork of the
 [xf86-input-multitouch][3] driver by Henrik Rydberg.
 
-Binaries
---------
-
-* [Gentoo][5]
-* [Ubuntu][6]
-* [Arch][7]
-
-Arch package contributed and maintained by Mike Zackles.
-
 Building and Installing
 -----------------------
 This is a standard autoconf package. So:
@@ -297,7 +288,3 @@ Whether or not to invert the Y axis. Boolean value. Defaults to false.
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"
 [3]: http://bitmath.org/code/multitouch/                                        "xf86-input-multitouch website"
 [4]: http://bitmath.org/code/mtdev/                                             "mtdev library website"
-[5]: http://www.dev.fatalmachine.org/xf86-input-mtrack/gentoo                   "Gentoo Ebuilds"
-[6]: http://www.dev.fatalmachine.org/xf86-input-mtrack/ubuntu                   "Ubuntu Packages"
-[7]: http://aur.archlinux.org/packages.php?ID=48505                             "Arch Package"
-
