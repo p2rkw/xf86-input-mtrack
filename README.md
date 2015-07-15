@@ -31,6 +31,7 @@ See `configure --help` for options.
 
 To build deb package and install in system wide you will usually have to change
 installation prefix to /usr like so:
+
     ./configure --prefix=/usr
     dpkg-buildpackage
 
