@@ -53,7 +53,7 @@ typedef unsigned int bitmask_t;
 #define MODBIT(m, x, b) ((b) ? SETBIT(m, x) : CLEARBIT(m, x))
 
 #define ABSVAL(x) ((x) < 0 ? -1*(x) : (x))
-#define MINVAL(x, y) ((x) < (y) ? (x) : (y)) 
+#define MINVAL(x, y) ((x) < (y) ? (x) : (y))
 #define MAXVAL(x, y) ((x) > (y) ? (x) : (y))
 #define MODVAL(x, y) ((x) - ((int)((x) / (y))) * (y))
 #define SQRVAL(x) ((x) * (x))
@@ -103,6 +103,16 @@ static inline void timeraddms(const struct timeval* a, const mstime_t b, struct 
 	struct timeval tv;
 	timerfromms(&tv, b);
 	timeradd(a, &tv, dest);
+}
+
+/* Check if given timeval a is set to epoch time.
+ */
+static inline int isepochtime(const struct timeval* a)
+{
+	struct timeval epoch;
+	timerclear(&epoch);
+
+	return timercmp(a, &epoch, ==);
 }
 
 /* Clamp value to 15 bits.

@@ -75,6 +75,26 @@ Atom atom_init_float(DeviceIntPtr dev, char* name, int nvalues, float* values, A
 	return atom;
 }
 
+static void init_swipe_props(DeviceIntPtr dev, struct MPropsSwipe* propsSwipe,
+                             struct MConfigSwipe* cfgSwipe, char const* distPropName,
+                             char const* buttonsPropName, char const* holdPropName){
+	int ivals[MAX_INT_VALUES];
+	ivals[0] = cfgSwipe->dist;
+	propsSwipe->dist = atom_init_integer(dev, (char*)distPropName, 1, ivals, 32);
+
+	ivals[0] = cfgSwipe->up_btn;
+	ivals[1] = cfgSwipe->dn_btn;
+	ivals[2] = cfgSwipe->lt_btn;
+	ivals[3] = cfgSwipe->rt_btn;
+	propsSwipe->buttons = atom_init_integer(dev, (char*)buttonsPropName, 4, ivals, 8);
+
+	ivals[0] = cfgSwipe->up_hold;
+	ivals[1] = cfgSwipe->dn_hold;
+	ivals[2] = cfgSwipe->lt_hold;
+	ivals[3] = cfgSwipe->rt_hold;
+	propsSwipe->hold = atom_init_integer(dev, (char*)holdPropName, 4, ivals, 16);
+}
+
 void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	int ivals[MAX_INT_VALUES];
 	float fvals[MAX_FLOAT_VALUES];
@@ -142,32 +162,11 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->gesture_wait;
 	mprops.gesture_settings = atom_init_integer(local->dev, MTRACK_PROP_GESTURE_SETTINGS, 2, ivals, 16);
 
-	ivals[0] = cfg->scroll_dist;
-	mprops.scroll_dist = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_DIST, 1, ivals, 32);
+	init_swipe_props(local->dev, &mprops.scroll, &cfg->scroll, MTRACK_PROP_SCROLL_DIST, MTRACK_PROP_SCROLL_BUTTONS, MTRACK_PROP_SCROLL_CLICK_TIME);
 
-	ivals[0] = cfg->scroll_up_btn;
-	ivals[1] = cfg->scroll_dn_btn;
-	ivals[2] = cfg->scroll_lt_btn;
-	ivals[3] = cfg->scroll_rt_btn;
-	mprops.scroll_buttons = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_BUTTONS, 4, ivals, 8);
+	init_swipe_props(local->dev, &mprops.swipe3, &cfg->swipe3, MTRACK_PROP_SWIPE_DIST, MTRACK_PROP_SWIPE_BUTTONS, MTRACK_PROP_SWIPE_CLICK_TIME);
 
-	ivals[0] = cfg->swipe_dist;
-	mprops.swipe_dist = atom_init_integer(local->dev, MTRACK_PROP_SWIPE_DIST, 1, ivals, 32);
-
-	ivals[0] = cfg->swipe_up_btn;
-	ivals[1] = cfg->swipe_dn_btn;
-	ivals[2] = cfg->swipe_lt_btn;
-	ivals[3] = cfg->swipe_rt_btn;
-	mprops.swipe_buttons = atom_init_integer(local->dev, MTRACK_PROP_SWIPE_BUTTONS, 4, ivals, 8);
-
-	ivals[0] = cfg->swipe4_dist;
-	mprops.swipe4_dist = atom_init_integer(local->dev, MTRACK_PROP_SWIPE4_DIST, 1, ivals, 32);
-
-	ivals[0] = cfg->swipe4_up_btn;
-	ivals[1] = cfg->swipe4_dn_btn;
-	ivals[2] = cfg->swipe4_lt_btn;
-	ivals[3] = cfg->swipe4_rt_btn;
-	mprops.swipe4_buttons = atom_init_integer(local->dev, MTRACK_PROP_SWIPE4_BUTTONS, 4, ivals, 8);
+	init_swipe_props(local->dev, &mprops.swipe4, &cfg->swipe4, MTRACK_PROP_SWIPE4_DIST, MTRACK_PROP_SWIPE4_BUTTONS, MTRACK_PROP_SWIPE4_CLICK_TIME);
 
 	ivals[0] = cfg->scale_dist;
 	mprops.scale_dist = atom_init_integer(local->dev, MTRACK_PROP_SCALE_DIST, 1, ivals, 32);
@@ -192,6 +191,71 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[0] = cfg->axis_x_invert;
 	ivals[1] = cfg->axis_y_invert;
 	mprops.axis_invert = atom_init_integer(local->dev, MTRACK_PROP_AXIS_INVERT, 2, ivals, 8);
+}
+
+static int set_swipe_properties(Atom property, BOOL checkonly, XIPropertyValuePtr prop,
+                                struct MPropsSwipe* propsSwipe, struct MConfigSwipe* cfgSwipe){
+
+	uint8_t* ivals8;
+	uint16_t* ivals16;
+	uint32_t* ivals32;
+
+	if (property == propsSwipe->dist) {
+		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 1)
+			return BadMatch;
+
+		if (!checkonly) {
+			cfgSwipe->dist = ivals32[0];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set swipe distance to %d\n",
+				cfgSwipe->dist);
+#endif
+		}
+	}
+	else if (property == propsSwipe->buttons) {
+		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfgSwipe->up_btn = ivals8[0];
+			cfgSwipe->dn_btn = ivals8[1];
+			cfgSwipe->lt_btn = ivals8[2];
+			cfgSwipe->rt_btn = ivals8[3];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set swipe buttons to %d %d %d %d\n",
+				cfgSwipe->up_btn, cfgSwipe->dn_btn, cfgSwipe->lt_btn, cfgSwipe->rt_btn);
+#endif
+		}
+	}
+	else if (property == propsSwipe->hold) {
+		if (prop->size != 4 || prop->format != 16 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals16 = (uint16_t*)prop->data;
+
+		if (!checkonly) {
+			cfgSwipe->up_hold = ivals16[0];
+			cfgSwipe->dn_hold = ivals16[1];
+			cfgSwipe->lt_hold = ivals16[2];
+			cfgSwipe->rt_hold = ivals16[3];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set swipe hold to %d %d %d %d\n",
+				cfgSwipe->up_hold, cfgSwipe->dn_hold, cfgSwipe->lt_hold, cfgSwipe->rt_hold);
+#endif
+		}
+	}
+	else{
+		return 0;
+	}
+	return 1;
 }
 
 int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop, BOOL checkonly) {
@@ -237,7 +301,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		}
 	}
 	else if (property == mprops.pressure) {
-		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER) 
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals8 = (uint8_t*)prop->data;
@@ -254,7 +318,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		}
 	}
 	else if (property == mprops.button_settings) {
-		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER) 
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals8 = (uint8_t*)prop->data;
@@ -332,7 +396,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
 			return BadMatch;
 
-		if (!checkonly) {			
+		if (!checkonly) {
 			cfg->tap_1touch = ivals8[0];
 			cfg->tap_2touch = ivals8[1];
 			cfg->tap_3touch = ivals8[2];
@@ -427,110 +491,14 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (property == mprops.scroll_dist) {
-		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
-			return BadMatch;
-
-		ivals32 = (uint32_t*)prop->data;
-		if (ivals32[0] < 1)
-			return BadMatch;
-
-		if (!checkonly) {
-			cfg->scroll_dist = ivals32[0];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set scroll distance to %d\n",
-				cfg->scroll_dist);
-#endif
-		}
+   else if (set_swipe_properties(property, checkonly, prop, &mprops.scroll, &cfg->scroll)) {
+		/* nothing to do */
 	}
-	else if (property == mprops.scroll_buttons) {
-		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
-			return BadMatch;
-
-		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
-			return BadMatch;
-
-		if (!checkonly) {
-			cfg->scroll_up_btn = ivals8[0];
-			cfg->scroll_dn_btn = ivals8[1];
-			cfg->scroll_lt_btn = ivals8[2];
-			cfg->scroll_rt_btn = ivals8[3];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set scroll buttons to %d %d %d %d\n",
-				cfg->scroll_up_btn, cfg->scroll_dn_btn, cfg->scroll_lt_btn, cfg->scroll_rt_btn);
-#endif
-		}
+	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe3, &cfg->swipe3)) {
+		/* nothing to do */
 	}
-	else if (property == mprops.swipe_dist) {
-		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
-			return BadMatch;
-
-		ivals32 = (uint32_t*)prop->data;
-		if (ivals32[0] < 1)
-			return BadMatch;
-
-		if (!checkonly) {
-			cfg->swipe_dist = ivals32[0];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set swipe distance to %d\n",
-				cfg->swipe_dist);
-#endif
-		}
-	}
-	else if (property == mprops.swipe_buttons) {
-		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
-			return BadMatch;
-
-		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
-			return BadMatch;
-
-		if (!checkonly) {
-			cfg->swipe_up_btn = ivals8[0];
-			cfg->swipe_dn_btn = ivals8[1];
-			cfg->swipe_lt_btn = ivals8[2];
-			cfg->swipe_rt_btn = ivals8[3];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set swipe buttons to %d %d %d %d\n",
-				cfg->swipe_up_btn, cfg->swipe_dn_btn, cfg->swipe_lt_btn, cfg->swipe_rt_btn);
-#endif
-		}
-	}
-	else if (property == mprops.swipe4_dist) {
-		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)
-			return BadMatch;
-
-		ivals32 = (uint32_t*)prop->data;
-		if (ivals32[0] < 1)
-			return BadMatch;
-
-		if (!checkonly) {
-			cfg->swipe4_dist = ivals32[0];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set swipe4 distance to %d\n",
-				cfg->swipe4_dist);
-#endif
-		}
-	}
-	else if (property == mprops.swipe4_buttons) {
-		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
-			return BadMatch;
-
-		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
-			return BadMatch;
-
-		if (!checkonly) {
-			cfg->swipe4_up_btn = ivals8[0];
-			cfg->swipe4_dn_btn = ivals8[1];
-			cfg->swipe4_lt_btn = ivals8[2];
-			cfg->swipe4_rt_btn = ivals8[3];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set swipe4 buttons to %d %d %d %d\n",
-				cfg->swipe4_up_btn, cfg->swipe4_dn_btn, cfg->swipe4_lt_btn, cfg->swipe4_rt_btn);
-#endif
-		}
+	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe4, &cfg->swipe4)) {
+		/* nothing to do */
 	}
 	else if (property == mprops.scale_dist) {
 		if (prop->size != 1 || prop->format != 32 || prop->type != XA_INTEGER)

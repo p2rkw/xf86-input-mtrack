@@ -25,7 +25,14 @@ This is a standard autoconf package. So:
     make && make install
 
 It is likely that you will need to change system-dependent paths such as the
-xorg module directory. See `configure --help` for options.
+xorg module directory. Otherwise mtrack may be not installed in xserver search
+path.
+See `configure --help` for options.
+
+To build deb package and install in system wide you will usually have to change
+installation prefix to /usr like so:
+    ./configure --prefix=/usr
+    dpkg-buildpackage
 
 Configuration
 -------------
@@ -153,10 +160,13 @@ disables three-finger tapping. Defaults to 0.
 
 **ClickTime** - 
 When tapping, how much time to hold down the emulated button. Integer value
-representing milliseconds. Defaults to 50.
+representing milliseconds. Too high value (greater than tap to drag wait time)
+may interrupt dragging when tap to drag is enabled. 
+Integer value representing miliseconds. Defaults to 50.
 
 **MaxTapTime** - 
-The amount of time to wait for a tap to release before counting it as a move.
+The amount of time to wait for incoming touches after first one before counting
+it as emulated button click.
 Integer value representing milliseconds. Defaults to 120.
 
 **MaxTapMove** - 
@@ -194,6 +204,22 @@ Integer value. A value of 0 disables scrolling left. Defaults to 6.
 For two finger scrolling. The button that is triggered by scrolling right.
 Integer value. A value of 0 disables scrolling right. Defaults to 7.
 
+**ScrollUpClickTime** -
+For two finger scrolling. How long button triggered by scrolling right
+will be hold down. Integer value representing milliseconds. Defaults to 20.
+
+**ScrollDownClickTime** -
+For two finger scrolling. How long button triggered by scrolling down
+will be hold down. Integer value representing milliseconds. Defaults to 20.
+
+**ScrollLeftClickTime** -
+For two finger scrolling. How long button triggered by scrolling left
+will be hold down. Integer value representing milliseconds. Defaults to 20.
+
+**ScrollRightClickTime** -
+For two finger scrolling. How long button triggered by scrolling right
+will be hold down. Integer value representing milliseconds. Defaults to 20.
+
 **SwipeDistance** - 
 For three finger swiping. How far you must move your fingers before a button
 click is triggered. Integer value. Defaults to 700.
@@ -214,6 +240,22 @@ value. A value of 0 disables swiping left. Defaults to 10.
 For three finger swiping. The button that is triggered by swiping right. Integer
 value. A value of 0 disables swiping right. Defaults to 11.
 
+**SwipeUpClickTime** -
+For three finger swiping. How long button triggered by swiping up
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**SwipeDownClickTime** -
+For three finger swiping. How long button triggered by swiping down
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**SwipeRightClickTime** -
+For three finger swiping. How long button triggered by swiping right
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**SwipeLeftClickTime** -
+For three finger swiping. How long button triggered by swiping left
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
 **Swipe4Distance** - 
 For four finger swiping. How far you must move your fingers before a button
 click is triggered. Integer value. Defaults to 700.
@@ -233,6 +275,22 @@ value. A value of 0 disables swiping left. Defaults to 10.
 **Swipe4RightButton** - 
 For four finger swiping. The button that is triggered by swiping right. Integer
 value. A value of 0 disables swiping right. Defaults to 11.
+
+**Swipe4UpClickTime** -
+For four finger swiping. How long button triggered by swiping up
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**Swipe4DownClickTime** -
+For four finger swiping. How long button triggered by swiping down
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**Swipe4RightClickTime** -
+For four finger swiping. How long button triggered by swiping right
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**Swipe4LeftClickTime** -
+For four finger swiping. How long button triggered by swiping left
+will be hold down. Integer value representing milliseconds. Defaults to 300.
 
 **ScaleDistance** - 
 For pinch scaling. How far you must move your fingers before a button click is
