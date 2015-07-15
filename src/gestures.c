@@ -411,28 +411,20 @@ static void trigger_move(struct Gestures* gs,
 	}
 }
 
-static void trigger_swipe_button(struct Gestures* gs,
-	const struct MConfig* cfg,
-	const struct MConfigSwipe* swipeCfg, int dir, double dist){
+static void trigger_swipe_button(struct Gestures* gs, const struct MConfigSwipe* swipeCfg,
+	int dir, double dist){
 	struct timeval tv_tmp;
 	if (swipeCfg->dist > 0 && gs->move_dist >= swipeCfg->dist) {
+		timeraddms(&gs->time, swipeCfg->hold, &tv_tmp);
 		gs->move_dist = MODVAL(gs->move_dist, swipeCfg->dist);
-		if (dir == TR_DIR_UP){
-			timeraddms(&gs->time, swipeCfg->up_hold, &tv_tmp);
+		if (dir == TR_DIR_UP)
 			trigger_button_click(gs, swipeCfg->up_btn - 1, &tv_tmp);
-		}
-		else if (dir == TR_DIR_DN){
-			timeraddms(&gs->time, swipeCfg->dn_hold, &tv_tmp);
+		else if (dir == TR_DIR_DN)
 			trigger_button_click(gs, swipeCfg->dn_btn - 1, &tv_tmp);
-		}
-		else if (dir == TR_DIR_LT){
-			timeraddms(&gs->time, swipeCfg->lt_hold, &tv_tmp);
+		else if (dir == TR_DIR_LT)
 			trigger_button_click(gs, swipeCfg->lt_btn - 1, &tv_tmp);
-		}
-		else if (dir == TR_DIR_RT){
-			timeraddms(&gs->time, swipeCfg->rt_hold, &tv_tmp);
+		else if (dir == TR_DIR_RT)
 			trigger_button_click(gs, swipeCfg->rt_btn - 1, &tv_tmp);
-		}
 	}
 #ifdef DEBUG_GESTURES
 			xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
@@ -458,11 +450,11 @@ static void trigger_swipe(struct Gestures* gs,
 
 		switch(move_type_to_trigger){
 		case GS_SWIPE2:
-			return trigger_swipe_button(gs, cfg, &cfg->scroll, dir, dist);
+			return trigger_swipe_button(gs, &cfg->scroll, dir, dist);
 		case GS_SWIPE3:
-			return trigger_swipe_button(gs, cfg, &cfg->swipe3, dir, dist);
+			return trigger_swipe_button(gs, &cfg->swipe3, dir, dist);
 		case GS_SWIPE4:
-			return trigger_swipe_button(gs, cfg, &cfg->swipe4, dir, dist);
+			return trigger_swipe_button(gs, &cfg->swipe4, dir, dist);
 		}
 	}
 }
@@ -742,37 +734,53 @@ void gestures_extract(struct MTouch* mt)
  * Return vale meaning:
  *  - 0 - no delay to handle, don't install timer, do nothing
  *  - 1 - only install timer
- *  - 2 - state was changed, so handle it
+ *  - 2 - state was changed, so caller have to cancel timer and handle state change
  */
 int gestures_delayed(struct MTouch* mt)
 {
 	struct Gestures* gs = &mt->gs;
+	struct MTState* ms = &mt->state;
 	struct timeval now, epoch;
+	int i, taps_released;
+
 	timerclear(&epoch);
+	taps_released = 0;
 
 	// if there's no delayed button - return
 	if(timercmp(&gs->button_delayed_time, &epoch, ==))
 		return 0;
 
-	microtime(&now);
-	timersub(&now, &mt->gs.time, &mt->gs.dt);
-	timercp(&mt->gs.time, &now);
-
-	if(timercmp(&gs->button_delayed_time, &now, >)){
-		// update delta time
-		timersub(&gs->button_delayed_time, &now, &gs->button_delayed_delta);
-		// That second check may seem unnecessary, but it is not.
-		// Even if button delayed time is > than now time, timertoms may still return 0
-		// because it truncates time to miliseconds. It's important because truncated time
-		// is used to setup timer.
-		if(timertoms(&gs->button_delayed_delta) > 1){
-#ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "gestures_delayed: %d delayed, new delta: %d ms\n", gs->button_delayed, timertoms(&gs->button_delayed_delta));
-#endif
-			return 1; // install timer
-		}
-		// else execute now
+	// count released fingers
+	foreach_bit(i, ms->touch_used) {
+		if (GETBIT(ms->touch[i].state, MT_RELEASED))
+			++taps_released;
 	}
+
+	// if one of fingers were released it means that gesture was ended so
+	// send "button up" event immediately without checking for delivery time
+	if(taps_released == 0){
+		microtime(&now);
+		timersub(&now, &mt->gs.time, &mt->gs.dt);
+		timercp(&mt->gs.time, &now);
+
+		if(timercmp(&gs->button_delayed_time, &now, >)){
+		   // update delta time
+		   timersub(&gs->button_delayed_time, &now, &gs->button_delayed_delta);
+		   // That second check may seem unnecessary, but it is not.
+		   // Even if button delayed time is > than now time, timertoms may still return 0
+		   // because it truncates time to miliseconds. It's important because truncated time
+		   // is used to setup timer.
+		   if(timertoms(&gs->button_delayed_delta) > 1){
+		#ifdef DEBUG_GESTURES
+			  xf86Msg(X_INFO, "gestures_delayed: %d delayed, new delta: %d ms\n", gs->button_delayed, timertoms(&gs->button_delayed_delta));
+		#endif
+			  return 1; // install timer
+		   }
+		   // else execute now
+		}
+	}
+	timerclear(&gs->button_delayed_time);
+	timerclear(&gs->button_delayed_delta);
 #ifdef DEBUG_GESTURES
 	xf86Msg(X_INFO, "gestures_delayed: %d up, timer expired\n", gs->button_delayed);
 #endif
@@ -780,8 +788,7 @@ int gestures_delayed(struct MTouch* mt)
 	gs->move_dx = 0;
 	gs->move_dy = 0;
 	gs->button_delayed = 0;
-	timerclear(&gs->button_delayed_time);
-	timerclear(&gs->button_delayed_delta);
-	return 2; // caller scholud call handle_gestures
+
+	return 2; // caller scholud call TimerCancel() and handle_gestures()
 }
 

@@ -238,7 +238,10 @@ static CARD32 check_resolve_delayed(OsTimerPtr timer, CARD32 time, void *arg){
 		mt->timer = TimerSet(mt->timer, 0, timertoms(&mt->gs.button_delayed_delta),
                             check_resolve_delayed, local);
 		break;
-	case 2: handle_gestures(local, &mt->gs); break;
+	case 2:
+		TimerCancel(mt->timer);
+		handle_gestures(local, &mt->gs);
+		break;
 	case 0:
 	default: break;
 	}

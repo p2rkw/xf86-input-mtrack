@@ -161,8 +161,8 @@ disables three-finger tapping. Defaults to 0.
 
 **ClickTime** - 
 When tapping, how much time to hold down the emulated button. Integer value
-representing milliseconds. Too high value (greater than tap to drag wait time)
-may interrupt dragging when tap to drag is enabled. 
+representing milliseconds. Not very usable because button release event will be
+sent immediately after releasing any of fingers (touches).
 Integer value representing miliseconds. Defaults to 50.
 
 **MaxTapTime** - 
@@ -205,20 +205,8 @@ Integer value. A value of 0 disables scrolling left. Defaults to 6.
 For two finger scrolling. The button that is triggered by scrolling right.
 Integer value. A value of 0 disables scrolling right. Defaults to 7.
 
-**ScrollUpClickTime** -
-For two finger scrolling. How long button triggered by scrolling right
-will be hold down. Integer value representing milliseconds. Defaults to 20.
-
-**ScrollDownClickTime** -
-For two finger scrolling. How long button triggered by scrolling down
-will be hold down. Integer value representing milliseconds. Defaults to 20.
-
-**ScrollLeftClickTime** -
-For two finger scrolling. How long button triggered by scrolling left
-will be hold down. Integer value representing milliseconds. Defaults to 20.
-
-**ScrollRightClickTime** -
-For two finger scrolling. How long button triggered by scrolling right
+**ScrollClickTime** -
+For two finger scrolling. How long button triggered by scrolling 
 will be hold down. Integer value representing milliseconds. Defaults to 20.
 
 **SwipeDistance** - 
@@ -241,20 +229,8 @@ value. A value of 0 disables swiping left. Defaults to 10.
 For three finger swiping. The button that is triggered by swiping right. Integer
 value. A value of 0 disables swiping right. Defaults to 11.
 
-**SwipeUpClickTime** -
-For three finger swiping. How long button triggered by swiping up
-will be hold down. Integer value representing milliseconds. Defaults to 300.
-
-**SwipeDownClickTime** -
-For three finger swiping. How long button triggered by swiping down
-will be hold down. Integer value representing milliseconds. Defaults to 300.
-
-**SwipeRightClickTime** -
-For three finger swiping. How long button triggered by swiping right
-will be hold down. Integer value representing milliseconds. Defaults to 300.
-
-**SwipeLeftClickTime** -
-For three finger swiping. How long button triggered by swiping left
+**SwipeClickTime** -
+For three finger swiping. How long button triggered by swiping
 will be hold down. Integer value representing milliseconds. Defaults to 300.
 
 **Swipe4Distance** - 
@@ -277,20 +253,8 @@ value. A value of 0 disables swiping left. Defaults to 10.
 For four finger swiping. The button that is triggered by swiping right. Integer
 value. A value of 0 disables swiping right. Defaults to 11.
 
-**Swipe4UpClickTime** -
-For four finger swiping. How long button triggered by swiping up
-will be hold down. Integer value representing milliseconds. Defaults to 300.
-
-**Swipe4DownClickTime** -
-For four finger swiping. How long button triggered by swiping down
-will be hold down. Integer value representing milliseconds. Defaults to 300.
-
-**Swipe4RightClickTime** -
-For four finger swiping. How long button triggered by swiping right
-will be hold down. Integer value representing milliseconds. Defaults to 300.
-
-**Swipe4LeftClickTime** -
-For four finger swiping. How long button triggered by swiping left
+**Swipe4ClickTime** -
+For four finger swiping. How long button triggered by swiping
 will be hold down. Integer value representing milliseconds. Defaults to 300.
 
 **ScaleDistance** - 

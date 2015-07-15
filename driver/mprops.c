@@ -88,11 +88,8 @@ static void init_swipe_props(DeviceIntPtr dev, struct MPropsSwipe* propsSwipe,
 	ivals[3] = cfgSwipe->rt_btn;
 	propsSwipe->buttons = atom_init_integer(dev, (char*)buttonsPropName, 4, ivals, 8);
 
-	ivals[0] = cfgSwipe->up_hold;
-	ivals[1] = cfgSwipe->dn_hold;
-	ivals[2] = cfgSwipe->lt_hold;
-	ivals[3] = cfgSwipe->rt_hold;
-	propsSwipe->hold = atom_init_integer(dev, (char*)holdPropName, 4, ivals, 16);
+	ivals[0] = cfgSwipe->hold;
+	propsSwipe->hold = atom_init_integer(dev, (char*)holdPropName, 1, ivals, 16);
 }
 
 void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
@@ -236,19 +233,15 @@ static int set_swipe_properties(Atom property, BOOL checkonly, XIPropertyValuePt
 		}
 	}
 	else if (property == propsSwipe->hold) {
-		if (prop->size != 4 || prop->format != 16 || prop->type != XA_INTEGER)
+		if (prop->size != 1 || prop->format != 16 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals16 = (uint16_t*)prop->data;
 
 		if (!checkonly) {
-			cfgSwipe->up_hold = ivals16[0];
-			cfgSwipe->dn_hold = ivals16[1];
-			cfgSwipe->lt_hold = ivals16[2];
-			cfgSwipe->rt_hold = ivals16[3];
+			cfgSwipe->hold = ivals16[0];
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set swipe hold to %d %d %d %d\n",
-				cfgSwipe->up_hold, cfgSwipe->dn_hold, cfgSwipe->lt_hold, cfgSwipe->rt_hold);
+			xf86Msg(X_INFO, "mtrack: set swipe hold to %d\n", cfgSwipe->hold);
 #endif
 		}
 	}
@@ -491,7 +484,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-   else if (set_swipe_properties(property, checkonly, prop, &mprops.scroll, &cfg->scroll)) {
+	else if (set_swipe_properties(property, checkonly, prop, &mprops.scroll, &cfg->scroll)) {
 		/* nothing to do */
 	}
 	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe3, &cfg->swipe3)) {
