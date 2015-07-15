@@ -66,20 +66,20 @@
 #define MTRACK_PROP_SCROLL_DIST "Trackpad Scroll Distance"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SCROLL_BUTTONS "Trackpad Scroll Buttons"
-// int, 4 values - how much milliseconds button will be hold after {up,down,left,right} scroll
-#define MTRACK_PROP_SCROLL_CLICK_TIME "Trackpad Scroll Click Time"
+// int, 1 value - how much milliseconds button will be hold after {up,down,left,right} scroll
+#define MTRACK_PROP_SCROLL_SETTINGS "Trackpad Scroll Settings"
 // int, 1 value - distance before a swipe event is triggered
 #define MTRACK_PROP_SWIPE_DIST "Trackpad Swipe Distance"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SWIPE_BUTTONS "Trackpad Swipe Buttons"
-// int, 4 values - how much milliseconds button will be hold after {up,down,left,right} swipe
-#define MTRACK_PROP_SWIPE_CLICK_TIME "Trackpad Swipe Click Time"
+// int, 1 value - how much milliseconds button will be hold after {up,down,left,right} swipe
+#define MTRACK_PROP_SWIPE_SETTINGS "Trackpad Swipe Settings"
 // int, 1 value - distance before a swipe event is triggered
 #define MTRACK_PROP_SWIPE4_DIST "Trackpad Swipe4 Distance"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SWIPE4_BUTTONS "Trackpad Swipe4 Buttons"
-// int, 4 values - how much milliseconds button will be hold after {up,down,left,right} swipe4
-#define MTRACK_PROP_SWIPE4_CLICK_TIME "Trackpad Swipe4 Click Time"
+// int, 1 value - how much milliseconds button will be hold after {up,down,left,right} swipe4
+#define MTRACK_PROP_SWIPE4_SETTINGS "Trackpad Swipe4 Settings"
 // int, 1 value - distance before a scale event is triggered
 #define MTRACK_PROP_SCALE_DIST "Trackpad Scale Distance"
 // int, 2 values - up button, down button

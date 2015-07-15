@@ -159,11 +159,11 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->gesture_wait;
 	mprops.gesture_settings = atom_init_integer(local->dev, MTRACK_PROP_GESTURE_SETTINGS, 2, ivals, 16);
 
-	init_swipe_props(local->dev, &mprops.scroll, &cfg->scroll, MTRACK_PROP_SCROLL_DIST, MTRACK_PROP_SCROLL_BUTTONS, MTRACK_PROP_SCROLL_CLICK_TIME);
+	init_swipe_props(local->dev, &mprops.scroll, &cfg->scroll, MTRACK_PROP_SCROLL_DIST, MTRACK_PROP_SCROLL_BUTTONS, MTRACK_PROP_SCROLL_SETTINGS);
 
-	init_swipe_props(local->dev, &mprops.swipe3, &cfg->swipe3, MTRACK_PROP_SWIPE_DIST, MTRACK_PROP_SWIPE_BUTTONS, MTRACK_PROP_SWIPE_CLICK_TIME);
+	init_swipe_props(local->dev, &mprops.swipe3, &cfg->swipe3, MTRACK_PROP_SWIPE_DIST, MTRACK_PROP_SWIPE_BUTTONS, MTRACK_PROP_SWIPE_SETTINGS);
 
-	init_swipe_props(local->dev, &mprops.swipe4, &cfg->swipe4, MTRACK_PROP_SWIPE4_DIST, MTRACK_PROP_SWIPE4_BUTTONS, MTRACK_PROP_SWIPE4_CLICK_TIME);
+	init_swipe_props(local->dev, &mprops.swipe4, &cfg->swipe4, MTRACK_PROP_SWIPE4_DIST, MTRACK_PROP_SWIPE4_BUTTONS, MTRACK_PROP_SWIPE4_SETTINGS);
 
 	ivals[0] = cfg->scale_dist;
 	mprops.scale_dist = atom_init_integer(local->dev, MTRACK_PROP_SCALE_DIST, 1, ivals, 32);
