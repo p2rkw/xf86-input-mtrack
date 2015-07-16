@@ -115,7 +115,7 @@ struct MProps {
 	struct MPropsSwipe{
 		Atom dist;
 		Atom buttons;
-		Atom hold;
+		Atom settings;
 	} scroll, swipe3, swipe4/*, swipe5*/;
 	Atom scale_dist;
 	Atom scale_buttons;

@@ -432,31 +432,81 @@ static void trigger_swipe_button(struct Gestures* gs, const struct MConfigSwipe*
 #endif
 }
 
-static void trigger_swipe(struct Gestures* gs,
-			const struct MConfig* cfg,
-			double dist, int dir, int move_type_to_trigger)
+#define TOUCHES_MAX 5
+static int get_swipe_dir_n(const struct Touch* touches[TOUCHES_MAX], int count)
 {
+    if(count > TOUCHES_MAX)
+        return TR_NONE;
+    double angles[TOUCHES_MAX];
+    int i;
+    for (i = 0; i < count; i++) {
+        angles[i] = touches[i]->direction;
+    }
+	 return trig_generalize(trig_angles_avg(angles, count));
+}
+
+static void get_swipe_avg_xy(const struct Touch* touches[TOUCHES_MAX], int count, double* out_x, double* out_y){
+    double x, y;
+    x = y = 0.0;
+    int i;
+    for (i = 0; i < count; ++i) {
+        x += touches[i]->dx;
+        y += touches[i]->dy;
+    }
+    *out_x = x/(double)count;
+    *out_y = y/(double)count;
+}
+#undef TOUCHES_MAX
+
+static int trigger_swipe(struct Gestures* gs,
+			const struct MConfig* cfg, const struct Touch* touches[4], int touches_count)
+{
+    int move_type_to_trigger, dir;
+    double avg_move_x, avg_move_y, dist;
+    const struct MConfigSwipe* swipe_cfg;
+
+    if((dir = get_swipe_dir_n(touches, touches_count)) == TR_NONE)
+        return 0;
+
 	if (gs->move_type == move_type_to_trigger || !timercmp(&gs->time, &gs->move_wait, <)) {
+		switch(touches_count){
+		case 2:
+          swipe_cfg = &cfg->scroll;
+          move_type_to_trigger = GS_SCROLL;
+          break;
+		case 3:
+          swipe_cfg = &cfg->swipe3;
+          move_type_to_trigger = GS_SWIPE3;
+          break;
+		case 4:
+			swipe_cfg = &cfg->swipe4;
+          move_type_to_trigger = GS_SWIPE4;
+          break;
+      default:
+          return 2;
+		}
 		trigger_drag_stop(gs, 1);
-		if (gs->move_type != move_type_to_trigger || gs->move_dir != dir)
-			gs->move_dist = 0;
-		gs->move_dx = 0;
-		gs->move_dy = 0;
+		get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
+      // hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
+      dist = hypot(avg_move_x, avg_move_y);
+      if(swipe_cfg->is_drag){
+            gs->move_dx = (int)(cfg->sensitivity * avg_move_x * swipe_cfg->is_drag * 0.001);
+            gs->move_dy = (int)(cfg->sensitivity * avg_move_y * swipe_cfg->is_drag * 0.001);
+      } else{
+            gs->move_dx = 0;
+            gs->move_dy = 0;
+      }
+        if (gs->move_type != move_type_to_trigger || gs->move_dir != dir)
+            gs->move_dist = 0;
 		gs->move_type = move_type_to_trigger;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
 		gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 
-		switch(move_type_to_trigger){
-		case GS_SWIPE2:
-			return trigger_swipe_button(gs, &cfg->scroll, dir, dist);
-		case GS_SWIPE3:
-			return trigger_swipe_button(gs, &cfg->swipe3, dir, dist);
-		case GS_SWIPE4:
-			return trigger_swipe_button(gs, &cfg->swipe4, dir, dist);
-		}
+		trigger_swipe_button(gs, swipe_cfg, dir, dist);
 	}
+    return 1;
 }
 
 static void trigger_scale(struct Gestures* gs,
@@ -602,7 +652,7 @@ static void moving_update(struct Gestures* gs,
 {
 	int i, count, btn_count, dx, dy, dir;
 	double dist;
-	struct Touch* touches[4];
+	const struct Touch* touches[4];
 	count = btn_count = 0;
 	dx = dy = 0;
 	dir = 0;
@@ -640,11 +690,8 @@ static void moving_update(struct Gestures* gs,
 	}
 	else if (count == 2 && cfg->trackpad_disable < 1) {
 		// scroll, scale, or rotate
-		if ((dir = get_scroll_dir(touches[0], touches[1])) != TR_NONE) {
-			dist = hypot(
-				touches[0]->dx + touches[1]->dx,
-				touches[0]->dy + touches[1]->dy);
-			trigger_swipe(gs, cfg, dist/2.0, dir, GS_SCROLL);
+		if (trigger_swipe(gs, cfg, touches, count)) {
+			/* nothing to do */
 		}
 		else if ((dir = get_rotate_dir(touches[0], touches[1])) != TR_NONE) {
 			dist = ABSVAL(hypot(touches[0]->dx, touches[0]->dy)) +
@@ -658,20 +705,10 @@ static void moving_update(struct Gestures* gs,
 		}
 	}
 	else if (count == 3 && cfg->trackpad_disable < 1) {
-		if ((dir = get_swipe_dir(touches[0], touches[1], touches[2])) != TR_NONE) {
-			dist = hypot(
-				touches[0]->dx + touches[1]->dx + touches[2]->dx,
-				touches[0]->dy + touches[1]->dy + touches[2]->dy);
-			trigger_swipe(gs, cfg, dist/3.0, dir, GS_SWIPE3);
-		}
+		trigger_swipe(gs, cfg, touches, count);
 	}
 	else if (count == 4 && cfg->trackpad_disable < 1) {
-		if ((dir = get_swipe4_dir(touches[0], touches[1], touches[2], touches[3])) != TR_NONE) {
-			dist = hypot(
-				touches[0]->dx + touches[1]->dx + touches[2]->dx + touches[3]->dx,
-				touches[0]->dy + touches[1]->dy + touches[2]->dy + touches[3]->dy);
-			trigger_swipe(gs, cfg, dist/4.0, dir, GS_SWIPE4);
-		}
+		trigger_swipe(gs, cfg, touches, count);
 	}
 }
 

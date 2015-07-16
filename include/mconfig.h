@@ -69,6 +69,7 @@
 #define DEFAULT_SWIPE4_DN_BTN 0
 #define DEFAULT_SWIPE4_LT_BTN 0
 #define DEFAULT_SWIPE4_RT_BTN 0
+#define DEFAULT_SWIPE_DRAG 0
 #define DEFAULT_SCALE_DIST 150
 #define DEFAULT_SCALE_UP_BTN 12
 #define DEFAULT_SCALE_DN_BTN 13
@@ -146,6 +147,7 @@ struct MConfig {
 		int lt_btn;		// Button to use for swipe left. >= 0, 0 is none
 		int rt_btn;		// Button to use for swipe right. >= 0, 0 is none
 		int hold;		// How long to "hold down" the emulated button for swipe up gesture. > 0
+		int is_drag;		// should this gesture emit movement events? 0 or 1
 	} scroll, swipe3, swipe4/*, swipe5*/;
 	int scale_dist;			// Distance needed to trigger a button. >= 0, 0 disables
 	int scale_up_btn;		// Button to use for scale up. >= 0, 0 is none
