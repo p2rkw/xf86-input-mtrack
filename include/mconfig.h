@@ -142,12 +142,12 @@ struct MConfig {
 	int gesture_wait;		// How long after a gesture to wait before movement is allowed. >= 0
 	struct MConfigSwipe{
 		int dist;		// Distance needed to trigger a button. >= 0, 0 disables
+		int hold;		// How long to "hold down" the emulated button for swipe gesture. > 0
+		int drag_sens;		// Should this gesture emit movement events? 0 disables movement, 1000 set speed same as during normal movement
 		int up_btn;		// Button to use for swipe up. >= 0, 0 is none
 		int dn_btn;		// Button to use for swipe down. >= 0, 0 is none
 		int lt_btn;		// Button to use for swipe left. >= 0, 0 is none
 		int rt_btn;		// Button to use for swipe right. >= 0, 0 is none
-		int hold;		// How long to "hold down" the emulated button for swipe up gesture. > 0
-		int drag_sens;		// should this gesture emit movement events? 0 or 1
 	} scroll, swipe3, swipe4/*, swipe5*/;
 	int scale_dist;			// Distance needed to trigger a button. >= 0, 0 disables
 	int scale_up_btn;		// Button to use for scale up. >= 0, 0 is none

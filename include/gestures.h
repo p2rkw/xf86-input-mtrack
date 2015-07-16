@@ -65,9 +65,12 @@ struct Gestures {
 	/* Internal state tracking. Not for direct access.
 	 */
 	int button_emulate;
+	/* Invalid button_delayed means that there's no delayed button.
+	 */
 	int button_delayed;
+	/* If equals to epoch time then button is delayed till gesture end.
+	 */
 	struct timeval button_delayed_time;
-	struct timeval button_delayed_delta;
 
 	int tap_touching;
 	int tap_released;

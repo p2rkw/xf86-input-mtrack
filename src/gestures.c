@@ -50,7 +50,7 @@ static void trigger_button_down(struct Gestures* gs, int button)
 	struct timeval epoch;
 	timerclear(&epoch);
 
-	if (IS_VALID_BUTTON(button) && (button != gs->button_delayed || timercmp(&gs->button_delayed_time, &epoch, ==))) {
+	if (IS_VALID_BUTTON(button) && (button != gs->button_delayed || !IS_VALID_BUTTON(gs->button_delayed))) {
 		SETBIT(gs->buttons, button);
 #ifdef DEBUG_GESTURES
 		xf86Msg(X_INFO, "trigger_button_down: %d down\n", button);
@@ -74,28 +74,52 @@ static void trigger_button_emulation(struct Gestures* gs, int button)
 	}
 }
 
+/*
+ * If trigger_up_time is NULL or epoch time it will set timer to infinity - button up will
+ * be send when user finish gesture.
+ */
 static void trigger_button_click(struct Gestures* gs,
 			int button, struct timeval* trigger_up_time)
 {
+#ifdef DEBUG_GESTURES
+	struct timeval delta;
+#endif
+
 	if (!IS_VALID_BUTTON(button))
 		return;
-	if (isepochtime(&gs->button_delayed_time)) {
+
+	if (!IS_VALID_BUTTON(gs->button_delayed)) {
 		trigger_button_down(gs, button);
 		gs->button_delayed = button;
-		if(trigger_up_time == NULL || isepochtime(trigger_up_time))
-			timercp(&gs->button_delayed_time, &gs->time);
+		if(trigger_up_time == NULL)
+			timerclear(&gs->button_delayed_time);		// "infinite timer", wait for gesture end
 		else
-			timercp(&gs->button_delayed_time, trigger_up_time);
+			timercp(&gs->button_delayed_time, trigger_up_time);	// may be also "infinite"
 
-		timersub(&gs->button_delayed_time, &gs->time, &gs->button_delayed_delta);
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_button_click: %d placed in delayed mode; delta: %d ms\n", button, timertoms(&gs->button_delayed_delta));
+		timersub(&gs->button_delayed_time, &gs->time, &delta);
+		xf86Msg(X_INFO, "trigger_button_click: %d placed in delayed mode; delta: %d ms\n", button, timertoms(&delta));
 #endif
 	}
 #ifdef DEBUG_GESTURES
 	else
 		xf86Msg(X_INFO, "trigger_button_click: %d ignored, in delayed mode\n", button);
 #endif
+}
+
+static void trigger_delayed_button_unsafe(struct Gestures* gs)
+{
+	int button;
+
+	// clear button before timer (unless compiler decide otherwise)
+	button = gs->button_delayed;
+
+	gs->button_delayed = -1;
+	timerclear(&gs->button_delayed_time);
+#ifdef DEBUG_GESTURES
+	xf86Msg(X_INFO, "trigger_delayed_button: %d up, timer expired\n", button);
+#endif
+	trigger_button_up(gs, button);
 }
 
 static void trigger_drag_ready(struct Gestures* gs,
@@ -411,103 +435,106 @@ static void trigger_move(struct Gestures* gs,
 	}
 }
 
-static void trigger_swipe_button(struct Gestures* gs, const struct MConfigSwipe* cfg_swipe,
-	int dir, double dist){
-	struct timeval tv_tmp;
-	if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
-		timeraddms(&gs->time, cfg_swipe->hold, &tv_tmp);
-		gs->move_dist = MODVAL(gs->move_dist, cfg_swipe->dist);
-		if (dir == TR_DIR_UP)
-			trigger_button_click(gs, cfg_swipe->up_btn - 1, &tv_tmp);
-		else if (dir == TR_DIR_DN)
-			trigger_button_click(gs, cfg_swipe->dn_btn - 1, &tv_tmp);
-		else if (dir == TR_DIR_LT)
-			trigger_button_click(gs, cfg_swipe->lt_btn - 1, &tv_tmp);
-		else if (dir == TR_DIR_RT)
-			trigger_button_click(gs, cfg_swipe->rt_btn - 1, &tv_tmp);
-	}
-#ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
-				dist, dir, gs->move_dist, cfg_swipe->dist, gs->move_speed);
-#endif
-}
-
 #define TOUCHES_MAX 5
 static int get_swipe_dir_n(const struct Touch* touches[TOUCHES_MAX], int count)
 {
-    if(count > TOUCHES_MAX)
-        return TR_NONE;
-    double angles[TOUCHES_MAX];
-    int i;
-    for (i = 0; i < count; i++) {
-        angles[i] = touches[i]->direction;
-    }
-	 return trig_generalize(trig_angles_avg(angles, count));
+	if(count > TOUCHES_MAX)
+		return TR_NONE;
+	double angles[TOUCHES_MAX];
+	int i;
+	for (i = 0; i < count; i++) {
+		angles[i] = touches[i]->direction;
+	}
+	return trig_generalize(trig_angles_avg(angles, count));
 }
 
 static void get_swipe_avg_xy(const struct Touch* touches[TOUCHES_MAX], int count, double* out_x, double* out_y){
-    double x, y;
-    x = y = 0.0;
-    int i;
-    for (i = 0; i < count; ++i) {
-        x += touches[i]->dx;
-        y += touches[i]->dy;
-    }
-    *out_x = x/(double)count;
-    *out_y = y/(double)count;
+	double x, y;
+	x = y = 0.0;
+	int i;
+	for (i = 0; i < count; ++i) {
+		x += touches[i]->dx;
+		y += touches[i]->dy;
+	}
+	*out_x = x/(double)count;
+	*out_y = y/(double)count;
 }
 #undef TOUCHES_MAX
 
+/* Return:
+ *  0 - it wasn't swipe
+ *  other value - it was swipe
+ */
 static int trigger_swipe(struct Gestures* gs,
 			const struct MConfig* cfg, const struct Touch* touches[4], int touches_count)
 {
-    int move_type_to_trigger, dir;
-    double avg_move_x, avg_move_y, dist;
-    const struct MConfigSwipe* swipe_cfg;
+	int move_type_to_trigger, dir;
+	double avg_move_x, avg_move_y, dist;
+	const struct MConfigSwipe* cfg_swipe;
+	struct timeval tv_tmp;
 
-    dir = get_swipe_dir_n(touches, touches_count);
-    if(dir == TR_NONE)
-        return 0;
-    switch(touches_count){
-    case 2:
-        swipe_cfg = &cfg->scroll;
-        move_type_to_trigger = GS_SCROLL;
-        break;
-    case 3:
-        swipe_cfg = &cfg->swipe3;
-        move_type_to_trigger = GS_SWIPE3;
-        break;
-    case 4:
-        swipe_cfg = &cfg->swipe4;
-        move_type_to_trigger = GS_SWIPE4;
-        break;
-    default:
-        return 2;
-    }
+	dir = get_swipe_dir_n(touches, touches_count);
+	if(dir == TR_NONE)
+		return 0;
+
+	switch(touches_count){
+	case 2:
+		cfg_swipe = &cfg->scroll;
+		move_type_to_trigger = GS_SCROLL;
+		break;
+	case 3:
+		cfg_swipe = &cfg->swipe3;
+		move_type_to_trigger = GS_SWIPE3;
+		break;
+	case 4:
+		cfg_swipe = &cfg->swipe4;
+		move_type_to_trigger = GS_SWIPE4;
+		break;
+	default:
+			return 2;
+	}
 
 	if (gs->move_type == move_type_to_trigger || !timercmp(&gs->time, &gs->move_wait, <)) {
 		trigger_drag_stop(gs, 1);
 		get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
-      // hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
-      dist = hypot(avg_move_x, avg_move_y);
-      if(swipe_cfg->drag_sens){
-            gs->move_dx = (int)(cfg->sensitivity * avg_move_x * swipe_cfg->drag_sens * 0.001);
-            gs->move_dy = (int)(cfg->sensitivity * avg_move_y * swipe_cfg->drag_sens * 0.001);
-      } else{
-            gs->move_dx = 0;
-            gs->move_dy = 0;
-      }
-        if (gs->move_type != move_type_to_trigger || gs->move_dir != dir)
-            gs->move_dist = 0;
+		// hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
+		dist = hypot(avg_move_x, avg_move_y);
+		if(cfg_swipe->drag_sens){
+			gs->move_dx = (int)(cfg->sensitivity * avg_move_x * cfg_swipe->drag_sens * 0.001);
+			gs->move_dy = (int)(cfg->sensitivity * avg_move_y * cfg_swipe->drag_sens * 0.001);
+		} else{
+			gs->move_dx = 0;
+			gs->move_dy = 0;
+		}
+		if (gs->move_type != move_type_to_trigger || gs->move_dir != dir)
+			gs->move_dist = 0;
 		gs->move_type = move_type_to_trigger;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
 		gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 
-		trigger_swipe_button(gs, swipe_cfg, dir, dist);
+		if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
+			if(cfg_swipe->hold != 0)
+				timeraddms(&gs->time, cfg_swipe->hold, &tv_tmp);
+			else
+				timerclear(&tv_tmp); // wait for gesture end
+			gs->move_dist = MODVAL(gs->move_dist, cfg_swipe->dist);
+			if (dir == TR_DIR_UP)
+				trigger_button_click(gs, cfg_swipe->up_btn - 1, &tv_tmp);
+			else if (dir == TR_DIR_DN)
+				trigger_button_click(gs, cfg_swipe->dn_btn - 1, &tv_tmp);
+			else if (dir == TR_DIR_LT)
+				trigger_button_click(gs, cfg_swipe->lt_btn - 1, &tv_tmp);
+			else if (dir == TR_DIR_RT)
+				trigger_button_click(gs, cfg_swipe->rt_btn - 1, &tv_tmp);
+		}
+#ifdef DEBUG_GESTURES
+			xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
+				dist, dir, gs->move_dist, cfg_swipe->dist, gs->move_speed);
+#endif
 	}
-    return 1;
+	return 1;
 }
 
 static void trigger_scale(struct Gestures* gs,
@@ -723,25 +750,27 @@ static void dragging_update(struct Gestures* gs)
 	}
 }
 
+static int is_timer_infinite(struct Gestures* gs){
+	return isepochtime(&gs->button_delayed_time);
+}
+
 static void delayed_update(struct Gestures* gs)
 {
 	// if there's no delayed button - return
-	if(isepochtime(&gs->button_delayed_time))
+	if(!IS_VALID_BUTTON(gs->button_delayed))
 		return;
 
-	if (timercmp(&gs->time, &gs->button_delayed_time, >=)) {
+	if (!is_timer_infinite(gs) && timercmp(&gs->time, &gs->button_delayed_time, >=)) {
 #ifdef DEBUG_GESTURES
 		xf86Msg(X_INFO, "delayed_update: %d delay expired, triggering up\n", gs->button_delayed);
 #endif
-		trigger_button_up(gs, gs->button_delayed);
-		gs->button_delayed = 0;
-		timerclear(&gs->button_delayed_time);
-		timerclear(&gs->button_delayed_delta);
+		trigger_delayed_button_unsafe(gs);
 	}
 	else {
-		timersub(&gs->button_delayed_time, &gs->time, &gs->button_delayed_delta);
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "delayed_update: %d still waiting, new delta %d ms\n", gs->button_delayed, timertoms(&gs->button_delayed_delta));
+		struct timeval delta;
+		timersub(&gs->button_delayed_time, &gs->time, &delta);
+		xf86Msg(X_INFO, "delayed_update: %d still waiting, new delta %d ms\n", gs->button_delayed, timertoms(&delta));
 #endif
 	}
 }
@@ -773,19 +802,19 @@ void gestures_extract(struct MTouch* mt)
  *  - 0 - no delay to handle, don't install timer, do nothing
  *  - 1 - only install timer
  *  - 2 - state was changed, so caller have to cancel timer and handle state change
+ *        by calling TimerCancel() and handle_gestures()
  */
 int gestures_delayed(struct MTouch* mt)
 {
 	struct Gestures* gs = &mt->gs;
 	struct MTState* ms = &mt->state;
-	struct timeval now, epoch;
+	struct timeval now, delta;
 	int i, taps_released;
 
-	timerclear(&epoch);
 	taps_released = 0;
 
 	// if there's no delayed button - return
-	if(timercmp(&gs->button_delayed_time, &epoch, ==))
+	if(!IS_VALID_BUTTON(gs->button_delayed))
 		return 0;
 
 	// count released fingers
@@ -796,37 +825,35 @@ int gestures_delayed(struct MTouch* mt)
 
 	// if one of fingers were released it means that gesture was ended so
 	// send "button up" event immediately without checking for delivery time
-	if(taps_released == 0){
-		microtime(&now);
-		timersub(&now, &mt->gs.time, &mt->gs.dt);
-		timercp(&mt->gs.time, &now);
-
-		if(timercmp(&gs->button_delayed_time, &now, >)){
-		   // update delta time
-		   timersub(&gs->button_delayed_time, &now, &gs->button_delayed_delta);
-		   // That second check may seem unnecessary, but it is not.
-		   // Even if button delayed time is > than now time, timertoms may still return 0
-		   // because it truncates time to miliseconds. It's important because truncated time
-		   // is used to setup timer.
-		   if(timertoms(&gs->button_delayed_delta) > 1){
-		#ifdef DEBUG_GESTURES
-			  xf86Msg(X_INFO, "gestures_delayed: %d delayed, new delta: %d ms\n", gs->button_delayed, timertoms(&gs->button_delayed_delta));
-		#endif
-			  return 1; // install timer
-		   }
-		   // else execute now
-		}
+	if(taps_released != 0){
+		trigger_delayed_button_unsafe(gs);
+		gs->move_dx = gs->move_dy = 0;
+		return 2;
 	}
-	timerclear(&gs->button_delayed_time);
-	timerclear(&gs->button_delayed_delta);
-#ifdef DEBUG_GESTURES
-	xf86Msg(X_INFO, "gestures_delayed: %d up, timer expired\n", gs->button_delayed);
-#endif
-	trigger_button_up(gs, gs->button_delayed);
-	gs->move_dx = 0;
-	gs->move_dy = 0;
-	gs->button_delayed = 0;
 
-	return 2; // caller scholud call TimerCancel() and handle_gestures()
+	if(is_timer_infinite(gs))
+		return 0;
+
+	microtime(&now);
+	timersub(&now, &mt->gs.time, &mt->gs.dt);
+	timercp(&mt->gs.time, &now);
+
+	if(timercmp(&gs->button_delayed_time, &now, >)){
+		 timersub(&gs->button_delayed_time, &now, &delta);
+		 // That second check may seem unnecessary, but it is not.
+		 // Even if button delayed time is > than now time, timertoms may still return 0
+		 // because it truncates time to miliseconds. It's important because truncated time
+		 // is used to setup timer.
+		 if(timertoms(&delta) > 1){
+#ifdef DEBUG_GESTURES
+			xf86Msg(X_INFO, "gestures_delayed: %d delayed, new delta: %d ms\n", gs->button_delayed, timertoms(&delta));
+#endif
+			return 1; // install timer
+		 }
+	}
+
+	trigger_delayed_button_unsafe(gs);
+	gs->move_dx = gs->move_dy = 0;
+	return 2;
 }
 

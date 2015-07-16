@@ -39,6 +39,7 @@ struct MTouch {
 	struct MTState state;
 	struct MConfig cfg;
 	struct Gestures gs;
+	int is_timer_installed;   // to avoid setting timer multiple times
 	OsTimerPtr timer;
 };
 

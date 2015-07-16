@@ -158,7 +158,8 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
 	TimerInit();
-	mt->timer = NULL; /* allocated later in device_on */
+	mt->timer = NULL; /* allocated later */
+	mt->is_timer_installed = 0;
 	return Success;
 }
 
@@ -175,6 +176,8 @@ static int device_on(LocalDevicePtr local)
 		return !Success;
 	}
 	xf86AddEnabledDevice(local);
+	TimerFree(mt->timer);	// release any existing timer
+	mt->is_timer_installed = 0;
 	return Success;
 }
 
@@ -185,6 +188,8 @@ static int device_off(LocalDevicePtr local)
 	if (mtouch_close(mt))
 		xf86Msg(X_WARNING, "mtrack: cannot ungrab device\n");
 	xf86CloseSerial(local->fd);
+	TimerFree(mt->timer);
+	mt->is_timer_installed = 0;
 	return Success;
 }
 
@@ -231,19 +236,26 @@ static void handle_gestures(LocalDevicePtr local,
 static CARD32 check_resolve_delayed(OsTimerPtr timer, CARD32 time, void *arg){
 	LocalDevicePtr local = arg;
 	struct MTouch *mt = local->private;
+	mstime_t delta_millis;
+	struct timeval delta;
+
 	// If it was to early to trigger delayed button, next timer will be set,
 	// but when called by timer such situation shouldn't take place.
 	switch (mtouch_delayed(mt)){
 	case 1:
-		mt->timer = TimerSet(mt->timer, 0, timertoms(&mt->gs.button_delayed_delta),
-                            check_resolve_delayed, local);
+		if(mt->is_timer_installed == 0){
+			mt->is_timer_installed = 1;
+			timersub(&mt->gs.button_delayed_time, &mt->gs.time, &delta);
+			delta_millis = timertoms(&delta);
+			mt->timer = TimerSet(mt->timer, 0, delta_millis, check_resolve_delayed, local);
+		}
 		break;
 	case 2:
 		TimerCancel(mt->timer);
+		mt->is_timer_installed = 0;
 		handle_gestures(local, &mt->gs);
 		break;
-	case 0:
-	default: break;
+	case 0: break;
 	}
 	return 0;
 }
