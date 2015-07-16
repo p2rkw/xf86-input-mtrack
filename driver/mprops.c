@@ -81,7 +81,8 @@ static void init_swipe_props(DeviceIntPtr dev, struct MPropsSwipe* props_swipe,
 	int ivals[MAX_INT_VALUES];
 	ivals[0] = cfg_swipe->dist;
 	ivals[1] = cfg_swipe->hold;
-	props_swipe->settings = atom_init_integer(dev, (char*)settings_prop_name, 2, ivals, 32);
+	ivals[2] = cfg_swipe->is_drag;
+	props_swipe->settings = atom_init_integer(dev, (char*)settings_prop_name, 3, ivals, 32);
 
 	ivals[0] = cfg_swipe->up_btn;
 	ivals[1] = cfg_swipe->dn_btn;
@@ -213,7 +214,7 @@ static int set_swipe_properties(Atom property, BOOL checkonly, XIPropertyValuePt
 		if (!checkonly) {
 			cfg_swipe->dist = ivals32[0];
 			cfg_swipe->hold = ivals32[1];
-			//cfg_swipe->is_drag = ivals32[2];
+			cfg_swipe->is_drag = ivals32[2];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set swipe settings: dist: %d hold: %d\n",
 				cfg_swipe->dist, cfg_swipe->hold);

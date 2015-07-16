@@ -458,15 +458,6 @@ static void get_swipe_avg_xy(const struct Touch* touches[TOUCHES_MAX], int count
 }
 #undef TOUCHES_MAX
 
-static
-int get_swipe_dir(const struct Touch* t1,
-			const struct Touch* t2,
-			const struct Touch* t3);
-
-static
-int get_scroll_dir(const struct Touch* t1,
-			const struct Touch* t2);
-
 static int trigger_swipe(struct Gestures* gs,
 			const struct MConfig* cfg, const struct Touch* touches[4], int touches_count)
 {
@@ -474,24 +465,18 @@ static int trigger_swipe(struct Gestures* gs,
     double avg_move_x, avg_move_y, dist;
     const struct MConfigSwipe* swipe_cfg;
 
-    ///dir = get_swipe_dir_n(touches, touches_count);
-
+    if((dir = get_swipe_dir_n(touches, touches_count)) == TR_NONE)
+        return 0;
 
 	if (gs->move_type == move_type_to_trigger || !timercmp(&gs->time, &gs->move_wait, <)) {
 		switch(touches_count){
 		case 2:
           swipe_cfg = &cfg->scroll;
           move_type_to_trigger = GS_SCROLL;
-          dist = hypot(touches[0]->dx + touches[1]->dx,
-                       touches[0]->dy + touches[1]->dy)/2;
-          dir = get_scroll_dir(touches[0], touches[1]);
           break;
 		case 3:
           swipe_cfg = &cfg->swipe3;
           move_type_to_trigger = GS_SWIPE3;
-          dist = hypot(touches[0]->dx + touches[1]->dx + touches[2]->dx,
-                       touches[0]->dy + touches[1]->dy + touches[2]->dy)/3;
-          dir = get_swipe_dir(touches[0], touches[1], touches[2]);
           break;
 		case 4:
 			swipe_cfg = &cfg->swipe4;
@@ -500,15 +485,13 @@ static int trigger_swipe(struct Gestures* gs,
       default:
           return 2;
 		}
-      if(dir == TR_NONE)
-        return 0;
 		trigger_drag_stop(gs, 1);
-		//get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
+		get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
       // hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
-      //dist = hypot(avg_move_x, avg_move_y);
-      if(1 /*swipe_cfg->is_drag*/){
-            gs->move_dx = (int)(cfg->sensitivity * avg_move_x /** swipe_cfg->is_drag*/ * 0.001);
-            gs->move_dy = (int)(cfg->sensitivity * avg_move_y /** swipe_cfg->is_drag*/ * 0.001);
+      dist = hypot(avg_move_x, avg_move_y);
+      if(swipe_cfg->is_drag){
+            gs->move_dx = (int)(cfg->sensitivity * avg_move_x * swipe_cfg->is_drag * 0.001);
+            gs->move_dy = (int)(cfg->sensitivity * avg_move_y * swipe_cfg->is_drag * 0.001);
       } else{
             gs->move_dx = 0;
             gs->move_dy = 0;
@@ -599,7 +582,7 @@ static void trigger_reset(struct Gestures* gs)
 	timerclear(&gs->move_wait);
 }
 
-/*static */int get_scroll_dir(const struct Touch* t1,
+static int get_scroll_dir(const struct Touch* t1,
 			const struct Touch* t2)
 {
 	if (trig_angles_acute(t1->direction, t2->direction) < 2.0) {
@@ -639,7 +622,7 @@ static int get_scale_dir(const struct Touch* t1,
 	return TR_NONE;
 }
 
-/*static */int get_swipe_dir(const struct Touch* t1,
+static int get_swipe_dir(const struct Touch* t1,
 			const struct Touch* t2,
 			const struct Touch* t3)
 {
