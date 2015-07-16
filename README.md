@@ -189,6 +189,17 @@ gestures. Integer value representing milliseconds. Defaults to 100.
 For two finger scrolling. How far you must move your fingers before a button
 click is triggered. Integer value. Defaults to 150.
 
+**ScrollClickTime** -
+For two finger scrolling. How long button triggered by scrolling 
+will be hold down. A value of 0 will hold button down till end of gesture.
+Integer value representing milliseconds. Defaults to 20.
+
+**ScrollSensitivity** -
+For two finger scrolling. Sensitivity (movement speed) of pointer during two 
+finger scrolling. A value of 0 disables pointer movement during gesture.
+Integer value expressed as parts per thousand of normal sensivity.
+A value of 1000 results with normal movement speed. Defaults to 0.
+
 **ScrollUpButton** - 
 For two finger scrolling. The button that is triggered by scrolling up. Integer
 value. A value of 0 disables scrolling up. Defaults to 4.
@@ -205,13 +216,19 @@ Integer value. A value of 0 disables scrolling left. Defaults to 6.
 For two finger scrolling. The button that is triggered by scrolling right.
 Integer value. A value of 0 disables scrolling right. Defaults to 7.
 
-**ScrollClickTime** -
-For two finger scrolling. How long button triggered by scrolling 
-will be hold down. Integer value representing milliseconds. Defaults to 20.
-
 **SwipeDistance** - 
 For three finger swiping. How far you must move your fingers before a button
 click is triggered. Integer value. Defaults to 700.
+
+**SwipeClickTime** -
+For three finger swiping. How long button triggered by swiping
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**SwipeSensitivity** -
+For three finger scrolling. Sensitivity (movement speed) of pointer during three 
+finger scrolling. A value of 0 disables pointer movement during gesture.
+Integer value expressed as parts per thousand of normal sensivity.
+A value of 1000 results with normal movement speed. Defaults to 0.
 
 **SwipeUpButton** - 
 For three finger swiping. The button that is triggered by swiping up. Integer
@@ -229,13 +246,19 @@ value. A value of 0 disables swiping left. Defaults to 10.
 For three finger swiping. The button that is triggered by swiping right. Integer
 value. A value of 0 disables swiping right. Defaults to 11.
 
-**SwipeClickTime** -
-For three finger swiping. How long button triggered by swiping
-will be hold down. Integer value representing milliseconds. Defaults to 300.
-
 **Swipe4Distance** - 
 For four finger swiping. How far you must move your fingers before a button
 click is triggered. Integer value. Defaults to 700.
+
+**Swipe4ClickTime** -
+For four finger swiping. How long button triggered by swiping
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**Swipe4Sensitivity** -
+For four finger scrolling. Sensitivity (movement speed) of pointer during four 
+finger scrolling. A value of 0 disables pointer movement during gesture.
+Integer value expressed as parts per thousand of normal sensivity.
+A value of 1000 results with normal movement speed. Defaults to 0.
 
 **Swipe4UpButton** - 
 For four finger swiping. The button that is triggered by swiping up. Integer
@@ -252,10 +275,6 @@ value. A value of 0 disables swiping left. Defaults to 10.
 **Swipe4RightButton** - 
 For four finger swiping. The button that is triggered by swiping right. Integer
 value. A value of 0 disables swiping right. Defaults to 11.
-
-**Swipe4ClickTime** -
-For four finger swiping. How long button triggered by swiping
-will be hold down. Integer value representing milliseconds. Defaults to 300.
 
 **ScaleDistance** - 
 For pinch scaling. How far you must move your fingers before a button click is

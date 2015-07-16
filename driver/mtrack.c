@@ -270,7 +270,7 @@ static void read_input(LocalDevicePtr local)
 	struct MTouch *mt = local->private;
 	while (mtouch_read(mt) > 0)
 		handle_gestures(local, &mt->gs);
-	check_resolve_delayed(mt->timer, 0, local);
+	check_resolve_delayed(NULL, 0, local);
 }
 
 static Bool device_control(DeviceIntPtr dev, int mode)

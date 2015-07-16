@@ -411,24 +411,24 @@ static void trigger_move(struct Gestures* gs,
 	}
 }
 
-static void trigger_swipe_button(struct Gestures* gs, const struct MConfigSwipe* swipeCfg,
+static void trigger_swipe_button(struct Gestures* gs, const struct MConfigSwipe* cfg_swipe,
 	int dir, double dist){
 	struct timeval tv_tmp;
-	if (swipeCfg->dist > 0 && gs->move_dist >= swipeCfg->dist) {
-		timeraddms(&gs->time, swipeCfg->hold, &tv_tmp);
-		gs->move_dist = MODVAL(gs->move_dist, swipeCfg->dist);
+	if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
+		timeraddms(&gs->time, cfg_swipe->hold, &tv_tmp);
+		gs->move_dist = MODVAL(gs->move_dist, cfg_swipe->dist);
 		if (dir == TR_DIR_UP)
-			trigger_button_click(gs, swipeCfg->up_btn - 1, &tv_tmp);
+			trigger_button_click(gs, cfg_swipe->up_btn - 1, &tv_tmp);
 		else if (dir == TR_DIR_DN)
-			trigger_button_click(gs, swipeCfg->dn_btn - 1, &tv_tmp);
+			trigger_button_click(gs, cfg_swipe->dn_btn - 1, &tv_tmp);
 		else if (dir == TR_DIR_LT)
-			trigger_button_click(gs, swipeCfg->lt_btn - 1, &tv_tmp);
+			trigger_button_click(gs, cfg_swipe->lt_btn - 1, &tv_tmp);
 		else if (dir == TR_DIR_RT)
-			trigger_button_click(gs, swipeCfg->rt_btn - 1, &tv_tmp);
+			trigger_button_click(gs, cfg_swipe->rt_btn - 1, &tv_tmp);
 	}
 #ifdef DEBUG_GESTURES
 			xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
-				dist, dir, gs->move_dist, swipeCfg->dist, gs->move_speed);
+				dist, dir, gs->move_dist, cfg_swipe->dist, gs->move_speed);
 #endif
 }
 
@@ -465,33 +465,34 @@ static int trigger_swipe(struct Gestures* gs,
     double avg_move_x, avg_move_y, dist;
     const struct MConfigSwipe* swipe_cfg;
 
-    if((dir = get_swipe_dir_n(touches, touches_count)) == TR_NONE)
+    dir = get_swipe_dir_n(touches, touches_count);
+    if(dir == TR_NONE)
         return 0;
+    switch(touches_count){
+    case 2:
+        swipe_cfg = &cfg->scroll;
+        move_type_to_trigger = GS_SCROLL;
+        break;
+    case 3:
+        swipe_cfg = &cfg->swipe3;
+        move_type_to_trigger = GS_SWIPE3;
+        break;
+    case 4:
+        swipe_cfg = &cfg->swipe4;
+        move_type_to_trigger = GS_SWIPE4;
+        break;
+    default:
+        return 2;
+    }
 
 	if (gs->move_type == move_type_to_trigger || !timercmp(&gs->time, &gs->move_wait, <)) {
-		switch(touches_count){
-		case 2:
-          swipe_cfg = &cfg->scroll;
-          move_type_to_trigger = GS_SCROLL;
-          break;
-		case 3:
-          swipe_cfg = &cfg->swipe3;
-          move_type_to_trigger = GS_SWIPE3;
-          break;
-		case 4:
-			swipe_cfg = &cfg->swipe4;
-          move_type_to_trigger = GS_SWIPE4;
-          break;
-      default:
-          return 2;
-		}
 		trigger_drag_stop(gs, 1);
 		get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
       // hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
       dist = hypot(avg_move_x, avg_move_y);
-      if(swipe_cfg->is_drag){
-            gs->move_dx = (int)(cfg->sensitivity * avg_move_x * swipe_cfg->is_drag * 0.001);
-            gs->move_dy = (int)(cfg->sensitivity * avg_move_y * swipe_cfg->is_drag * 0.001);
+      if(swipe_cfg->drag_sens){
+            gs->move_dx = (int)(cfg->sensitivity * avg_move_x * swipe_cfg->drag_sens * 0.001);
+            gs->move_dy = (int)(cfg->sensitivity * avg_move_y * swipe_cfg->drag_sens * 0.001);
       } else{
             gs->move_dx = 0;
             gs->move_dy = 0;
