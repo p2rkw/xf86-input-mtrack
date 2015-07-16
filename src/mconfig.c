@@ -165,7 +165,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->scroll.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "ScrollRightButton", DEFAULT_SCROLL_RT_BTN), 0, 32);
 	cfg->swipe3.dist = MAXVAL(xf86SetIntOption(opts, "SwipeDistance", DEFAULT_SWIPE_DIST), 1);
 	cfg->swipe3.hold = MAXVAL(xf86SetIntOption(opts, "SwipeClickTime", DEFAULT_SWIPE_HOLD), 0);
-   	cfg->swipe3.drag_sens = MAXVAL(xf86SetIntOption(opts, "SwipeSensitivity", DEFAULT_SWIPE_SENS), 0);
+	cfg->swipe3.drag_sens = MAXVAL(xf86SetIntOption(opts, "SwipeSensitivity", DEFAULT_SWIPE_SENS), 0);
 	cfg->swipe3.up_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeUpButton", DEFAULT_SWIPE_UP_BTN), 0, 32);
 	cfg->swipe3.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeDownButton", DEFAULT_SWIPE_DN_BTN), 0, 32);
 	cfg->swipe3.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeLeftButton", DEFAULT_SWIPE_LT_BTN), 0, 32);

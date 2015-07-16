@@ -116,7 +116,8 @@ Button emulation depends on this value being correct. Boolean value. Defaults
 to true.
 
 **ButtonMoveEmulate**
-Whether or not to count the moving finger when emulating button clicks. Useful to disable if you use two hands on trackpad. Boolean value. Defaults to true.
+Whether or not to count the moving finger when emulating button clicks.
+Useful to disable if you use two hands on trackpad. Boolean value. Defaults to true.
 
 **ButtonZonesEnable** -
 Whether or not to enable button zones. If button zones are enabled then the
@@ -325,6 +326,24 @@ Whether or not to invert the X axis. Boolean value. Defaults to false.
 
 **AxisYInvert**
 Whether or not to invert the Y axis. Boolean value. Defaults to false.
+
+Tips
+-------------
+##### Swipe to drag
+To setup swipe to drag functionality you have to choose which swipe gesture (Scroll, Swipe, Swipe4)
+will be used for dragging.
+Example configuration for three finger drag:
+```
+    Option "SwipeDistance" "1"
+    Option "SwipeLeftButton" "1"
+    Option "SwipeRightButton" "1"
+    Option "SwipeUpButton" "1"
+    Option "SwipeDownButton" "1"
+    Option "SwipeClickTime" "0"
+    Option "SwipeSensitivity" "1000"
+```
+This will enable draging with three fingers. Change sensitivity for faster/slower movements.
+Scroll, and Swipe4 are also supported.
 
 [1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt     "Kernel Multitouch Protocol"
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"
