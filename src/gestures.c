@@ -31,6 +31,8 @@
 
 #define IS_VALID_BUTTON(x) (x >= 0 && x <= 31)
 
+#define TOUCHES_MAX 4
+
 static void trigger_button_up(struct Gestures* gs, int button)
 {
 	if (IS_VALID_BUTTON(button)) {
@@ -74,6 +76,21 @@ static void trigger_button_emulation(struct Gestures* gs, int button)
 	}
 }
 
+static void trigger_delayed_button_unsafe(struct Gestures* gs)
+{
+	int button;
+
+	// clear button before timer (unless compiler decide otherwise)
+	button = gs->button_delayed;
+
+	gs->button_delayed = -1;
+	timerclear(&gs->button_delayed_time);
+#ifdef DEBUG_GESTURES
+	xf86Msg(X_INFO, "trigger_delayed_button: %d up, timer expired\n", button);
+#endif
+	trigger_button_up(gs, button);
+}
+
 /*
  * If trigger_up_time is NULL or epoch time it will set timer to infinity - button up will
  * be send when user finish gesture.
@@ -105,21 +122,6 @@ static void trigger_button_click(struct Gestures* gs,
 	else
 		xf86Msg(X_INFO, "trigger_button_click: %d ignored, in delayed mode\n", button);
 #endif
-}
-
-static void trigger_delayed_button_unsafe(struct Gestures* gs)
-{
-	int button;
-
-	// clear button before timer (unless compiler decide otherwise)
-	button = gs->button_delayed;
-
-	gs->button_delayed = -1;
-	timerclear(&gs->button_delayed_time);
-#ifdef DEBUG_GESTURES
-	xf86Msg(X_INFO, "trigger_delayed_button: %d up, timer expired\n", button);
-#endif
-	trigger_button_up(gs, button);
 }
 
 static void trigger_drag_ready(struct Gestures* gs,
@@ -435,7 +437,18 @@ static void trigger_move(struct Gestures* gs,
 	}
 }
 
-#define TOUCHES_MAX 5
+static int get_scroll_dir(const struct Touch* t1,
+			const struct Touch* t2)
+{
+	if (trig_angles_acute(t1->direction, t2->direction) < 2.0) {
+		double angles[2];
+		angles[0] = t1->direction;
+		angles[1] = t2->direction;
+		return trig_generalize(trig_angles_avg(angles, 2));
+	}
+	return TR_NONE;
+}
+
 static int get_swipe_dir_n(const struct Touch* touches[TOUCHES_MAX], int count)
 {
 	if(count > TOUCHES_MAX)
@@ -459,7 +472,6 @@ static void get_swipe_avg_xy(const struct Touch* touches[TOUCHES_MAX], int count
 	*out_x = x/(double)count;
 	*out_y = y/(double)count;
 }
-#undef TOUCHES_MAX
 
 /* Return:
  *  0 - it wasn't swipe
@@ -473,28 +485,30 @@ static int trigger_swipe(struct Gestures* gs,
 	const struct MConfigSwipe* cfg_swipe;
 	struct timeval tv_tmp;
 
-	dir = get_swipe_dir_n(touches, touches_count);
-	if(dir == TR_NONE)
-		return 0;
-
 	switch(touches_count){
 	case 2:
 		cfg_swipe = &cfg->scroll;
 		move_type_to_trigger = GS_SCROLL;
+		dir = get_scroll_dir(touches[0], touches[1]);
 		break;
 	case 3:
 		cfg_swipe = &cfg->swipe3;
 		move_type_to_trigger = GS_SWIPE3;
+		dir = get_swipe_dir_n(touches, touches_count);
 		break;
 	case 4:
 		cfg_swipe = &cfg->swipe4;
 		move_type_to_trigger = GS_SWIPE4;
+		dir = get_swipe_dir_n(touches, touches_count);
 		break;
 	default:
 			return 2;
 	}
 
-	if (gs->move_type == move_type_to_trigger || !timercmp(&gs->time, &gs->move_wait, <)) {
+	if(dir == TR_NONE)
+		return 0;
+
+	if (gs->move_type == move_type_to_trigger || timercmp(&gs->time, &gs->move_wait, >=)) {
 		trigger_drag_stop(gs, 1);
 		get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
 		// hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
@@ -506,7 +520,11 @@ static int trigger_swipe(struct Gestures* gs,
 			gs->move_dx = 0;
 			gs->move_dy = 0;
 		}
-		if (gs->move_type != move_type_to_trigger || gs->move_dir != dir)
+		if (gs->move_type != move_type_to_trigger){
+			trigger_delayed_button_unsafe(gs);
+			gs->move_dist = 0;
+		}
+		else if (gs->move_dir != dir)
 			gs->move_dist = 0;
 		gs->move_type = move_type_to_trigger;
 		gs->move_dist += (int)ABSVAL(dist);
@@ -610,18 +628,6 @@ static void trigger_reset(struct Gestures* gs)
 	timerclear(&gs->move_wait);
 }
 
-static int get_scroll_dir(const struct Touch* t1,
-			const struct Touch* t2)
-{
-	if (trig_angles_acute(t1->direction, t2->direction) < 2.0) {
-		double angles[2];
-		angles[0] = t1->direction;
-		angles[1] = t2->direction;
-		return trig_generalize(trig_angles_avg(angles, 2));
-	}
-	return TR_NONE;
-}
-
 static int get_rotate_dir(const struct Touch* t1,
 			const struct Touch* t2)
 {
@@ -650,37 +656,13 @@ static int get_scale_dir(const struct Touch* t1,
 	return TR_NONE;
 }
 
-static int get_swipe_dir(const struct Touch* t1,
-			const struct Touch* t2,
-			const struct Touch* t3)
-{
-	double angles[3];
-	angles[0] = t1->direction;
-	angles[1] = t2->direction;
-	angles[2] = t3->direction;
-	return trig_generalize(trig_angles_avg(angles, 3));
-}
-
-static int get_swipe4_dir(const struct Touch* t1,
-			const struct Touch* t2,
-			const struct Touch* t3,
-			const struct Touch* t4)
-{
-	double angles[4];
-	angles[0] = t1->direction;
-	angles[1] = t2->direction;
-	angles[2] = t3->direction;
-	angles[3] = t4->direction;
-	return trig_generalize(trig_angles_avg(angles, 4));
-}
-
 static void moving_update(struct Gestures* gs,
 			const struct MConfig* cfg,
 			struct MTState* ms)
 {
 	int i, count, btn_count, dx, dy, dir;
 	double dist;
-	const struct Touch* touches[4];
+	const struct Touch* touches[TOUCHES_MAX];
 	count = btn_count = 0;
 	dx = dy = 0;
 	dir = 0;
@@ -699,7 +681,7 @@ static void moving_update(struct Gestures* gs,
 			dy += ms->touch[i].dy;
 		}
 		else if (!GETBIT(ms->touch[i].flags, GS_TAP)) {
-			if (count < 4)
+			if (count < TOUCHES_MAX)
 				touches[count++] = &ms->touch[i];
 		}
 	}
@@ -823,11 +805,12 @@ int gestures_delayed(struct MTouch* mt)
 			++taps_released;
 	}
 
-	// if one of fingers were released it means that gesture was ended so
+	// if one of fingers were released it means that gesture was finisfed so
 	// send "button up" event immediately without checking for delivery time
 	if(taps_released != 0){
 		trigger_delayed_button_unsafe(gs);
 		gs->move_dx = gs->move_dy = 0;
+		gs->move_type = GS_NONE;
 		return 2;
 	}
 
