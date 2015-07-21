@@ -84,7 +84,8 @@
 #define MCFG_NONE 0
 #define MCFG_SCALE 1
 #define MCFG_SIZE 2
-#define MCFG_PRESSURE 3
+#define MCFG_PRESSURE_SIZE 3
+#define MCFG_PRESSURE 4
 
 struct MConfig {
 	/* Used by MTState */
@@ -94,6 +95,8 @@ struct MConfig {
 	int touch_minor;	// Does the touchpad report touches as ellipses? 0 or 1
 	int touch_min;		// Minimum touch value.
 	int touch_max;		// Maximum touch value.
+	int pressure_min;		// Minimum pressure value.
+	int pressure_max;		// Maximum pressure value.
 	int pad_width;		// Width of the touchpad.
 	int pad_height;		// Height of the touchpad.
 
