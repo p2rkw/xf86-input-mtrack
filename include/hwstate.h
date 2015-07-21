@@ -26,7 +26,9 @@
 #include "capabilities.h"
 
 struct FingerState {
+	/* The size of the contact area */
 	int touch_major, touch_minor;
+	/* The size of the approaching tool */
 	int width_major, width_minor;
 	int orientation, pressure;
 	int position_x, position_y;
