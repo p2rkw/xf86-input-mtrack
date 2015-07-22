@@ -177,7 +177,9 @@ static int device_on(LocalDevicePtr local)
 		return !Success;
 	}
 	xf86AddEnabledDevice(local);
-	TimerFree(mt->timer);	// release any existing timer
+	if(mt->timer != NULL)
+		TimerFree(mt->timer);	// release any existing timer
+	mt->timer = NULL;
 	mt->is_timer_installed = 0;
 	return Success;
 }
@@ -189,7 +191,9 @@ static int device_off(LocalDevicePtr local)
 	if (mtouch_close(mt))
 		xf86Msg(X_WARNING, "mtrack: cannot ungrab device\n");
 	xf86CloseSerial(local->fd);
-	TimerFree(mt->timer);
+	if(mt->timer != NULL)
+		TimerFree(mt->timer);	// release any existing timer
+	mt->timer = NULL;
 	mt->is_timer_installed = 0;
 	return Success;
 }
