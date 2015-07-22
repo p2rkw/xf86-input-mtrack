@@ -160,6 +160,7 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 	TimerInit();
 	mt->timer = NULL; /* allocated later */
 	mt->is_timer_installed = 0;
+	mt->absolute_mode = FALSE;
 	return Success;
 }
 
@@ -201,8 +202,15 @@ static int device_close(LocalDevicePtr local)
 static void handle_gestures(LocalDevicePtr local,
 			const struct Gestures* gs)
 {
+	const struct MTouch *mt = local->private;
 	static bitmask_t buttons_prev = 0U;
 	int i;
+
+	/* Give the HW coordinates to Xserver as absolute coordinates, these coordinates
+	 * are not scaled, this is oke if the touchscreen has the same resolution as the display.
+	 */
+	if(mt->absolute_mode == TRUE)
+		xf86PostMotionEvent(local->dev, 1, 0, 2, mt->state.touch[0].x, mt->state.touch[0].y);
 
 	for (i = 0; i < 32; i++) {
 		if (GETBIT(gs->buttons, i) == GETBIT(buttons_prev, i))
@@ -222,7 +230,7 @@ static void handle_gestures(LocalDevicePtr local,
 	}
 	buttons_prev = gs->buttons;
 
-	if (gs->move_dx != 0 || gs->move_dy != 0)
+	if (mt->absolute_mode == FALSE && (gs->move_dx != 0 || gs->move_dy != 0))
 		xf86PostMotionEvent(local->dev, 0, 0, 2, gs->move_dx, gs->move_dy);
 }
 
@@ -285,6 +293,27 @@ static void read_input(LocalDevicePtr local)
 	check_resolve_delayed(NULL, 0, local);
 }
 
+static int switch_mode(ClientPtr client, DeviceIntPtr dev, int mode)
+{
+	LocalDevicePtr local = dev->public.devicePrivate;
+	struct MTouch *mt = local->private;
+
+	switch (mode) {
+	case Absolute:
+		mt->absolute_mode = TRUE;
+		xf86Msg(X_INFO, "switch_mode: switing to absolute mode\n");
+		break;
+	case Relative:
+		mt->absolute_mode = FALSE;
+		xf86Msg(X_INFO, "switch_mode: switing to relative mode\n");
+		break;
+	default:
+		return XI_BadMode;
+	}
+	return Success;
+}
+
+
 static Bool device_control(DeviceIntPtr dev, int mode)
 {
 	LocalDevicePtr local = dev->public.devicePrivate;
@@ -321,7 +350,7 @@ static int preinit(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
 	pInfo->type_name = XI_TOUCHPAD;
 	pInfo->device_control = device_control;
 	pInfo->read_input = read_input;
-	pInfo->switch_mode = 0;
+	pInfo->switch_mode = switch_mode;
 
 	xf86CollectInputOptions(pInfo, NULL);
 	xf86OptionListReport(pInfo->options);
@@ -345,6 +374,7 @@ static InputInfoPtr preinit(InputDriverPtr drv, IDevPtr dev, int flags)
 	local->type_name = XI_TOUCHPAD;
 	local->device_control = device_control;
 	local->read_input = read_input;
+	local->switch_mode = switch_mode;
 	local->private = mt;
 	local->flags = XI86_POINTER_CAPABLE | XI86_SEND_DRAG_EVENTS;
 	local->conf_idev = dev;
@@ -386,7 +416,7 @@ static XF86ModuleVersionInfo moduleVersion = {
 	MODINFOSTRING1,
 	MODINFOSTRING2,
 	XORG_VERSION_CURRENT,
-	0, 1, 0,
+	PACKAGE_VERSION_MAJOR, PACKAGE_VERSION_MINOR, PACKAGE_VERSION_PATCHLEVEL,
 	ABI_CLASS_XINPUT,
 	ABI_XINPUT_VERSION,
 	MOD_CLASS_XINPUT,

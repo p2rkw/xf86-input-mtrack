@@ -86,7 +86,7 @@ int read_capabilities(struct Capabilities *cap, int fd)
 	SYSCALL(rc = ioctl(fd, EVIOCGID, &cap->devid));
 	if (rc < 0)
 		return rc;
-	SYSCALL(rc = ioctl(fd, EVIOCGNAME(sizeof(cap->devname)), cap->devname));
+	SYSCALL(rc = ioctl(fd, EVIOCGNAME(sizeof(cap->devname) - 1), cap->devname));
 	if (rc < 0)
 		return rc;
 	SYSCALL(rc = ioctl(fd, EVIOCGBIT(EV_SYN, sizeof(evbits)), evbits));
@@ -151,16 +151,16 @@ int get_cap_ymid(const struct Capabilities *cap)
 	return (y->maximum + y->minimum) >> 1;
 }
 
-int get_cap_xflip(const struct Capabilities *cap, int x)
+int get_cap_x(const struct Capabilities *cap, int x)
 {
-	const struct input_absinfo *i = &cap->abs[MTDEV_POSITION_X];
-	return i->maximum - (x - i->minimum);
+	int mid = get_cap_xmid(cap);
+	return x - mid;
 }
 
-int get_cap_yflip(const struct Capabilities *cap, int y)
+int get_cap_y(const struct Capabilities *cap, int y)
 {
-	const struct input_absinfo *i = &cap->abs[MTDEV_POSITION_Y];
-	return i->maximum - (y - i->minimum);
+	int mid = get_cap_ymid(cap);
+	return y - mid;
 }
 
 void output_capabilities(const struct Capabilities *cap)

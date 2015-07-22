@@ -8,6 +8,7 @@ protocol see the [kernel documentation][1].
 This driver is compatible with Xorg server versions 1.7 to 1.12. It requires
 the [mtdev][4] library to operate.
 
+
 License
 -------
 
@@ -16,6 +17,7 @@ License
 
 This software is licensed under the [GPLv2][2] and is a fork of the
 [xf86-input-multitouch][3] driver by Henrik Rydberg.
+
 
 Building and Installing
 -----------------------
@@ -100,10 +102,10 @@ The minimum size of what's considered a palm. Palms are expected to be very
 large on the trackpad. This is represented as a percentage of the maximum touch
 value and is dependent on the trackpad hardware. Integer value. Defaults to 40.
 
-**BottomEdge** -
-The size of an area at the bottom of the trackpad where new touches are ignored
-(fingers traveling into this area from above will still be tracked). This is
-represented as a percentage of the total trackpad height. Defaults to 10.
+**EdgeSize** -
+The size of an area around the trackpad where new touches are ignored (fingers
+traveling into this area from above will still be tracked). This is represented
+as a percentage of the total trackpad height. Defaults to 10.
 
 **ButtonEnable** - 
 Whether or not to enable the physical buttons on or near the trackpad. Boolean
@@ -310,21 +312,21 @@ The tap-to-drag timeout. This is how long the driver will wait after a single
 tap for a movement event before sending the click. Integer value representing
 milliseconds. Defaults to 350.
 
-**TapDragWait**
+**TapDragWait** - 
 How long after detecting movement to trigger a button down event. During this
 time pointer movement will be disabled. Increase this value if you find you're
 draggin when you don't wish it. Integer value representing milliseconds.
 Defaults to 40.
 
-**TapDragDist**
+**TapDragDist** - 
 How far the finger is allowed to move during drag wait time. If the finger
 moves farther than this distance during the wait time then dragging will be
 canceled and pointer movement will resume. Integer value. Defaults to 200.
 
-**AxisXInvert**
+**AxisXInvert** - 
 Whether or not to invert the X axis. Boolean value. Defaults to false.
 
-**AxisYInvert**
+**AxisYInvert** - 
 Whether or not to invert the Y axis. Boolean value. Defaults to false.
 
 Tips

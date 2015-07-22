@@ -99,23 +99,44 @@ static int is_thumb(const struct MConfig* cfg,
 static int is_palm(const struct MConfig* cfg,
 			const struct FingerState* hw)
 {
-	if (cfg->touch_type != MCFG_SCALE && cfg->touch_type != MCFG_SIZE
-		&& cfg->touch_type != MCFG_PRESSURE_SIZE && cfg->touch_type != MCFG_SIZE_PRESSURE)
-		return 0;
+	int ratio;
+	switch(cfg->touch_type){
+	case MCFG_SCALE:
+		ratio = percentage(hw->touch_major, hw->width_major);
+		break;
+	case MCFG_SIZE:
+	case MCFG_SIZE_PRESSURE:
+	case MCFG_PRESSURE_SIZE:
+		ratio = touch_range_ratio(cfg, hw->touch_major);
+		break;
+	case MCFG_PRESSURE:
+		ratio =  pressure_range_ratio(cfg, hw->pressure);
+		break;
+	default: return 0;
+	}
 
-	int size = touch_range_ratio(cfg, hw->touch_major);
-	if (size > cfg->palm_size) {
+	if (ratio > cfg->palm_size) {
 #if DEBUG_MTSTATE
-		xf86Msg(X_INFO, "is_palm: yes %d > %d\n", size, cfg->palm_size);
+		xf86Msg(X_INFO, "is_palm: yes %d > %d\n", ratio, cfg->palm_size);
 #endif
 		return 1;
 	}
 	else {
 #if DEBUG_MTSTATE
-		xf86Msg(X_INFO, "is_palm: no  %d > %d\n", size, cfg->palm_size);
+		xf86Msg(X_INFO, "is_palm: no  %d > %d\n", ratio, cfg->palm_size);
 #endif
 		return 0;
 	}
+}
+
+static int is_edge(const struct MConfig* cfg, const struct FingerState* hw)
+{
+	int edge_width = (cfg->edge_size * cfg->pad_width) / 100;
+	int edge_height = (cfg->edge_size * cfg->pad_height) / 100;
+	return ((hw->position_x < edge_width) ||
+		(hw->position_x >= (cfg->pad_width-edge_width)) ||
+		(hw->position_y < edge_height) ||
+		(hw->position_y >= (cfg->pad_height-edge_height)));
 }
 
 /* Find a touch by its tracking ID.  Return -1 if not found.
@@ -145,8 +166,10 @@ static int touch_append(struct MTState* ms,
 	if (n < 0)
 		xf86Msg(X_WARNING, "Too many touches to track. Ignoring touch %d.\n", fs->tracking_id);
 	else {
-		x = cfg->axis_x_invert ? get_cap_xflip(caps, fs->position_x) : fs->position_x;
-		y = cfg->axis_y_invert ? get_cap_yflip(caps, fs->position_y) : fs->position_y;
+		x = get_cap_x(caps, fs->position_x);
+		y = get_cap_y(caps, fs->position_y);
+		x = cfg->axis_x_invert ? -x : x;
+		y = cfg->axis_y_invert ? -y : y;
 		ms->touch[n].state = 0U;
 		ms->touch[n].flags = 0U;
 		timercp(&ms->touch[n].down, &hs->evtime);
@@ -173,8 +196,10 @@ static void touch_update(struct MTState* ms,
 			int touch)
 {
 	int x, y;
-	x = cfg->axis_x_invert ? get_cap_xflip(caps, fs->position_x) : fs->position_x;
-	y = cfg->axis_y_invert ? get_cap_yflip(caps, fs->position_y) : fs->position_y;
+	x = get_cap_x(caps, fs->position_x);
+	y = get_cap_y(caps, fs->position_y);
+	x = cfg->axis_x_invert ? -x : x;
+	y = cfg->axis_y_invert ? -y : y;
 	ms->touch[touch].dx = x - ms->touch[touch].x;
 	ms->touch[touch].dy = y - ms->touch[touch].y;
 	ms->touch[touch].total_dx += ms->touch[touch].dx;
@@ -233,7 +258,7 @@ static void touches_update(struct MTState* ms,
 			n = touch_append(ms, cfg, caps, hs, i);
 
 		if (n >= 0) {
-			// Track and invalidate thumb, palm, and bottom edge touches.
+			// Track and invalidate thumb, palm, and edge touches.
 			if (is_thumb(cfg, &hs->data[i]))
 				SETBIT(ms->touch[n].state, MT_THUMB);
 			else
@@ -244,17 +269,17 @@ static void touches_update(struct MTState* ms,
 			else
 				CLEARBIT(ms->touch[n].state, MT_PALM);
 
-			if (ms->touch[n].y > (100 - cfg->bottom_edge)*cfg->pad_height/100) {
+			if (is_edge(cfg, &hs->data[i])) {
 				if (GETBIT(ms->touch[n].state, MT_NEW))
-					SETBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+					SETBIT(ms->touch[n].state, MT_EDGE);
 			}
 			else
-				CLEARBIT(ms->touch[n].state, MT_BOTTOM_EDGE);
+				CLEARBIT(ms->touch[n].state, MT_EDGE);
 
 			MODBIT(ms->touch[n].state, MT_INVALID,
 				GETBIT(ms->touch[n].state, MT_THUMB) && cfg->ignore_thumb ||
 				GETBIT(ms->touch[n].state, MT_PALM) && cfg->ignore_palm ||
-				GETBIT(ms->touch[n].state, MT_BOTTOM_EDGE));
+				GETBIT(ms->touch[n].state, MT_EDGE));
 
 			disable |= cfg->disable_on_thumb && GETBIT(ms->touch[n].state, MT_THUMB);
 			disable |= cfg->disable_on_palm && GETBIT(ms->touch[n].state, MT_PALM);
