@@ -44,6 +44,7 @@ static int finger_touch_ratio(const struct MConfig* cfg, const struct FingerStat
 	case MCFG_SCALE:
 		return percentage(hw->touch_major, hw->width_major); /* = estimated pressure */
 	case MCFG_SIZE:
+	case MCFG_SIZE_PRESSURE:
 		return touch_range_ratio(cfg, hw->touch_major);
 	case MCFG_PRESSURE_SIZE:
 	case MCFG_PRESSURE:
@@ -98,7 +99,8 @@ static int is_thumb(const struct MConfig* cfg,
 static int is_palm(const struct MConfig* cfg,
 			const struct FingerState* hw)
 {
-	if (cfg->touch_type != MCFG_SCALE && cfg->touch_type != MCFG_SIZE && cfg->touch_type != MCFG_PRESSURE_SIZE)
+	if (cfg->touch_type != MCFG_SCALE && cfg->touch_type != MCFG_SIZE
+		&& cfg->touch_type != MCFG_PRESSURE_SIZE && cfg->touch_type != MCFG_SIZE_PRESSURE)
 		return 0;
 
 	int size = touch_range_ratio(cfg, hw->touch_major);
