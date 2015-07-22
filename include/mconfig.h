@@ -85,7 +85,8 @@
 #define MCFG_SCALE 1
 #define MCFG_SIZE 2
 #define MCFG_PRESSURE_SIZE 3
-#define MCFG_PRESSURE 4
+#define MCFG_SIZE_PRESSURE 4 /* same capabilities as above, but with higher resolution of touches*/
+#define MCFG_PRESSURE 5
 
 struct MConfig {
 	/* Used by MTState */
