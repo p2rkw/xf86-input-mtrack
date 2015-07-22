@@ -176,7 +176,7 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 
 	ivals[0] = cfg->rotate_lt_btn;
 	ivals[1] = cfg->rotate_rt_btn;
-	mprops.rotate_buttons = atom_init_integer(local->dev, MTRACK_PROP_SCALE_BUTTONS, 2, ivals, 8);
+	mprops.rotate_buttons = atom_init_integer(local->dev, MTRACK_PROP_ROTATE_BUTTONS, 2, ivals, 8);
 
 	ivals[0] = cfg->drag_enable;
 	ivals[1] = cfg->drag_timeout;
@@ -507,11 +507,11 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		}
 	}
 	else if (property == mprops.scale_buttons) {
-		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]))
 			return BadMatch;
 
 		if (!checkonly) {
@@ -540,11 +540,11 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		}
 	}
 	else if (property == mprops.rotate_buttons) {
-		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
+		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]))
 			return BadMatch;
 
 		if (!checkonly) {
@@ -561,7 +561,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		ivals32 = (uint32_t*)prop->data;
-		if (!VALID_BOOL(ivals32[0]) || ivals32[1] < 1 || ivals32[2] < 0 || ivals32[3] < 0)
+		if (!VALID_BOOL(ivals32[0]) || ivals32[1] < 1 || (int)(ivals32[2]) < 0 || (int)(ivals32[3]) < 0)
 			return BadMatch;
 
 		if (!checkonly) {
