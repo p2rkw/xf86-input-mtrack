@@ -25,7 +25,15 @@ This is a standard autoconf package. So:
     make && make install
 
 It is likely that you will need to change system-dependent paths such as the
-xorg module directory. See `configure --help` for options.
+xorg module directory. Otherwise mtrack may be not installed in xserver search
+path.
+See `configure --help` for options.
+
+To build deb package and install in system wide you will usually have to change
+installation prefix to /usr like so:
+
+    ./configure --prefix=/usr
+    dpkg-buildpackage
 
 Configuration
 -------------
@@ -108,7 +116,8 @@ Button emulation depends on this value being correct. Boolean value. Defaults
 to true.
 
 **ButtonMoveEmulate**
-Whether or not to count the moving finger when emulating button clicks. Useful to disable if you use two hands on trackpad. Boolean value. Defaults to true.
+Whether or not to count the moving finger when emulating button clicks.
+Useful to disable if you use two hands on trackpad. Boolean value. Defaults to true.
 
 **ButtonZonesEnable** -
 Whether or not to enable button zones. If button zones are enabled then the
@@ -153,10 +162,13 @@ disables three-finger tapping. Defaults to 0.
 
 **ClickTime** - 
 When tapping, how much time to hold down the emulated button. Integer value
-representing milliseconds. Defaults to 50.
+representing milliseconds. Not very usable because button release event will be
+sent immediately after releasing any of fingers (touches).
+Integer value representing miliseconds. Defaults to 50.
 
 **MaxTapTime** - 
-The amount of time to wait for a tap to release before counting it as a move.
+The amount of time to wait for incoming touches after first one before counting
+it as emulated button click.
 Integer value representing milliseconds. Defaults to 120.
 
 **MaxTapMove** - 
@@ -178,6 +190,17 @@ gestures. Integer value representing milliseconds. Defaults to 100.
 For two finger scrolling. How far you must move your fingers before a button
 click is triggered. Integer value. Defaults to 150.
 
+**ScrollClickTime** -
+For two finger scrolling. How long button triggered by scrolling 
+will be hold down. A value of 0 will hold button down till end of gesture.
+Integer value representing milliseconds. Defaults to 20.
+
+**ScrollSensitivity** -
+For two finger scrolling. Sensitivity (movement speed) of pointer during two 
+finger scrolling. A value of 0 disables pointer movement during gesture.
+Integer value expressed as parts per thousand of normal sensivity.
+A value of 1000 results with normal movement speed. Defaults to 0.
+
 **ScrollUpButton** - 
 For two finger scrolling. The button that is triggered by scrolling up. Integer
 value. A value of 0 disables scrolling up. Defaults to 4.
@@ -198,6 +221,16 @@ Integer value. A value of 0 disables scrolling right. Defaults to 7.
 For three finger swiping. How far you must move your fingers before a button
 click is triggered. Integer value. Defaults to 700.
 
+**SwipeClickTime** -
+For three finger swiping. How long button triggered by swiping
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**SwipeSensitivity** -
+For three finger scrolling. Sensitivity (movement speed) of pointer during three 
+finger scrolling. A value of 0 disables pointer movement during gesture.
+Integer value expressed as parts per thousand of normal sensivity.
+A value of 1000 results with normal movement speed. Defaults to 0.
+
 **SwipeUpButton** - 
 For three finger swiping. The button that is triggered by swiping up. Integer
 value. A value of 0 disables swiping up. Defaults to 8.
@@ -217,6 +250,16 @@ value. A value of 0 disables swiping right. Defaults to 11.
 **Swipe4Distance** - 
 For four finger swiping. How far you must move your fingers before a button
 click is triggered. Integer value. Defaults to 700.
+
+**Swipe4ClickTime** -
+For four finger swiping. How long button triggered by swiping
+will be hold down. Integer value representing milliseconds. Defaults to 300.
+
+**Swipe4Sensitivity** -
+For four finger scrolling. Sensitivity (movement speed) of pointer during four 
+finger scrolling. A value of 0 disables pointer movement during gesture.
+Integer value expressed as parts per thousand of normal sensivity.
+A value of 1000 results with normal movement speed. Defaults to 0.
 
 **Swipe4UpButton** - 
 For four finger swiping. The button that is triggered by swiping up. Integer
@@ -283,6 +326,24 @@ Whether or not to invert the X axis. Boolean value. Defaults to false.
 
 **AxisYInvert**
 Whether or not to invert the Y axis. Boolean value. Defaults to false.
+
+Tips
+-------------
+##### Swipe to drag
+To setup swipe to drag functionality you have to choose which swipe gesture (Scroll, Swipe, Swipe4)
+will be used for dragging.
+Example configuration for three finger drag:
+```
+    Option "SwipeDistance" "1"
+    Option "SwipeLeftButton" "1"
+    Option "SwipeRightButton" "1"
+    Option "SwipeUpButton" "1"
+    Option "SwipeDownButton" "1"
+    Option "SwipeClickTime" "0"
+    Option "SwipeSensitivity" "1000"
+```
+This will enable draging with three fingers. Change sensitivity for faster/slower movements.
+Scroll, and Swipe4 are also supported.
 
 [1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt     "Kernel Multitouch Protocol"
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"

@@ -62,16 +62,22 @@
 #define MTRACK_PROP_PALM_SIZE "Trackpad Palm Size"
 // int, 2 value - button hold, wait time
 #define MTRACK_PROP_GESTURE_SETTINGS "Trackpad Gesture Settings"
-// int, 1 value - distance before a scroll event is triggered
-#define MTRACK_PROP_SCROLL_DIST "Trackpad Scroll Distance"
+// int, 2 values
+//   first: distance before a scroll event (two finger swipe) is triggered
+//   second: how much milliseconds button will be hold after {up,down,left,right} scroll
+#define MTRACK_PROP_SCROLL_SETTINGS "Trackpad Scroll Settings"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SCROLL_BUTTONS "Trackpad Scroll Buttons"
-// int, 1 value - distance before a swipe event is triggered
-#define MTRACK_PROP_SWIPE_DIST "Trackpad Swipe Distance"
+// int, 2 values
+//   first: distance before a three finger swipe event is triggered
+//   second: how much milliseconds button will be hold after {up,down,left,right} swipe
+#define MTRACK_PROP_SWIPE_SETTINGS "Trackpad Swipe Settings"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SWIPE_BUTTONS "Trackpad Swipe Buttons"
-// int, 1 value - distance before a swipe event is triggered
-#define MTRACK_PROP_SWIPE4_DIST "Trackpad Swipe4 Distance"
+// int, 2 values
+//   first: distance before a four finger swipe event is triggered
+//   second: how much milliseconds button will be hold after {up,down,left,right} swipe4
+#define MTRACK_PROP_SWIPE4_SETTINGS "Trackpad Swipe4 Settings"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SWIPE4_BUTTONS "Trackpad Swipe4 Buttons"
 // int, 1 value - distance before a scale event is triggered
@@ -106,12 +112,10 @@ struct MProps {
 	Atom palm_detect;
 	Atom palm_size;
 	Atom gesture_settings;
-	Atom scroll_dist;
-	Atom scroll_buttons;
-	Atom swipe_dist;
-	Atom swipe_buttons;
-	Atom swipe4_dist;
-	Atom swipe4_buttons;
+	struct MPropsSwipe{
+		Atom settings;
+		Atom buttons;
+	} scroll, swipe3, swipe4/*, swipe5*/;
 	Atom scale_dist;
 	Atom scale_buttons;
 	Atom rotate_dist;

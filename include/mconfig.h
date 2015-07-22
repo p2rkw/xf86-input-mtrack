@@ -57,16 +57,19 @@
 #define DEFAULT_SCROLL_DN_BTN 5
 #define DEFAULT_SCROLL_LT_BTN 6
 #define DEFAULT_SCROLL_RT_BTN 7
+#define DEFAULT_SCROLL_HOLD 20
 #define DEFAULT_SWIPE_DIST 700
 #define DEFAULT_SWIPE_UP_BTN 8
 #define DEFAULT_SWIPE_DN_BTN 9
 #define DEFAULT_SWIPE_LT_BTN 10
 #define DEFAULT_SWIPE_RT_BTN 11
+#define DEFAULT_SWIPE_HOLD 300
 #define DEFAULT_SWIPE4_DIST 700
 #define DEFAULT_SWIPE4_UP_BTN 0
 #define DEFAULT_SWIPE4_DN_BTN 0
 #define DEFAULT_SWIPE4_LT_BTN 0
 #define DEFAULT_SWIPE4_RT_BTN 0
+#define DEFAULT_SWIPE_SENS 0
 #define DEFAULT_SCALE_DIST 150
 #define DEFAULT_SCALE_UP_BTN 12
 #define DEFAULT_SCALE_DN_BTN 13
@@ -135,26 +138,21 @@ struct MConfig {
 	int tap_2touch;			// What button to emulate for two touch taps? 0 to 32
 	int tap_3touch;			// What button to emulate for three touch taps? 0 to 32
 	int tap_4touch;			// What button to emulate for four touch taps? 0 to 32
-	int tap_timeout;		// Window for touches when counting for the button. > 0
+	int tap_timeout;		// Window for touches when counting for the button.
+							// How long to wait for incoming touches after first one. > 0
 	int tap_hold;			// How long to "hold down" the emulated button on tap. > 0
 	int tap_dist;			// How far to allow a touch to move before it's a moving touch. > 0
 	int gesture_hold;		// How long to "hold down" the emulated button for gestures. > 0
 	int gesture_wait;		// How long after a gesture to wait before movement is allowed. >= 0
-	int scroll_dist;		// Distance needed to trigger a button. >= 0, 0 disables
-	int scroll_up_btn;		// Button to use for scroll up. >= 0, 0 is none
-	int scroll_dn_btn;		// Button to use for scroll down. >= 0, 0 is none
-	int scroll_lt_btn;		// Button to use for scroll left. >= 0, 0 is none
-	int scroll_rt_btn;		// Button to use for scroll right. >= 0, 0 is none
-	int swipe_dist;			// Distance needed to trigger a button. >= 0, 0 disables
-	int swipe_up_btn;		// Button to use for swipe up. >= 0, 0 is none
-	int swipe_dn_btn;		// Button to use for swipe down. >= 0, 0 is none
-	int swipe_lt_btn;		// Button to use for swipe left. >= 0, 0 is none
-	int swipe_rt_btn;		// Button to use for swipe right. >= 0, 0 is none
-	int swipe4_dist;		// Distance needed to trigger a button. >= 0, 0 disables
-	int swipe4_up_btn;		// Button to use for four finger swipe up. >= 0, 0 is none
-	int swipe4_dn_btn;		// Button to use for four finger swipe down. >= 0, 0 is none
-	int swipe4_lt_btn;		// Button to use for four finger swipe left. >= 0, 0 is none
-	int swipe4_rt_btn;		// Button to use for four finger swipe right. >= 0, 0 is none
+	struct MConfigSwipe{
+		int dist;		// Distance needed to trigger a button. >= 0, 0 disables
+		int hold;		// How long to "hold down" the emulated button for swipe gesture. > 0
+		int drag_sens;		// Should this gesture emit movement events? 0 disables movement, 1000 set speed same as during normal movement
+		int up_btn;		// Button to use for swipe up. >= 0, 0 is none
+		int dn_btn;		// Button to use for swipe down. >= 0, 0 is none
+		int lt_btn;		// Button to use for swipe left. >= 0, 0 is none
+		int rt_btn;		// Button to use for swipe right. >= 0, 0 is none
+	} scroll, swipe3, swipe4/*, swipe5*/;
 	int scale_dist;			// Distance needed to trigger a button. >= 0, 0 disables
 	int scale_up_btn;		// Button to use for scale up. >= 0, 0 is none
 	int scale_dn_btn;		// Button to use for scale down. >= 0, 0 is none

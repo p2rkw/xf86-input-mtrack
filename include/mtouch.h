@@ -29,6 +29,7 @@
 #include "mtstate.h"
 #include "mconfig.h"
 #include "gestures.h"
+#include "os.h" /* xorg/os.h for timers */
 
 struct MTouch {
 	int fd;
@@ -38,6 +39,8 @@ struct MTouch {
 	struct MTState state;
 	struct MConfig cfg;
 	struct Gestures gs;
+	int is_timer_installed;   // to avoid setting timer multiple times
+	OsTimerPtr timer;
 };
 
 int mtouch_configure(struct MTouch* mt, int fd);
