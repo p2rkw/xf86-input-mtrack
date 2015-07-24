@@ -133,10 +133,11 @@ static int is_edge(const struct MConfig* cfg, const struct FingerState* hw)
 {
 	int edge_width = (cfg->edge_size * cfg->pad_width) / 100;
 	int edge_height = (cfg->edge_size * cfg->pad_height) / 100;
-	return ((hw->position_x < edge_width) ||
-		(hw->position_x >= (cfg->pad_width-edge_width)) ||
-		(hw->position_y < edge_height) ||
-		(hw->position_y >= (cfg->pad_height-edge_height)));
+	return
+		hw->position_x < cfg->x_min + edge_width ||
+		hw->position_x > cfg->x_min - edge_width + cfg->pad_width ||
+		hw->position_y < cfg->y_min + edge_height ||
+		hw->position_y > cfg->y_min - edge_height + cfg->pad_height;
 }
 
 /* Find a touch by its tracking ID.  Return -1 if not found.

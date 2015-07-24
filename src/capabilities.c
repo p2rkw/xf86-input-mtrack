@@ -163,6 +163,18 @@ int get_cap_y(const struct Capabilities *cap, int y)
 	return y - mid;
 }
 
+int get_cap_xmin(const struct Capabilities *cap)
+{
+	const struct input_absinfo *x = &cap->abs[MTDEV_POSITION_X];
+	return x->minimum;
+}
+
+int get_cap_ymin(const struct Capabilities *cap)
+{
+	const struct input_absinfo *y = &cap->abs[MTDEV_POSITION_Y];
+	return y->minimum;
+}
+
 void output_capabilities(const struct Capabilities *cap)
 {
 	char line[1024];
