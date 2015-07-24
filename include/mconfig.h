@@ -96,6 +96,8 @@ struct MConfig {
 	int touch_max;		// Maximum touch value.
 	int pad_width;		// Width of the touchpad.
 	int pad_height;		// Height of the touchpad.
+	int x_min;		// Minimum value of first position coordinate
+	int y_min;		// Minimum value of second position coordinate
 
 	// Set by config.
 	int touch_down;		// When is a finger touching? 0 - 100 (percentage)
