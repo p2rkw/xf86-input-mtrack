@@ -42,10 +42,9 @@ static double trig_decode_radians(double angle) {
 }
 
 double trig_direction(double dx, double dy) {
-	double angle = TR_NONE;
 	if (dx != 0 || dy != 0)
 		return trig_encode_radians(atan2(dx, dy*-1));
-	return angle;
+	return TR_NONE;
 }
 
 int trig_generalize(double dir)
