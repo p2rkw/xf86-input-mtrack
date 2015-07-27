@@ -1,24 +1,25 @@
 SOURCES_COMMON = \
-	$(srcdir)/src/capabilities.c \
-	$(srcdir)/src/gestures.c \
-	$(srcdir)/src/hwstate.c \
-	$(srcdir)/src/mconfig.c \
-	$(srcdir)/src/mtouch.c \
-	$(srcdir)/src/mtstate.c \
-	$(srcdir)/src/trig.c
+	src/capabilities.c \
+	src/gestures.c \
+	src/hwstate.c \
+	src/mconfig.c \
+	src/mtouch.c \
+	src/mtstate.c \
+	src/trig.c
 
 @DRIVER_NAME@_drv_la_LTLIBRARIES = @DRIVER_NAME@_drv.la
 @DRIVER_NAME@_drv_la_LDFLAGS = -module -avoid-version
 @DRIVER_NAME@_drv_la_SOURCES = $(SOURCES_COMMON) \
-	$(srcdir)/driver/mtrack.c \
-	$(srcdir)/driver/mprops.c
+	driver/mtrack.c \
+	driver/mprops.c
 @DRIVER_NAME@_drv_ladir = @inputdir@
 
 noinst_PROGRAMS = mtrack-test
 mtrack_test_SOURCES = $(SOURCES_COMMON) \
-	$(srcdir)/tools/mtrack-test.c
+	tools/mtrack-test.c
 mtrack_test_CFLAGS = $(AM_CFLAGS)
 
+ACLOCAL_AMFLAGS = -I m4
 AM_CPPFLAGS = -I$(top_srcdir)/include/ \
 	-I/usr/include/xorg \
 	-I/usr/include/pixman-1
