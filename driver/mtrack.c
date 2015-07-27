@@ -22,6 +22,7 @@
 
 #include "mtouch.h"
 #include "mprops.h"
+#include "capabilities.h"
 #include "os.h" /* xorg/os.h for timers */
 
 #include <xf86Module.h>
@@ -214,7 +215,9 @@ static void handle_gestures(LocalDevicePtr local,
 	 * are not scaled, this is oke if the touchscreen has the same resolution as the display.
 	 */
 	if(mt->absolute_mode == TRUE)
-		xf86PostMotionEvent(local->dev, 1, 0, 2, mt->state.touch[0].x, mt->state.touch[0].y);
+		xf86PostMotionEvent(local->dev, 1, 0, 2,
+			mt->state.touch[0].x + get_cap_xmid(&mt->caps),
+			mt->state.touch[0].y + get_cap_ymid(&mt->caps));
 
 	for (i = 0; i < 32; i++) {
 		if (GETBIT(gs->buttons, i) == GETBIT(buttons_prev, i))
