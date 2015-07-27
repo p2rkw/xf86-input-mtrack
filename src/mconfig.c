@@ -100,9 +100,9 @@ void mconfig_init(struct MConfig* cfg,
 		cfg->pressure_max = caps->abs[MTDEV_PRESSURE].maximum;
 		/* select source of the events basing on its resolution */
 		if(cfg->pressure_max - cfg->pressure_min >= cfg->touch_max - cfg->touch_min)
-			cfg->touch_type = MCFG_PRESSURE_SIZE;
+			cfg->touch_type = MCFG_MAJOR_PRESSURE_AND_MINOR_SIZE;
 		else
-			cfg->touch_type = MCFG_SIZE_PRESSURE;
+			cfg->touch_type = MCFG_MAJOR_SIZE_AND_MINOR_PRESSURE;
 		xf86Msg(X_INFO, "Touchpad is pressure based, but supports regular touches also.\n");
 		xf86Msg(X_INFO, "  touch_min = %d, touch_max = %d\n", cfg->touch_min, cfg->touch_max);
 		xf86Msg(X_INFO, "  pressure_min = %d, pressure_max = %d\n", cfg->pressure_min, cfg->pressure_max);
