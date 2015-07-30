@@ -354,10 +354,11 @@ This will enable draging with three fingers. Change sensitivity for faster/slowe
 Scroll, and Swipe4 are also supported.
 
 ##### Hold and move
-Touch and hold one finger in place to initiate hold-and-move gesture.
+Hold down one finger in place to initiate hold-and-move gesture.
 Then move another finger to drag configured button.
-Gesture will last as long as till fist finger (a.k.a. stationary finger) will
+Gesture will last as long as fist finger (a.k.a. stationary finger) will
 be held down in place.
+
 Increase TapMaxDist to give stationary finger more freedom.
 Set Hold1Move1Button to 0 to disable, set to other value to send button other 
 than "1".
