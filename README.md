@@ -164,8 +164,7 @@ disables three-finger tapping. Defaults to 0.
 
 **ClickTime** - 
 When tapping, how much time to hold down the emulated button. Integer value
-representing milliseconds. Not very usable because button release event will be
-sent immediately after releasing any of fingers (touches).
+representing milliseconds.
 Integer value representing miliseconds. Defaults to 50.
 
 **MaxTapTime** - 

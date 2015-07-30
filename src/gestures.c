@@ -88,6 +88,7 @@ static void trigger_delayed_button_unsafe(struct Gestures* gs)
 
 	gs->button_delayed = -1;
 	timerclear(&gs->button_delayed_time);
+	gs->move_dist = 0; /* don't count movement from delayed button phase in next stroke */
 #ifdef DEBUG_GESTURES
 	xf86Msg(X_INFO, "trigger_delayed_button: %d up, timer expired\n", button);
 #endif
@@ -338,7 +339,7 @@ static void tapping_update(struct Gestures* gs,
 	timerclear(&epoch);
 	timeraddms(&gs->tap_time_down, cfg->tap_timeout, &tv_tmp);
 	if (!timercmp(&gs->tap_time_down, &epoch, ==) && !timercmp(&gs->time, &tv_tmp, <)) {
-		// too much time passed by from first touch, stop waiting for incoming touches
+		/* too much time passed by from first touch, stop waiting for incoming touches */
 		gs->tap_touching = 0;
 		gs->tap_released = 0;
 		timerclear(&gs->tap_time_down);
@@ -394,13 +395,14 @@ static void tapping_update(struct Gestures* gs,
 	}
 
 	if ((gs->tap_touching == 0 && gs->tap_released > 0) || gs->tap_released >= released_max) {
-		// in this branch tap was recognized as button click
-		// clear tap flags from touches
+		/* in this branch tap was recognized as button click
+		 * clear tap flags from touches
+		 */
 		foreach_bit(i, ms->touch_used) {
 			if (GETBIT(ms->touch[i].flags, GS_TAP))
 				CLEARBIT(ms->touch[i].flags, GS_TAP);
 		}
-		// determinate which button was "tapped" by counting touches
+		/* Determinate which button was "tapped" by counting touches */
 		if (gs->tap_released == 1)
 			n = cfg->tap_1touch - 1;
 		else if (gs->tap_released == 2)
@@ -410,7 +412,7 @@ static void tapping_update(struct Gestures* gs,
 		else
 			n = cfg->tap_4touch - 1;
 
-		// how long button should be hold down
+		/* How long button should be hold down */
 		timeraddms(&gs->time, cfg->tap_hold, &tv_tmp);
 		trigger_button_click(gs, n, &tv_tmp);
 		if (cfg->drag_enable && n == 0)
@@ -973,9 +975,10 @@ int gestures_delayed(struct MTouch* mt)
 			++taps_released;
 	}
 
-	if(taps_released != 0){
-		/* If one of fingers were released it means that gesture was finished so
-		 * send "button up" event immediately without checking for delivery time.
+	/* Was finger released and it wasn't a tap, but gesture? */
+	if(taps_released != 0 && gs->move_type != GS_NONE){
+		/* Gesture finished - it's time to send "button up" event immediately without
+		 * checking for delivery time.
 		 */
 
 		/* For hold&move gesture user have to release stationary finger to end gesture.
