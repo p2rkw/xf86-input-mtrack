@@ -26,19 +26,19 @@
 /* Convert a radians value into an mtrack angle.
  */
 static double trig_encode_radians(double radians) {
-	double angle = (radians / M_PI) * 4;
-	if (angle < 0)
-		angle = angle + 8;
+	double angle = (radians / M_PI) * 4.0;
+	if (angle < 0.0)
+		angle = angle + 8.0;
 	return angle;
 }
 
 /* Convert an mtrack angle value into radians.
  */
 static double trig_decode_radians(double angle) {
-	if (angle < 4)
-		return (angle * M_PI) / 4;
+	if (angle < 4.0)
+		return (angle * M_PI) / 4.0;
 	else
-		return ((8 - angle) * M_PI) / -4;
+		return ((8.0 - angle) * M_PI) / -4.0;
 }
 
 double trig_direction(double dx, double dy) {
@@ -64,7 +64,7 @@ int trig_generalize(double dir)
 double trig_angles_add(double a1, double a2)
 {
 	double a = MODVAL(a1 + a2, 8.0);
-	if (a < 0)
+	if (a < 0.0)
 		a = a + 8.0;
 	return a;
 }
@@ -81,8 +81,8 @@ double trig_angles_acute(double a1, double a2)
 		angle = trig_angles_sub(a1, a2);
 	else
 		angle = trig_angles_sub(a2, a1);
-	if (angle > 4)
-		angle = 8 - angle;
+	if (angle > 4.0)
+		angle = 8.0 - angle;
 	return angle;
 }
 

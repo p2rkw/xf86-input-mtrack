@@ -76,6 +76,7 @@
 #define DEFAULT_ROTATE_DIST 150
 #define DEFAULT_ROTATE_LT_BTN 14
 #define DEFAULT_ROTATE_RT_BTN 15
+#define DEFAULT_HOLD1_MOVE1_BTN 1
 #define DEFAULT_DRAG_ENABLE 1
 #define DEFAULT_DRAG_TIMEOUT 350
 #define DEFAULT_DRAG_WAIT 40
@@ -161,6 +162,7 @@ struct MConfig {
 	int rotate_dist;		// Distance needed to trigger a button. >= 0, 0 disables
 	int rotate_lt_btn;		// Button to use for rotate left. >= 0, 0 is none
 	int rotate_rt_btn;		// Button to use for rotate right. >= 0, 0 is none
+	int hold1_move1_btn;		// Button to use for hold&move. For one stationary and one moving finger. >= 0, 0 disables
 	int drag_enable;		// Enable tap-to-drag? 0 or 1
 	int drag_timeout;		// How long to wait for a move after tapping? > 0
 	int drag_wait;			// How long to wait before triggering button down? >= 0

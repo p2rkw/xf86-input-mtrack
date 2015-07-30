@@ -178,6 +178,9 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->rotate_rt_btn;
 	mprops.rotate_buttons = atom_init_integer(local->dev, MTRACK_PROP_ROTATE_BUTTONS, 2, ivals, 8);
 
+	ivals[0] = cfg->hold1_move1_btn;
+	mprops.hold_move_buttons = atom_init_integer(local->dev, MTRACK_PROP_HOLD_MOVE_BUTTONS, 1, ivals, 8);
+
 	ivals[0] = cfg->drag_enable;
 	ivals[1] = cfg->drag_timeout;
 	ivals[2] = cfg->drag_wait;
@@ -556,6 +559,22 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set rotate buttons to %d %d\n",
 				cfg->rotate_lt_btn, cfg->rotate_rt_btn);
+#endif
+		}
+	}
+	else if (property == mprops.hold_move_buttons){
+		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals8 = (uint8_t*)prop->data;
+		if (!VALID_BUTTON(ivals8[0]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->hold1_move1_btn = ivals8[0];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: set hold1 move1 button to %d\n",
+				cfg->hold1_move1_btn);
 #endif
 		}
 	}

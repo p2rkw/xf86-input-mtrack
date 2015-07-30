@@ -76,6 +76,9 @@ static void trigger_button_emulation(struct Gestures* gs, int button)
 	}
 }
 
+/* It's called 'unsafe' because caller have to check that all conditions required to
+ * trigger delayed button were met.
+ */
 static void trigger_delayed_button_unsafe(struct Gestures* gs)
 {
 	int button;
@@ -443,12 +446,15 @@ static void trigger_move(struct Gestures* gs,
 	}
 }
 
-static int get_swipe_dir_n(const struct Touch* touches[TOUCHES_MAX], int count)
+static double get_swipe_dir_n(const struct Touch* touches[TOUCHES_MAX], int count)
 {
 	if(count > TOUCHES_MAX || count <= 0)
 		return TR_NONE;
+	if(count == 1)
+		return touches[0]->direction;
 
-	int i, avg_dir;
+	int i;
+	double avg_dir;
 	double angles[TOUCHES_MAX];
 
 	/* Find average direction */
@@ -461,7 +467,7 @@ static int get_swipe_dir_n(const struct Touch* touches[TOUCHES_MAX], int count)
 
 	/* Check if all touches have (almost) same direction */
 	for (i = 0; i < count; ++i) {
-		if (trig_angles_acute(avg_dir, touches[i]->direction) > 1.0)
+		if (trig_angles_acute(avg_dir, touches[i]->direction) > 0.5)
 			return TR_NONE;
 	}
 	return avg_dir;
@@ -479,63 +485,102 @@ static void get_swipe_avg_xy(const struct Touch* touches[TOUCHES_MAX], int count
 	*out_y = y/(double)count;
 }
 
-static struct MConfigSwipe tap_n_move_cfg = {
-	.drag_sens = 1000,
-	.dn_btn = 1,
-	.up_btn = 1,
-	.lt_btn = 1,
-	.rt_btn = 1,
-	.dist = 1,
-	.hold = 0
-};
-
+/* To avoid users' confusion accept diagonal direction only if same button was
+ * bound to aligned directions.
+ * If different buttons were used and it's diagonal movement we can't decide
+ * which button schould be generated.
+ * It's better to ignore one gesture than confuse user.
+ */
 int get_button_for_dir(const struct MConfigSwipe* cfg_swipe, int dir){
 	switch (dir){
 	case TR_NONE:
 		if(cfg_swipe->up_btn == cfg_swipe->lt_btn && cfg_swipe->lt_btn == cfg_swipe->dn_btn && cfg_swipe->dn_btn == cfg_swipe->rt_btn)
-			return cfg_swipe->up_btn - 1;
+			return cfg_swipe->up_btn;
 		return -1;
 	case TR_DIR_UP:
-		return cfg_swipe->up_btn - 1;
+		return cfg_swipe->up_btn;
 	case TR_DIR_DN:
-		return cfg_swipe->dn_btn - 1;
+		return cfg_swipe->dn_btn;
 	case TR_DIR_LT:
-		return cfg_swipe->lt_btn - 1;
+		return cfg_swipe->lt_btn;
 	case TR_DIR_RT:
-		return cfg_swipe->rt_btn - 1;
+		return cfg_swipe->rt_btn;
 	case (8 + TR_DIR_UP + TR_DIR_LT) / 2:
 		if(cfg_swipe->up_btn != cfg_swipe->lt_btn)
 			return -1;
-		return cfg_swipe->up_btn - 1;
+		return cfg_swipe->up_btn;
 	case (TR_DIR_LT + TR_DIR_DN) / 2:
 		if(cfg_swipe->lt_btn != cfg_swipe->dn_btn)
 			return -1;
-		return cfg_swipe->lt_btn - 1;
+		return cfg_swipe->lt_btn;
 	case (TR_DIR_DN + TR_DIR_RT) / 2:
 		if(cfg_swipe->dn_btn != cfg_swipe->rt_btn)
 			return -1;
-		return cfg_swipe->dn_btn - 1;
+		return cfg_swipe->dn_btn;
 	case (TR_DIR_RT + TR_DIR_UP) / 2:
 		if(cfg_swipe->rt_btn != cfg_swipe->up_btn)
 			return -1;
-		return cfg_swipe->rt_btn - 1;
+		return cfg_swipe->rt_btn;
 	default:
 		return -1;
 	}
 }
 
-/* To avoid users' confusion accept diagonal direction only if same button was
- * bound to aligned directions.
- * If different buttons were used and it's diagonal movement we can't decide
- * which button schould be generated, so it will be ignored.
+/* It's called 'unsafe' because caller have to check that all conditions required to
+ * trigger swipe were met.
  */
-static int get_unequivocal_button(const struct MConfigSwipe* cfg_swipe, int dir){
-	int button;
+static int trigger_swipe_unsafe(struct Gestures* gs,
+			const struct MConfig* cfg, const struct MConfigSwipe* cfg_swipe,
+			const struct Touch* touches[4], int touches_count,
+			int move_type_to_trigger)
+{
+	double avg_move_x, avg_move_y;
+	int dist, button;
+	double dir;
+	struct timeval tv_tmp;
 
+	dir = get_swipe_dir_n(touches, touches_count);
+	dir = trig_generalize(dir);
 	button = get_button_for_dir(cfg_swipe, dir);
-	if (button == get_button_for_dir(cfg_swipe, trig_generalize(dir)))
-		return button;
-	return -1;
+	if (!IS_VALID_BUTTON(button))
+		return 0;
+
+	trigger_drag_stop(gs, 1);
+	get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
+	// hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
+	dist = hypot(avg_move_x, avg_move_y);
+	if(cfg_swipe->drag_sens){
+		gs->move_dx = (int)(cfg->sensitivity * avg_move_x * cfg_swipe->drag_sens * 0.001);
+		gs->move_dy = (int)(cfg->sensitivity * avg_move_y * cfg_swipe->drag_sens * 0.001);
+	} else{
+		gs->move_dx = 0;
+		gs->move_dy = 0;
+	}
+	if (gs->move_type != move_type_to_trigger){
+		trigger_delayed_button_unsafe(gs);
+		gs->move_dist = 0;
+	}
+	else if (gs->move_dir != dir)
+		gs->move_dist = 0;
+	gs->move_type = move_type_to_trigger;
+	gs->move_dist += (int)ABSVAL(dist);
+	gs->move_dir = dir;
+	gs->move_speed = dist/timertomicro(&gs->dt);
+	timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
+
+	if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
+		if(cfg_swipe->hold != 0)
+			timeraddms(&gs->time, cfg_swipe->hold, &tv_tmp);
+		else
+			timerclear(&tv_tmp); // wait for gesture end
+		gs->move_dist = MODVAL(gs->move_dist, cfg_swipe->dist);
+		trigger_button_click(gs, button - 1, &tv_tmp);
+	}
+#ifdef DEBUG_GESTURES
+	xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
+		dist, dir, gs->move_dist, cfg_swipe->dist, gs->move_speed);
+#endif
+	return 1;
 }
 
 /* Return:
@@ -546,11 +591,8 @@ static int get_unequivocal_button(const struct MConfigSwipe* cfg_swipe, int dir)
 static int trigger_swipe(struct Gestures* gs,
 			const struct MConfig* cfg, const struct Touch* touches[4], int touches_count)
 {
-	int move_type_to_trigger, dir;
-	double avg_move_x, avg_move_y, dist;
+	int move_type_to_trigger;
 	const struct MConfigSwipe* cfg_swipe;
-	struct timeval tv_tmp;
-	int button;
 
 	switch(touches_count){
 	case 2:
@@ -566,138 +608,117 @@ static int trigger_swipe(struct Gestures* gs,
 		move_type_to_trigger = GS_SWIPE4;
 		break;
 	default:
-			return 2;
+			return 0;
 	}
 
-	dir = get_swipe_dir_n(touches, touches_count);
+	if (gs->move_type == move_type_to_trigger || timercmp(&gs->time, &gs->move_wait, >=))
+		return trigger_swipe_unsafe(gs, cfg, cfg_swipe, touches, touches_count, move_type_to_trigger);
 
-	if(dir == TR_NONE)
+	return 0;
+}
+
+/* Compute hypot from x, y and compare it with given value
+ */
+static int hypot_cmp(int x, int y, int value)
+{
+	int lhs, rhs;
+	lhs = x * x + y * y;
+	rhs = value * value;
+
+	if(lhs == rhs)
 		return 0;
-	button = get_unequivocal_button(cfg_swipe, dir);
-	if (!IS_VALID_BUTTON(button)){
-		return 3;
-	}
-
-	if (gs->move_type == move_type_to_trigger || timercmp(&gs->time, &gs->move_wait, >=)) {
-		trigger_drag_stop(gs, 1);
-		get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
-		// hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
-		dist = hypot(avg_move_x, avg_move_y);
-		if(cfg_swipe->drag_sens){
-			gs->move_dx = (int)(cfg->sensitivity * avg_move_x * cfg_swipe->drag_sens * 0.001);
-			gs->move_dy = (int)(cfg->sensitivity * avg_move_y * cfg_swipe->drag_sens * 0.001);
-		} else{
-			gs->move_dx = 0;
-			gs->move_dy = 0;
-		}
-		if (gs->move_type != move_type_to_trigger){
-			trigger_delayed_button_unsafe(gs);
-			gs->move_dist = 0;
-		}
-		else if (gs->move_dir != dir)
-			gs->move_dist = 0;
-		gs->move_type = move_type_to_trigger;
-		gs->move_dist += (int)ABSVAL(dist);
-		gs->move_dir = dir;
-		gs->move_speed = dist/timertomicro(&gs->dt);
-		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
-
-		if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
-			if(cfg_swipe->hold != 0)
-				timeraddms(&gs->time, cfg_swipe->hold, &tv_tmp);
-			else
-				timerclear(&tv_tmp); // wait for gesture end
-			gs->move_dist = MODVAL(gs->move_dist, cfg_swipe->dist);
-			trigger_button_click(gs, button, &tv_tmp);
-		}
-#ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
-				dist, dir, gs->move_dist, cfg_swipe->dist, gs->move_speed);
-#endif
-	}
+	if(lhs < rhs)
+		return -1;
 	return 1;
 }
 
-static int trigger_tap_n_swipe(struct Gestures* gs,
+static int is_hold_and_move(struct Gestures* gs)
+{
+	return gs->move_type == GS_HOLD_AND_MOVE2 /* || gs->move_type !== GS_HOLD_AND_MOVE_N*/ ;
+}
+
+static int is_touch_stationary(const struct Touch* touch, int max_movement)
+{
+	return touch->direction == TR_NONE ||
+				(hypot_cmp(touch->total_dx, touch->total_dy, max_movement) <= 0);
+}
+
+/* todo: make some of the fields (or whole object) configurable
+ */
+static struct MConfigSwipe hold_and_move_default_cfg = {
+	.drag_sens = 1100,
+	.dn_btn = 1,
+	.up_btn = 1,
+	.lt_btn = 1,
+	.rt_btn = 1,
+	.dist = 1,
+	.hold = 0
+};
+
+/* Right now only gesture with one stationary finger and one moving finger is supported.
+ * Gestures with two or more stationary fingers or two or more moving fingers
+ * are not implemented, but I guess it will be easy to extend this function to support
+ * them.
+ */
+static int trigger_hold_and_move(struct Gestures* gs,
 			const struct MConfig* cfg, const struct Touch* touches[TOUCHES_MAX], int touches_count)
 {
-	int dir, button, move_type_to_trigger;
-	int is_tap_n_swipe;
-	double avg_move_x, avg_move_y, dist;
-	const struct MConfigSwipe* cfg_swipe;
+	int move_type_to_trigger;
+	struct MConfigSwipe* cfg_swipe;
 	struct timeval tv_tmp;
+	int stationary_max_move;
+
+	/* Some day it may depend on touches_count and bacame const */
+	cfg_swipe = &hold_and_move_default_cfg;
+	/* How far stationary finger can move, before gesture invalidation.
+	 * todo: make configurable
+	 */
+	stationary_max_move = cfg->tap_dist * 1.35;
 
 	switch(touches_count){
-		case 2:
-			move_type_to_trigger = GS_TAP_N_SWIPE2;
-			break;
-		case 3:
-			move_type_to_trigger = GS_TAP_N_SWIPE3;
-			break;
-		case 4:
-			move_type_to_trigger = GS_TAP_N_SWIPE4;
-			break;
-	}
-
-	is_tap_n_swipe = gs->move_type == move_type_to_trigger || touches[0]->direction == TR_NONE || (touches[0]->total_dx < 10 && touches[0]->total_dy < 20);
-
-	if(is_tap_n_swipe == FALSE)
+	case 0:
 		return 0;
-
-	/* skip first touch with dir == NONE */
-	//++touches;
-	//--touches_count;
-	cfg_swipe = &tap_n_move_cfg;
-
-	dir = get_swipe_dir_n(touches+1, touches_count-1);
-
-	timeraddms(&touches[0]->down, cfg->tap_timeout * 2, &tv_tmp);
-	if (timercmp(&touches[touches_count-1]->down, &tv_tmp, >=)){
-		gs->move_type = move_type_to_trigger;
-		xf86Msg(X_INFO, "gs->move_type = move_type_to_trigger\n");
-	}
-	else if (dir == TR_NONE){
-		return 0;
+	case 2:
+		move_type_to_trigger = GS_HOLD_AND_MOVE2;
+		cfg_swipe->up_btn = cfg_swipe->dn_btn = cfg->hold1_move1_btn;
+		cfg_swipe->lt_btn = cfg_swipe->rt_btn = cfg->hold1_move1_btn;
+		break;
+	case 1:
+	default:
+		if(!is_hold_and_move(gs))
+			return 0;
+		move_type_to_trigger = gs->move_type;
 	}
 
-	button = get_unequivocal_button(cfg_swipe, dir);
-	if (!IS_VALID_BUTTON(button)){
-		return 3;
-	}
-	dir = trig_generalize(dir);
-
-	if (gs->move_type == move_type_to_trigger) {
-		trigger_drag_stop(gs, 1);
-		get_swipe_avg_xy(touches + 1, touches_count - 1, &avg_move_x, &avg_move_y);
-		// hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
-		dist = hypot(avg_move_x, avg_move_y);
-		if(cfg_swipe->drag_sens){
-			gs->move_dx = (int)(cfg->sensitivity * avg_move_x * cfg_swipe->drag_sens * 0.001);
-			gs->move_dy = (int)(cfg->sensitivity * avg_move_y * cfg_swipe->drag_sens * 0.001);
-		} else{
-			gs->move_dx = 0;
-			gs->move_dy = 0;
-		}
-		if (gs->move_type != move_type_to_trigger){
+	if (gs->move_type == move_type_to_trigger){
+		if (!is_touch_stationary(touches[0], stationary_max_move)){
+			gs->move_type = GS_MOVE;
 			trigger_delayed_button_unsafe(gs);
-			gs->move_dist = 0;
 		}
-		else if (gs->move_dir != dir)
-			gs->move_dist = 0;
-		gs->move_type = move_type_to_trigger;
-		gs->move_dist += (int)ABSVAL(dist);
-		gs->move_dir = dir;
-		gs->move_speed = dist/timertomicro(&gs->dt);
-		if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
-			if(cfg_swipe->hold != 0)
-				timeraddms(&gs->time, cfg_swipe->hold, &tv_tmp);
-			else
-				timerclear(&tv_tmp); // wait for gesture end
-			gs->move_dist = MODVAL(gs->move_dist, cfg_swipe->dist);
-			trigger_button_click(gs, button, &tv_tmp);
+		else if (touches_count == 1){
+			/* Only one finger is touching, it's stationary, and touch&swipe was initiated
+			 * earlier.
+			 * Block other actions/movements.
+			 */
+			return 1;
 		}
 	}
-	return 1;
+	else{
+		if (is_touch_stationary(touches[0], stationary_max_move)){
+			if (get_swipe_dir_n(touches+1, touches_count-1) != TR_NONE){
+				timeraddms(&touches[0]->down, cfg->tap_timeout * 1.3, &tv_tmp);
+				if (timercmp(&touches[touches_count-1]->down, &tv_tmp, >=)){
+					gs->move_type = move_type_to_trigger;
+				}
+			}
+		}
+	}
+
+	if (gs->move_type == move_type_to_trigger)
+		return trigger_swipe_unsafe(gs, cfg, cfg_swipe, touches + 1, touches_count - 1,
+						move_type_to_trigger);
+
+	return 0;
 }
 
 static void trigger_scale(struct Gestures* gs,
@@ -838,22 +859,17 @@ static void moving_update(struct Gestures* gs,
 		else if (btn_count < 1)
 			trigger_reset(gs);
 	}
+	else if (cfg->trackpad_disable < 1 && trigger_hold_and_move(gs, cfg, touches, count)){
+		/* nothing to do */
+	}
 	else if (count == 1 && cfg->trackpad_disable < 2) {
-		if(gs->move_type == GS_TAP_N_SWIPE2 && touches[0]->dx < 10 && touches[0]->dy < 10){
-			/* nothing */
-		}
-		else{
-			dx += touches[0]->dx;
-			dy += touches[0]->dy;
-			trigger_move(gs, cfg, dx, dy);
-		}
+		dx += touches[0]->dx;
+		dy += touches[0]->dy;
+		trigger_move(gs, cfg, dx, dy);
 	}
 	else if (count == 2 && cfg->trackpad_disable < 1) {
 		// scroll, scale, or rotate
-		if (trigger_tap_n_swipe(gs, cfg, touches, count)){
-			/* nothing to do */
-		}
-		else if (trigger_swipe(gs, cfg, touches, count)) {
+		if (trigger_swipe(gs, cfg, touches, count)) {
 			/* nothing to do */
 		}
 		else if ((dir = get_rotate_dir(touches[0], touches[1])) != TR_NONE) {
@@ -868,10 +884,7 @@ static void moving_update(struct Gestures* gs,
 		}
 	}
 	else if ((count == 3 || count == 4) && cfg->trackpad_disable < 1) {
-		if (trigger_tap_n_swipe(gs, cfg, touches, count)){
-			/* nothing to do */
-		}
-		else if (trigger_swipe(gs, cfg, touches, count)) {
+		if (trigger_swipe(gs, cfg, touches, count)) {
 			/* nothing to do */
 		}
 	}
@@ -961,10 +974,13 @@ int gestures_delayed(struct MTouch* mt)
 	}
 
 	if(taps_released != 0){
-		// if one of fingers were released it means that gesture was finished so
-		// send "button up" event immediately without checking for delivery time
-		// for tap&swipe gesture user have to release first finger to end gesture
-		if (gs->move_type != GS_TAP_N_SWIPE2 || GETBIT(ms->touch[0].state, MT_RELEASED)){
+		/* If one of fingers were released it means that gesture was finished so
+		 * send "button up" event immediately without checking for delivery time.
+		 */
+
+		/* For hold&move gesture user have to release stationary finger to end gesture.
+		 */
+		if (!is_hold_and_move(gs) || GETBIT(ms->touch[0].state, MT_RELEASED)){
 			trigger_delayed_button_unsafe(gs);
 			gs->move_dx = gs->move_dy = 0;
 			gs->move_type = GS_NONE;
@@ -981,15 +997,16 @@ int gestures_delayed(struct MTouch* mt)
 
 	if(timercmp(&gs->button_delayed_time, &now, >)){
 		 timersub(&gs->button_delayed_time, &now, &delta);
-		 // That second check may seem unnecessary, but it is not.
-		 // Even if button delayed time is > than now time, timertoms may still return 0
-		 // because it truncates time to miliseconds. It's important because truncated time
-		 // is used to setup timer.
+		 /* That second check may seem unnecessary, but it is not.
+		  * Even if button delayed time is > than now time, timertoms may still return 0
+		  * because it truncates time to miliseconds. It's important because truncated time
+		  * is used to setup timer.
+		  */
 		 if(timertoms(&delta) > 1){
 #ifdef DEBUG_GESTURES
 			xf86Msg(X_INFO, "gestures_delayed: %d delayed, new delta: %d ms\n", gs->button_delayed, timertoms(&delta));
 #endif
-			return 1; // install timer
+			return 1; /* install timer */
 		 }
 	}
 
