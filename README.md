@@ -303,6 +303,12 @@ value. A value of 0 disables rotation left. Defaults to 14.
 For two finger rotation. The button that is triggered by rotating right. Integer
 value. A value of 0 disables rotation right. Defaults to 15.
 
+**Hold1Move1Button** - 
+For two finger hold-and-move functionality. The button that is triggered by 
+holding one finger and moving another one. Integer value. 
+A value of 0 disables hold-and-move. Value of 0 disables this functionality.
+Defaults to 1.
+
 **TapDragEnable** - 
 Whether or not to enable tap-to-drag functionality. Boolean value. Defaults to
 true.
@@ -346,6 +352,16 @@ Example configuration for three finger drag:
 ```
 This will enable draging with three fingers. Change sensitivity for faster/slower movements.
 Scroll, and Swipe4 are also supported.
+
+##### Hold and move
+Hold down one finger in place to initiate hold-and-move gesture.
+Then move another finger to drag configured button.
+Gesture will last as long as fist finger (a.k.a. stationary finger) will
+be held down in place.
+
+Increase TapMaxDist to give stationary finger more freedom.
+Set Hold1Move1Button to 0 to disable, set to other value to send button other 
+than "1".
 
 [1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt     "Kernel Multitouch Protocol"
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"
