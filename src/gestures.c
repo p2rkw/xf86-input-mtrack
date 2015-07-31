@@ -649,12 +649,12 @@ static int is_touch_stationary(const struct Touch* touch, int max_movement)
  */
 static struct MConfigSwipe hold_and_move_default_cfg = {
 	.drag_sens = 1100,
-	.dn_btn = 1,
-	.up_btn = 1,
-	.lt_btn = 1,
-	.rt_btn = 1,
-	.dist = 1,
-	.hold = 0
+	.dn_btn = 10,
+	.up_btn = 11,
+	.lt_btn = 12,
+	.rt_btn = 13,
+	.dist = 50,
+	.hold = 50
 };
 
 /* Right now only gesture with one stationary finger and one moving finger is supported.
@@ -679,6 +679,15 @@ static int trigger_hold_and_move(struct Gestures* gs,
 
 	switch(touches_count){
 	case 0:
+		xf86Msg(X_INFO, "trigger_hold_and_move: touches_count: 0; move_type: %d\n", gs->move_type);
+		if (is_hold_and_move(gs)){
+			/* Stationary finger released */
+			gs->move_type = GS_NONE;
+			trigger_delayed_button_unsafe(gs);
+			trigger_button_up(gs, 9);
+xf86Msg(X_INFO, "trigger_hold_and_move: stationary finger released\n");
+			return 0;
+		}
 		return 0;
 	case 2:
 		move_type_to_trigger = GS_HOLD_AND_MOVE2;
@@ -694,8 +703,10 @@ static int trigger_hold_and_move(struct Gestures* gs,
 
 	if (gs->move_type == move_type_to_trigger){
 		if (!is_touch_stationary(touches[0], stationary_max_move)){
+			/* Stationary finger moved too far */
 			gs->move_type = GS_MOVE;
 			trigger_delayed_button_unsafe(gs);
+			trigger_button_up(gs, 9);
 		}
 		else if (touches_count == 1){
 			/* Only one finger is touching, it's stationary, and touch&swipe was initiated
@@ -711,6 +722,7 @@ static int trigger_hold_and_move(struct Gestures* gs,
 				timeraddms(&touches[0]->down, cfg->tap_timeout * 1.3, &tv_tmp);
 				if (timercmp(&touches[touches_count-1]->down, &tv_tmp, >=)){
 					gs->move_type = move_type_to_trigger;
+					trigger_button_down(gs, 9);
 				}
 			}
 		}
@@ -848,21 +860,21 @@ static void moving_update(struct Gestures* gs,
 			dx += ms->touch[i].dx;
 			dy += ms->touch[i].dy;
 		}
-		else if (!GETBIT(ms->touch[i].flags, GS_TAP)) {
+		else if (!GETBIT(ms->touch[i].flags, GS_TAP) && !GETBIT(ms->touch[i].state, MT_RELEASED)) {
 			if (count < TOUCHES_MAX)
 				touches[count++] = &ms->touch[i];
 		}
 	}
 
 	// Determine gesture type.
-	if (count == 0) {
+	if (cfg->trackpad_disable < 1 && trigger_hold_and_move(gs, cfg, touches, count)){
+		/* nothing to do */
+	}
+	else if (count == 0) {
 		if (btn_count >= 1 && cfg->trackpad_disable < 2)
 			trigger_move(gs, cfg, dx, dy);
 		else if (btn_count < 1)
 			trigger_reset(gs);
-	}
-	else if (cfg->trackpad_disable < 1 && trigger_hold_and_move(gs, cfg, touches, count)){
-		/* nothing to do */
 	}
 	else if (count == 1 && cfg->trackpad_disable < 2) {
 		dx += touches[0]->dx;
@@ -976,19 +988,19 @@ int gestures_delayed(struct MTouch* mt)
 	}
 
 	/* Was finger released and it wasn't a tap, but gesture? */
-	if(taps_released != 0 && gs->move_type != GS_NONE){
+	if(taps_released != 0 && !is_hold_and_move(gs)){
 		/* Gesture finished - it's time to send "button up" event immediately without
 		 * checking for delivery time.
 		 */
 
 		/* For hold&move gesture user have to release stationary finger to end gesture.
 		 */
-		if (!is_hold_and_move(gs) || GETBIT(ms->touch[0].state, MT_RELEASED)){
+		//if (!is_hold_and_move(gs) || GETBIT(ms->touch[0].state, MT_RELEASED)){
 			trigger_delayed_button_unsafe(gs);
 			gs->move_dx = gs->move_dy = 0;
 			gs->move_type = GS_NONE;
 			return 2;
-		}
+		//}
 	}
 
 	if(is_timer_infinite(gs))
