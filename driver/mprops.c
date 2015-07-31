@@ -25,6 +25,7 @@
 
 #define MAX_INT_VALUES 4
 #define MAX_FLOAT_VALUES 4
+#define MAX_BUTTON_VALUES 6
 
 #define VALID_BUTTON(x) (x >= 0 && x <= 32)
 #define VALID_BOOL(x) (x == 0 || x == 1)
@@ -178,8 +179,24 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->rotate_rt_btn;
 	mprops.rotate_buttons = atom_init_integer(local->dev, MTRACK_PROP_ROTATE_BUTTONS, 2, ivals, 8);
 
-	ivals[0] = cfg->hold1_move1_btn;
-	mprops.hold_move_buttons = atom_init_integer(local->dev, MTRACK_PROP_HOLD_MOVE_BUTTONS, 1, ivals, 8);
+	ivals[0] = cfg->hold1_move1_stationary.max_move;
+	ivals[1] = cfg->hold1_move1_stationary.button;
+	mprops.hold1_move1_stationary = atom_init_integer(local->dev, MTRACK_PROP_HOLD1_MOVE1_STATIONARY_SETTINGS, 2, ivals, 32);
+
+	init_swipe_props(local->dev, &mprops.hold1_move1, &cfg->hold1_move1, MTRACK_PROP_HOLD1_MOVE1_SETTINGS, MTRACK_PROP_HOLD1_MOVE1_BUTTONS);
+
+	ivals[0] = cfg->hold1_move2_stationary.max_move;
+	ivals[1] = cfg->hold1_move2_stationary.button;
+	mprops.hold1_move2_stationary = atom_init_integer(local->dev, MTRACK_PROP_HOLD1_MOVE2_STATIONARY_SETTINGS, 2, ivals, 32);
+
+	init_swipe_props(local->dev, &mprops.hold1_move2, &cfg->hold1_move2, MTRACK_PROP_HOLD1_MOVE2_SETTINGS, MTRACK_PROP_HOLD1_MOVE2_BUTTONS);
+
+
+	ivals[0] = cfg->hold1_move3_stationary.max_move;
+	ivals[1] = cfg->hold1_move3_stationary.button;
+	mprops.hold1_move3_stationary = atom_init_integer(local->dev, MTRACK_PROP_HOLD1_MOVE3_STATIONARY_SETTINGS, 2, ivals, 32);
+
+	init_swipe_props(local->dev, &mprops.hold1_move3, &cfg->hold1_move3, MTRACK_PROP_HOLD1_MOVE3_SETTINGS, MTRACK_PROP_HOLD1_MOVE3_BUTTONS);
 
 	ivals[0] = cfg->drag_enable;
 	ivals[1] = cfg->drag_timeout;
@@ -195,6 +212,24 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	mprops.edge_size = atom_init_integer(local->dev, MTRACK_PROP_EDGE_SIZE, 1, ivals, 8);
 }
 
+int check_buttons_property(XIPropertyValuePtr prop, uint8_t** buttons_ret_arr, int buttons_count)
+{
+	uint8_t* ivals8;
+	int i;
+
+	if (prop->size != buttons_count || prop->format != 8 || prop->type != XA_INTEGER)
+		return BadMatch;
+
+	ivals8 = (uint8_t*)prop->data;
+	for (i = 0; i < buttons_count; ++i) {
+		if (!VALID_BUTTON(ivals8[i]))
+			return BadMatch;
+	}
+
+	*buttons_ret_arr = ivals8;
+	return Success;
+}
+
 /* Return:
  * 1 - property was recognized and handled with or without error, check error code for details
  * 0 - property not recognized, don't trust returned error code - it's invalid
@@ -204,7 +239,6 @@ static int set_swipe_properties(Atom property, BOOL checkonly, XIPropertyValuePt
                                 struct MConfigSwipe* cfg_swipe, int* error_code){
 
 	uint8_t* ivals8;
-	uint16_t* ivals16;
 	uint32_t* ivals32;
 
 	*error_code = Success;
@@ -228,23 +262,16 @@ static int set_swipe_properties(Atom property, BOOL checkonly, XIPropertyValuePt
 		}
 	}
 	else if (property == props_swipe->buttons) {
-		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
-			return *error_code = BadMatch, 1;
-
-		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
-			return *error_code = BadMatch, 1;
-
-		if (!checkonly) {
-			cfg_swipe->up_btn = ivals8[0];
-			cfg_swipe->dn_btn = ivals8[1];
-			cfg_swipe->lt_btn = ivals8[2];
-			cfg_swipe->rt_btn = ivals8[3];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set swipe buttons to %d %d %d %d\n",
-				cfg_swipe->up_btn, cfg_swipe->dn_btn, cfg_swipe->lt_btn, cfg_swipe->rt_btn);
-#endif
+		if (check_buttons_property(prop, &ivals8, 4) == Success){
+			if (!checkonly) {
+				cfg_swipe->up_btn = ivals8[0];
+				cfg_swipe->dn_btn = ivals8[1];
+				cfg_swipe->lt_btn = ivals8[2];
+				cfg_swipe->rt_btn = ivals8[3];
+			}
 		}
+		else
+			return *error_code = BadMatch, 1;
 	}
 	else{
 		return 0;
@@ -562,21 +589,65 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (property == mprops.hold_move_buttons){
-		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
+	else if (property == mprops.hold1_move1_stationary){
+		if (prop->size != 2 || prop->format != 32 || prop->type != XA_INTEGER)
 			return BadMatch;
 
-		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_BUTTON(ivals8[0]))
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 0|| !VALID_BUTTON(ivals32[1]))
 			return BadMatch;
 
 		if (!checkonly) {
-			cfg->hold1_move1_btn = ivals8[0];
+			cfg->hold1_move1_stationary.max_move = ivals32[0];
+			cfg->hold1_move1_stationary.button = ivals32[1];
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set hold1 move1 button to %d\n",
-				cfg->hold1_move1_btn);
+			xf86Msg(X_INFO, "mtrack: hold1_move1: max_move %d; button: %d\n",
+				cfg->hold1_move1_stationary.max_move, cfg->hold1_move1_stationary.button);
 #endif
 		}
+	}
+	else if (set_swipe_properties(property, checkonly, prop, &mprops.hold1_move1, &cfg->hold1_move1, &error_code)) {
+		return error_code;
+	}
+	else if (property == mprops.hold1_move2_stationary){
+		if (prop->size != 2 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 0|| !VALID_BUTTON(ivals32[1]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->hold1_move2_stationary.max_move = ivals32[0];
+			cfg->hold1_move2_stationary.button = ivals32[1];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: hold1_move2: max_move %d; button: %d\n",
+				cfg->hold1_move2_stationary.max_move, cfg->hold1_move2_stationary.button);
+#endif
+		}
+	}
+	else if (set_swipe_properties(property, checkonly, prop, &mprops.hold1_move2, &cfg->hold1_move2, &error_code)) {
+		return error_code;
+	}
+	else if (property == mprops.hold1_move3_stationary){
+		if (prop->size != 2 || prop->format != 32 || prop->type != XA_INTEGER)
+			return BadMatch;
+
+		ivals32 = (uint32_t*)prop->data;
+		if (ivals32[0] < 0|| !VALID_BUTTON(ivals32[1]))
+			return BadMatch;
+
+		if (!checkonly) {
+			cfg->hold1_move3_stationary.max_move = ivals32[0];
+			cfg->hold1_move3_stationary.button = ivals32[1];
+#ifdef DEBUG_PROPS
+			xf86Msg(X_INFO, "mtrack: hold1_move1: max_move %d; button: %d\n",
+				cfg->hold1_move3_stationary.max_move, cfg->hold1_move3_stationary.button);
+#endif
+		}
+	}
+	else if (set_swipe_properties(property, checkonly, prop, &mprops.hold1_move3, &cfg->hold1_move3, &error_code)) {
+		return error_code;
 	}
 	else if (property == mprops.drag_settings) {
 		if (prop->size != 4 || prop->format != 32 || prop->type != XA_INTEGER)

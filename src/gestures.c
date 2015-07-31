@@ -541,11 +541,12 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 	double dir;
 	struct timeval tv_tmp;
 
+	if (touches_count <= 0)
+		return 0;
+
 	dir = get_swipe_dir_n(touches, touches_count);
 	dir = trig_generalize(dir);
 	button = get_button_for_dir(cfg_swipe, dir);
-	if (!IS_VALID_BUTTON(button))
-		return 0;
 
 	trigger_drag_stop(gs, 1);
 	get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
@@ -636,7 +637,9 @@ static int hypot_cmp(int x, int y, int value)
 
 static int is_hold_and_move(struct Gestures* gs)
 {
-	return gs->move_type == GS_HOLD_AND_MOVE2 /* || gs->move_type !== GS_HOLD_AND_MOVE_N*/ ;
+	return gs->move_type == GS_HOLD1_MOVE1  ||
+				gs->move_type == GS_HOLD1_MOVE2 ||
+				gs->move_type == GS_HOLD1_MOVE3;
 }
 
 static int is_touch_stationary(const struct Touch* touch, int max_movement)
@@ -645,17 +648,45 @@ static int is_touch_stationary(const struct Touch* touch, int max_movement)
 				(hypot_cmp(touch->total_dx, touch->total_dy, max_movement) <= 0);
 }
 
-/* todo: make some of the fields (or whole object) configurable
- */
-static struct MConfigSwipe hold_and_move_default_cfg = {
-	.drag_sens = 1100,
-	.dn_btn = 10,
-	.up_btn = 11,
-	.lt_btn = 12,
-	.rt_btn = 13,
-	.dist = 50,
-	.hold = 50
-};
+static int can_begin_hold_move(const struct Gestures* gs,
+				const struct Touch* touches[TOUCHES_MAX], int touches_count,
+				const struct MConfig* cfg, int max_move)
+{
+	struct timeval tv_tmp;
+	int i;
+
+	if (touches_count <= 1)
+		return 0;
+
+	/* Conditions: was first finger hold in place for some time */
+	if (!is_touch_stationary(touches[0], max_move))
+		return 0;
+	timeraddms(&touches[0]->down, cfg->tap_timeout * 1.2, &tv_tmp);
+	if (timercmp(&gs->time, &tv_tmp, <)) /* time < down + wait ?*/
+		return 0;
+
+	if (timercmp(&gs->time, &gs->move_wait, <))
+		return 0;
+
+	/* Condition: are other fingers making swipe gesture */
+	if (get_swipe_dir_n(touches+1, touches_count-1) == TR_NONE)
+		return 0;
+
+	return 1;
+}
+
+/* Map hold-and-move gesture type to touches */
+static int hold_move_calc_touches(int move_type, int real_touches_count){
+	switch (move_type){
+	case GS_HOLD1_MOVE1:
+		return 2;
+	case GS_HOLD1_MOVE2:
+		return 3;
+	case GS_HOLD1_MOVE3:
+		return 4;
+	}
+	return real_touches_count;
+}
 
 /* Right now only gesture with one stationary finger and one moving finger is supported.
  * Gestures with two or more stationary fingers or two or more moving fingers
@@ -666,66 +697,64 @@ static int trigger_hold_and_move(struct Gestures* gs,
 			const struct MConfig* cfg, const struct Touch* touches[TOUCHES_MAX], int touches_count)
 {
 	int move_type_to_trigger;
-	struct MConfigSwipe* cfg_swipe;
-	struct timeval tv_tmp;
-	int stationary_max_move;
+	const struct MConfigSwipe* cfg_swipe;
+	int stationary_max_move, stationary_btn;
 
-	/* Some day it may depend on touches_count and bacame const */
-	cfg_swipe = &hold_and_move_default_cfg;
-	/* How far stationary finger can move, before gesture invalidation.
-	 * todo: make configurable
-	 */
-	stationary_max_move = cfg->tap_dist * 1.35;
+	move_type_to_trigger = -1;
 
-	switch(touches_count){
-	case 0:
-		xf86Msg(X_INFO, "trigger_hold_and_move: touches_count: 0; move_type: %d\n", gs->move_type);
-		if (is_hold_and_move(gs)){
-			/* Stationary finger released */
-			gs->move_type = GS_NONE;
-			trigger_delayed_button_unsafe(gs);
-			trigger_button_up(gs, 9);
-xf86Msg(X_INFO, "trigger_hold_and_move: stationary finger released\n");
-			return 0;
-		}
-		return 0;
-	case 2:
-		move_type_to_trigger = GS_HOLD_AND_MOVE2;
-		cfg_swipe->up_btn = cfg_swipe->dn_btn = cfg->hold1_move1_btn;
-		cfg_swipe->lt_btn = cfg_swipe->rt_btn = cfg->hold1_move1_btn;
-		break;
-	case 1:
-	default:
-		if(!is_hold_and_move(gs))
-			return 0;
-		move_type_to_trigger = gs->move_type;
+	switch(hold_move_calc_touches(gs->move_type, touches_count)){
+		case 0:
+		case 1:
+			/* Process them later. */
+			break;
+		case 2:
+			move_type_to_trigger = GS_HOLD1_MOVE1;
+			stationary_btn = cfg->hold1_move1_stationary.button - 1;
+			stationary_max_move = cfg->hold1_move1_stationary.max_move;
+			cfg_swipe = &cfg->hold1_move1;
+			break;
+		case 3:
+			move_type_to_trigger = GS_HOLD1_MOVE2;
+			stationary_btn = cfg->hold1_move2_stationary.button - 1;
+			stationary_max_move = cfg->hold1_move2_stationary.max_move;
+			cfg_swipe = &cfg->hold1_move2;
+			break;
+		case 4:
+			move_type_to_trigger = GS_HOLD1_MOVE3;
+			stationary_btn = cfg->hold1_move3_stationary.button - 1;
+			stationary_max_move = cfg->hold1_move3_stationary.max_move;
+			cfg_swipe = &cfg->hold1_move3;
+			break;
+		default:
+				return 0;
 	}
 
-	if (gs->move_type == move_type_to_trigger){
-		if (!is_touch_stationary(touches[0], stationary_max_move)){
-			/* Stationary finger moved too far */
-			gs->move_type = GS_MOVE;
+	if (is_hold_and_move(gs)){
+		/* Condition: no fingers or stationary just released or stationary moved */
+		if (touches_count == 0 ||
+				GETBIT(touches[0]->state, MT_RELEASED) ||
+				!is_touch_stationary(touches[0], stationary_max_move)){
+			/* Stationary finger released or moved too far */
+			gs->move_type = GS_NONE;
 			trigger_delayed_button_unsafe(gs);
-			trigger_button_up(gs, 9);
+			trigger_button_up(gs, stationary_btn);
+			return 1;
 		}
 		else if (touches_count == 1){
-			/* Only one finger is touching, it's stationary, and touch&swipe was initiated
-			 * earlier.
+			/* Only one finger is touching, it's stationary.
+			 * The gesture was initiated earlier.
 			 * Block other actions/movements.
 			 */
 			return 1;
 		}
 	}
-	else{
-		if (is_touch_stationary(touches[0], stationary_max_move)){
-			if (get_swipe_dir_n(touches+1, touches_count-1) != TR_NONE){
-				timeraddms(&touches[0]->down, cfg->tap_timeout * 1.3, &tv_tmp);
-				if (timercmp(&touches[touches_count-1]->down, &tv_tmp, >=)){
-					gs->move_type = move_type_to_trigger;
-					trigger_button_down(gs, 9);
-				}
-			}
-		}
+
+	if (touches_count <= 1 || move_type_to_trigger == -1)
+		return 0;
+
+	if (can_begin_hold_move(gs, touches, touches_count, cfg, stationary_max_move)){
+		gs->move_type = move_type_to_trigger;
+		trigger_button_down(gs, stationary_btn);
 	}
 
 	if (gs->move_type == move_type_to_trigger)
@@ -860,7 +889,7 @@ static void moving_update(struct Gestures* gs,
 			dx += ms->touch[i].dx;
 			dy += ms->touch[i].dy;
 		}
-		else if (!GETBIT(ms->touch[i].flags, GS_TAP) && !GETBIT(ms->touch[i].state, MT_RELEASED)) {
+		else if (!GETBIT(ms->touch[i].flags, GS_TAP)) {
 			if (count < TOUCHES_MAX)
 				touches[count++] = &ms->touch[i];
 		}

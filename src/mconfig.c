@@ -80,7 +80,37 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->rotate_dist = SQRVAL(DEFAULT_ROTATE_DIST);
 	cfg->rotate_lt_btn = DEFAULT_ROTATE_LT_BTN;
 	cfg->rotate_rt_btn = DEFAULT_ROTATE_RT_BTN;
-	cfg->hold1_move1_btn = DEFAULT_HOLD1_MOVE1_BTN;
+
+	cfg->hold1_move1_stationary.max_move = DEFAULT_HOLD1_MOVE1_STATIONARY_MAX_MOVE;
+	cfg->hold1_move1_stationary.button = DEFAULT_HOLD1_MOVE1_STATIONARY_BTN;
+	cfg->hold1_move1.dist = DEFAULT_HOLD1_MOVE1_DIST;
+	cfg->hold1_move1.hold = DEFAULT_HOLD1_MOVE1_HOLD;
+	cfg->hold1_move1.drag_sens = DEFAULT_HOLD1_MOVE1_SENS;
+	cfg->hold1_move1.up_btn = DEFAULT_HOLD1_MOVE1_BTN;
+	cfg->hold1_move1.dn_btn = DEFAULT_HOLD1_MOVE1_BTN;
+	cfg->hold1_move1.lt_btn = DEFAULT_HOLD1_MOVE1_BTN;
+	cfg->hold1_move1.rt_btn = DEFAULT_HOLD1_MOVE1_BTN;
+
+	cfg->hold1_move2_stationary.max_move = DEFAULT_HOLD1_MOVE2_STATIONARY_MAX_MOVE;
+	cfg->hold1_move2_stationary.button = DEFAULT_HOLD1_MOVE2_STATIONARY_BTN;
+	cfg->hold1_move2.dist = DEFAULT_HOLD1_MOVE2_DIST;
+	cfg->hold1_move2.hold = DEFAULT_HOLD1_MOVE2_HOLD;
+	cfg->hold1_move2.drag_sens = DEFAULT_HOLD1_MOVE2_SENS;
+	cfg->hold1_move2.up_btn = DEFAULT_HOLD1_MOVE2_BTN;
+	cfg->hold1_move2.dn_btn = DEFAULT_HOLD1_MOVE2_BTN;
+	cfg->hold1_move2.lt_btn = DEFAULT_HOLD1_MOVE2_BTN;
+	cfg->hold1_move2.rt_btn = DEFAULT_HOLD1_MOVE2_BTN;
+
+	cfg->hold1_move3_stationary.max_move = DEFAULT_HOLD1_MOVE3_STATIONARY_MAX_MOVE;
+	cfg->hold1_move3_stationary.button = DEFAULT_HOLD1_MOVE3_STATIONARY_BTN;
+	cfg->hold1_move3.dist = DEFAULT_HOLD1_MOVE3_DIST;
+	cfg->hold1_move3.hold = DEFAULT_HOLD1_MOVE3_HOLD;
+	cfg->hold1_move3.drag_sens = DEFAULT_HOLD1_MOVE3_SENS;
+	cfg->hold1_move3.up_btn = DEFAULT_HOLD1_MOVE3_BTN;
+	cfg->hold1_move3.dn_btn = DEFAULT_HOLD1_MOVE3_BTN;
+	cfg->hold1_move3.lt_btn = DEFAULT_HOLD1_MOVE3_BTN;
+	cfg->hold1_move3.rt_btn = DEFAULT_HOLD1_MOVE3_BTN;
+
 	cfg->drag_enable = DEFAULT_DRAG_ENABLE;
 	cfg->drag_timeout = DEFAULT_DRAG_TIMEOUT;
 	cfg->sensitivity = DEFAULT_SENSITIVITY;
@@ -200,7 +230,37 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->rotate_dist = MAXVAL(xf86SetIntOption(opts, "RotateDistance", DEFAULT_ROTATE_DIST), 1);
 	cfg->rotate_lt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateLeftButton", DEFAULT_ROTATE_LT_BTN), 0, 32);
 	cfg->rotate_rt_btn = CLAMPVAL(xf86SetIntOption(opts, "RotateRightButton", DEFAULT_ROTATE_RT_BTN), 0, 32);
-	cfg->hold1_move1_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move1Button", DEFAULT_HOLD1_MOVE1_BTN), 0, 32);
+
+	cfg->hold1_move1_stationary.button = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move1StationaryButton", DEFAULT_HOLD1_MOVE1_STATIONARY_BTN), 0, 32);
+	cfg->hold1_move1_stationary.max_move = MAXVAL(xf86SetIntOption(opts, "Hold1Move1StationaryMaxMove", DEFAULT_HOLD1_MOVE1_STATIONARY_MAX_MOVE), 1);
+	cfg->hold1_move1.dist = MAXVAL(xf86SetIntOption(opts, "Hold1Move1Distance", DEFAULT_HOLD1_MOVE1_DIST), 1);
+	cfg->hold1_move1.hold = MAXVAL(xf86SetIntOption(opts, "Hold1Move1ClickTime", DEFAULT_HOLD1_MOVE1_HOLD), 0);
+	cfg->hold1_move1.drag_sens = MAXVAL(xf86SetIntOption(opts, "Hold1Move1Sensitivity", DEFAULT_HOLD1_MOVE1_SENS), 0);
+	cfg->hold1_move1.up_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move1UpButton", DEFAULT_HOLD1_MOVE1_BTN), 0, 32);
+	cfg->hold1_move1.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move1DownButton", DEFAULT_HOLD1_MOVE1_BTN), 0, 32);
+	cfg->hold1_move1.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move1LeftButton", DEFAULT_HOLD1_MOVE1_BTN), 0, 32);
+	cfg->hold1_move1.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move1RightButton", DEFAULT_HOLD1_MOVE1_BTN), 0, 32);
+
+	cfg->hold1_move2_stationary.button = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move2StationaryButton", DEFAULT_HOLD1_MOVE2_STATIONARY_BTN), 0, 32);
+	cfg->hold1_move2_stationary.max_move = MAXVAL(xf86SetIntOption(opts, "Hold1Move2StationaryMaxMove", DEFAULT_HOLD1_MOVE2_STATIONARY_MAX_MOVE), 1);
+	cfg->hold1_move2.dist = MAXVAL(xf86SetIntOption(opts, "Hold1Move2Distance", DEFAULT_HOLD1_MOVE2_DIST), 1);
+	cfg->hold1_move2.hold = MAXVAL(xf86SetIntOption(opts, "Hold1Move2ClickTime", DEFAULT_HOLD1_MOVE2_HOLD), 0);
+	cfg->hold1_move2.drag_sens = MAXVAL(xf86SetIntOption(opts, "Hold1Move2Sensitivity", DEFAULT_HOLD1_MOVE2_SENS), 0);
+	cfg->hold1_move2.up_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move2UpButton", DEFAULT_HOLD1_MOVE2_BTN), 0, 32);
+	cfg->hold1_move2.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move2DownButton", DEFAULT_HOLD1_MOVE2_BTN), 0, 32);
+	cfg->hold1_move2.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move2LeftButton", DEFAULT_HOLD1_MOVE2_BTN), 0, 32);
+	cfg->hold1_move2.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move2RightButton", DEFAULT_HOLD1_MOVE2_BTN), 0, 32);
+
+	cfg->hold1_move3_stationary.button = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move3StationaryButton", DEFAULT_HOLD1_MOVE3_STATIONARY_BTN), 0, 32);
+	cfg->hold1_move3_stationary.max_move = MAXVAL(xf86SetIntOption(opts, "Hold1Move3StationaryMaxMove", DEFAULT_HOLD1_MOVE3_STATIONARY_MAX_MOVE), 1);
+	cfg->hold1_move3.dist = MAXVAL(xf86SetIntOption(opts, "Hold1Move3Distance", DEFAULT_HOLD1_MOVE3_DIST), 1);
+	cfg->hold1_move3.hold = MAXVAL(xf86SetIntOption(opts, "Hold1Move3ClickTime", DEFAULT_HOLD1_MOVE3_HOLD), 0);
+	cfg->hold1_move3.drag_sens = MAXVAL(xf86SetIntOption(opts, "Hold1Move3Sensitivity", DEFAULT_HOLD1_MOVE3_SENS), 0);
+	cfg->hold1_move3.up_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move3UpButton", DEFAULT_HOLD1_MOVE3_BTN), 0, 32);
+	cfg->hold1_move3.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move3DownButton", DEFAULT_HOLD1_MOVE3_BTN), 0, 32);
+	cfg->hold1_move3.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move3LeftButton", DEFAULT_HOLD1_MOVE3_BTN), 0, 32);
+	cfg->hold1_move3.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move3RightButton", DEFAULT_HOLD1_MOVE3_BTN), 0, 32);
+
 	cfg->drag_enable = xf86SetBoolOption(opts, "TapDragEnable", DEFAULT_DRAG_ENABLE);
 	cfg->drag_timeout = MAXVAL(xf86SetIntOption(opts, "TapDragTime", DEFAULT_DRAG_TIMEOUT), 1);
 	cfg->drag_wait = MAXVAL(xf86SetIntOption(opts, "TapDragWait", DEFAULT_DRAG_WAIT), 0);

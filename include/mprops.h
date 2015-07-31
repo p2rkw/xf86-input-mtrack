@@ -72,7 +72,7 @@
 //   first: distance before a three finger swipe event is triggered
 //   second: how much milliseconds button will be hold after {up,down,left,right} swipe
 #define MTRACK_PROP_SWIPE_SETTINGS "Trackpad Swipe Settings"
-// int, 4 values - up button, down button, left button, right button
+
 #define MTRACK_PROP_SWIPE_BUTTONS "Trackpad Swipe Buttons"
 // int, 2 values
 //   first: distance before a four finger swipe event is triggered
@@ -88,8 +88,39 @@
 #define MTRACK_PROP_ROTATE_DIST "Trackpad Rotate Distance"
 // int, 2 values - left button, right button
 #define MTRACK_PROP_ROTATE_BUTTONS "Trackpad Rotate Buttons"
-// int, 1 value - hold&move with one stationary and one moving finger
-#define MTRACK_PROP_HOLD_MOVE_BUTTONS "Trackpad HoldMove Buttons"
+// int, 2 values - hold&move with one stationary and one moving finger
+//   first: stationary finger max move distance
+//   second: button
+#define MTRACK_PROP_HOLD1_MOVE1_STATIONARY_SETTINGS "Trackpad Hold1Move1 Stationary Settings"
+// int, 2 values
+//   first: distance before a four swipe event is triggered
+//   second: how much milliseconds button will be hold after gesture
+#define MTRACK_PROP_HOLD1_MOVE1_SETTINGS "Trackpad Hold1Move1 Settings"
+// int, 4 values - up button, down button, left button, right button
+#define MTRACK_PROP_HOLD1_MOVE1_BUTTONS "Trackpad Hold1Move1 Buttons"
+
+// int, 2 values - hold&move with one stationary and two moving fingers
+//   first: stationary finger max move distance
+//   second: button
+#define MTRACK_PROP_HOLD1_MOVE2_STATIONARY_SETTINGS "Trackpad Hold1Move2 Stationary Settings"
+// int, 2 values
+//   first: distance before a four swipe event is triggered
+//   second: how much milliseconds button will be hold after gesture
+#define MTRACK_PROP_HOLD1_MOVE2_SETTINGS "Trackpad Hold1Move2 Settings"
+// int, 4 values - up button, down button, left button, right button
+#define MTRACK_PROP_HOLD1_MOVE2_BUTTONS "Trackpad Hold1Move2 Buttons"
+
+// int, 2 values - hold&move with one stationary and three moving finger
+//   first: stationary finger max move distance
+//   second: button
+#define MTRACK_PROP_HOLD1_MOVE3_STATIONARY_SETTINGS "Trackpad Hold1Move3 Stationary Settings"
+// int, 2 values
+//   first: distance before a four swipe event is triggered
+//   second: how much milliseconds button will be hold after gesture
+#define MTRACK_PROP_HOLD1_MOVE3_SETTINGS "Trackpad Hold1Move3 Settings"
+// int, 4 values - up button, down button, left button, right button
+#define MTRACK_PROP_HOLD1_MOVE3_BUTTONS "Trackpad Hold1Move3 Buttons"
+
 // int, 4 values - enable, timeout, wait, dist
 #define MTRACK_PROP_DRAG_SETTINGS "Trackpad Drag Settings"
 // int, 2 values - invert x axis, invert y axis
@@ -124,7 +155,12 @@ struct MProps {
 	Atom scale_buttons;
 	Atom rotate_dist;
 	Atom rotate_buttons;
-	Atom hold_move_buttons;
+	Atom hold1_move1_stationary;
+	struct MPropsSwipe hold1_move1;
+	Atom hold1_move2_stationary;
+	struct MPropsSwipe hold1_move2;
+	Atom hold1_move3_stationary;
+	struct MPropsSwipe hold1_move3;
 	Atom drag_settings;
 	Atom axis_invert;
 	Atom edge_size;

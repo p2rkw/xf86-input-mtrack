@@ -44,7 +44,9 @@ struct MTouch;
 #define GS_DRAG_READY 7
 #define GS_DRAG_WAIT 8
 #define GS_DRAG_ACTIVE 9
-#define GS_HOLD_AND_MOVE2 10
+#define GS_HOLD1_MOVE1 10
+#define GS_HOLD1_MOVE2 11
+#define GS_HOLD1_MOVE3 12
 
 struct Gestures {
 	/* Taps, physical buttons, and gestures will trigger

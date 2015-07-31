@@ -76,7 +76,24 @@
 #define DEFAULT_ROTATE_DIST 150
 #define DEFAULT_ROTATE_LT_BTN 14
 #define DEFAULT_ROTATE_RT_BTN 15
+#define DEFAULT_HOLD1_MOVE1_STATIONARY_BTN 1
+#define DEFAULT_HOLD1_MOVE1_STATIONARY_MAX_MOVE 10
+#define DEFAULT_HOLD1_MOVE1_DIST 1
+#define DEFAULT_HOLD1_MOVE1_HOLD 0
+#define DEFAULT_HOLD1_MOVE1_SENS 1000
 #define DEFAULT_HOLD1_MOVE1_BTN 1
+#define DEFAULT_HOLD1_MOVE2_STATIONARY_BTN 3
+#define DEFAULT_HOLD1_MOVE2_STATIONARY_MAX_MOVE 30
+#define DEFAULT_HOLD1_MOVE2_DIST 1
+#define DEFAULT_HOLD1_MOVE2_HOLD 0
+#define DEFAULT_HOLD1_MOVE2_SENS 1000
+#define DEFAULT_HOLD1_MOVE2_BTN 3
+#define DEFAULT_HOLD1_MOVE3_STATIONARY_BTN 10
+#define DEFAULT_HOLD1_MOVE3_STATIONARY_MAX_MOVE 60
+#define DEFAULT_HOLD1_MOVE3_DIST 100
+#define DEFAULT_HOLD1_MOVE3_HOLD 50
+#define DEFAULT_HOLD1_MOVE3_SENS 0
+#define DEFAULT_HOLD1_MOVE3_BTN 11
 #define DEFAULT_DRAG_ENABLE 1
 #define DEFAULT_DRAG_TIMEOUT 350
 #define DEFAULT_DRAG_WAIT 40
@@ -162,7 +179,12 @@ struct MConfig {
 	int rotate_dist;		// Distance needed to trigger a button. >= 0, 0 disables
 	int rotate_lt_btn;		// Button to use for rotate left. >= 0, 0 is none
 	int rotate_rt_btn;		// Button to use for rotate right. >= 0, 0 is none
-	int hold1_move1_btn;		// Button to use for hold&move. For one stationary and one moving finger. >= 0, 0 disables
+	struct MConfigStationary{
+		int max_move;			// How far stationary finger can move, before interrupting the gesture. >= 0
+//		int wait;		// How long finher have to be hold down before gesture
+		int button;		// Button to be pressed/released when gesture starts/ends.
+	} hold1_move1_stationary, hold1_move2_stationary, hold1_move3_stationary;
+	struct MConfigSwipe		hold1_move1, hold1_move2, hold1_move3;
 	int drag_enable;		// Enable tap-to-drag? 0 or 1
 	int drag_timeout;		// How long to wait for a move after tapping? > 0
 	int drag_wait;			// How long to wait before triggering button down? >= 0
