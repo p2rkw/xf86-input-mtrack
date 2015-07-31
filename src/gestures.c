@@ -713,6 +713,7 @@ static int trigger_hold_and_move(struct Gestures* gs,
 			stationary_max_move = cfg->hold1_move1_stationary.max_move;
 			cfg_swipe = &cfg->hold1_move1;
 			break;
+#if 0
 		case 3:
 			move_type_to_trigger = GS_HOLD1_MOVE2;
 			stationary_btn = cfg->hold1_move2_stationary.button - 1;
@@ -725,6 +726,7 @@ static int trigger_hold_and_move(struct Gestures* gs,
 			stationary_max_move = cfg->hold1_move3_stationary.max_move;
 			cfg_swipe = &cfg->hold1_move3;
 			break;
+#endif
 		default:
 				return 0;
 	}
