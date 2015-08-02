@@ -200,6 +200,15 @@ static void trigger_drag_stop(struct Gestures* gs, int force)
    }
 }
 
+/* Return 0 only if actual time stamp is less than move_wait time stanp. */
+static int can_change_gesture_type(struct Gestures* gs, int desired_gesture){
+	if (gs->move_type == desired_gesture)
+		return 1;
+	if(gs->move_type == GS_NONE || gs->move_type == GS_MOVE)
+		return 1;
+	return timercmp(&gs->time, &gs->move_wait, >);
+}
+
 static void buttons_update(struct Gestures* gs,
 			const struct MConfig* cfg,
 			const struct HWState* hs,
@@ -596,6 +605,13 @@ static int trigger_swipe(struct Gestures* gs,
 {
 	int move_type_to_trigger;
 	const struct MConfigSwipe* cfg_swipe;
+	/* Feature: allow transition from low order swipes into higher ones.
+	 * Motivation: it's extremly hard to start fast swipe3 or swipe4 without triggering
+	 * swipe2 earlier.
+	 */
+	int can_transit_swipe;
+
+	can_transit_swipe = FALSE;
 
 	switch(touches_count){
 	case 2:
@@ -605,16 +621,18 @@ static int trigger_swipe(struct Gestures* gs,
 	case 3:
 		cfg_swipe = &cfg->swipe3;
 		move_type_to_trigger = GS_SWIPE3;
+		can_transit_swipe = gs->move_type == GS_SCROLL;
 		break;
 	case 4:
 		cfg_swipe = &cfg->swipe4;
 		move_type_to_trigger = GS_SWIPE4;
+		can_transit_swipe = gs->move_type == GS_SCROLL || gs->move_type == GS_SWIPE3;
 		break;
 	default:
 			return 0;
 	}
 
-	if (gs->move_type == move_type_to_trigger || timercmp(&gs->time, &gs->move_wait, >=))
+	if (can_change_gesture_type(gs, move_type_to_trigger) || can_transit_swipe != FALSE)
 		return trigger_swipe_unsafe(gs, cfg, cfg_swipe, touches, touches_count, move_type_to_trigger);
 
 	return 0;
@@ -635,20 +653,13 @@ static int hypot_cmp(int x, int y, int value)
 	return 1;
 }
 
-static int is_hold_and_move(struct Gestures* gs)
-{
-	return gs->move_type == GS_HOLD1_MOVE1  ||
-				gs->move_type == GS_HOLD1_MOVE2 ||
-				gs->move_type == GS_HOLD1_MOVE3;
-}
-
 static int is_touch_stationary(const struct Touch* touch, int max_movement)
 {
 	return touch->direction == TR_NONE ||
-				(hypot_cmp(touch->total_dx, touch->total_dy, max_movement) <= 0);
+				(hypot_cmp(touch->dx, touch->dy, max_movement) <= 0);
 }
 
-static int can_begin_hold_move(const struct Gestures* gs,
+static int can_trigger_hold_move(const struct Gestures* gs,
 				const struct Touch* touches[TOUCHES_MAX], int touches_count,
 				const struct MConfig* cfg, int max_move)
 {
@@ -672,11 +683,25 @@ static int can_begin_hold_move(const struct Gestures* gs,
 	if (get_swipe_dir_n(touches+1, touches_count-1) == TR_NONE)
 		return 0;
 
+	/* Check: are other fingers not stationary */
+	for (i = 1; i < touches_count; ++i) {
+		if (is_touch_stationary(touches[i], max_move))
+			return 0;
+	}
+
+
 	return 1;
 }
 
+static int is_hold_move(struct Gestures* gs)
+{
+	return gs->move_type == GS_HOLD1_MOVE1  ||
+				gs->move_type == GS_HOLD1_MOVE2 ||
+				gs->move_type == GS_HOLD1_MOVE3;
+}
+
 /* Map hold-and-move gesture type to touches */
-static int hold_move_calc_touches(int move_type, int real_touches_count){
+static int hold_move_gesture_to_touches(int move_type, int real_touches_count){
 	switch (move_type){
 	case GS_HOLD1_MOVE1:
 		return 2;
@@ -693,7 +718,7 @@ static int hold_move_calc_touches(int move_type, int real_touches_count){
  * are not implemented, but I guess it will be easy to extend this function to support
  * them.
  */
-static int trigger_hold_and_move(struct Gestures* gs,
+static int trigger_hold_move(struct Gestures* gs,
 			const struct MConfig* cfg, const struct Touch* touches[TOUCHES_MAX], int touches_count)
 {
 	int move_type_to_trigger;
@@ -702,7 +727,7 @@ static int trigger_hold_and_move(struct Gestures* gs,
 
 	move_type_to_trigger = -1;
 
-	switch(hold_move_calc_touches(gs->move_type, touches_count)){
+	switch(hold_move_gesture_to_touches(gs->move_type, touches_count)){
 		case 0:
 		case 1:
 			/* Process them later. */
@@ -728,10 +753,10 @@ static int trigger_hold_and_move(struct Gestures* gs,
 			break;
 #endif
 		default:
-				return 0;
+			return 0;
 	}
 
-	if (is_hold_and_move(gs)){
+	if (is_hold_move(gs)){
 		/* Condition: no fingers or stationary just released or stationary moved */
 		if (touches_count == 0 ||
 				GETBIT(touches[0]->state, MT_RELEASED) ||
@@ -754,14 +779,15 @@ static int trigger_hold_and_move(struct Gestures* gs,
 	if (touches_count <= 1 || move_type_to_trigger == -1)
 		return 0;
 
-	if (can_begin_hold_move(gs, touches, touches_count, cfg, stationary_max_move)){
-		gs->move_type = move_type_to_trigger;
-		trigger_button_down(gs, stationary_btn);
-	}
-
-	if (gs->move_type == move_type_to_trigger)
+	if (gs->move_type == move_type_to_trigger){
 		return trigger_swipe_unsafe(gs, cfg, cfg_swipe, touches + 1, touches_count - 1,
 						move_type_to_trigger);
+	}
+	else if (can_trigger_hold_move(gs, touches, touches_count, cfg, stationary_max_move)){
+		trigger_button_down(gs, stationary_btn);
+		return trigger_swipe_unsafe(gs, cfg, cfg_swipe, touches + 1, touches_count - 1,
+						move_type_to_trigger);
+	}
 
 	return 0;
 }
@@ -898,7 +924,7 @@ static void moving_update(struct Gestures* gs,
 	}
 
 	// Determine gesture type.
-	if (cfg->trackpad_disable < 1 && trigger_hold_and_move(gs, cfg, touches, count)){
+	if (cfg->trackpad_disable < 1 && trigger_hold_move(gs, cfg, touches, count)){
 		/* nothing to do */
 	}
 	else if (count == 0) {
@@ -1019,7 +1045,7 @@ int gestures_delayed(struct MTouch* mt)
 	}
 
 	/* Was finger released and it wasn't a tap, but gesture? */
-	if(taps_released != 0 && !is_hold_and_move(gs)){
+	if(taps_released != 0 && !is_hold_move(gs)){
 		/* Gesture finished - it's time to send "button up" event immediately without
 		 * checking for delivery time.
 		 */
