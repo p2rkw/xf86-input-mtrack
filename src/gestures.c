@@ -31,8 +31,6 @@
 
 #define IS_VALID_BUTTON(x) (x >= 0 && x <= 31)
 
-#define TOUCHES_MAX 4
-
 static void trigger_button_up(struct Gestures* gs, int button)
 {
 	if (IS_VALID_BUTTON(button)) {
@@ -457,16 +455,16 @@ static void trigger_move(struct Gestures* gs,
 	}
 }
 
-static double get_swipe_dir_n(const struct Touch* touches[TOUCHES_MAX], int count)
+static double get_swipe_dir_n(const struct Touch* touches[DIM_TOUCHES], int count)
 {
-	if(count > TOUCHES_MAX || count <= 0)
+	if(count > DIM_TOUCHES || count <= 0)
 		return TR_NONE;
 	if(count == 1)
 		return touches[0]->direction;
 
 	int i;
 	double avg_dir;
-	double angles[TOUCHES_MAX];
+	double angles[DIM_TOUCHES];
 
 	/* Find average direction */
 	for (i = 0; i < count; ++i) {
@@ -484,7 +482,7 @@ static double get_swipe_dir_n(const struct Touch* touches[TOUCHES_MAX], int coun
 	return avg_dir;
 }
 
-static void get_swipe_avg_xy(const struct Touch* touches[TOUCHES_MAX], int count, double* out_x, double* out_y){
+static void get_swipe_avg_xy(const struct Touch* touches[DIM_TOUCHES], int count, double* out_x, double* out_y){
 	double x, y;
 	x = y = 0.0;
 	int i;
@@ -656,11 +654,11 @@ static int hypot_cmp(int x, int y, int value)
 static int is_touch_stationary(const struct Touch* touch, int max_movement)
 {
 	return touch->direction == TR_NONE ||
-				(hypot_cmp(touch->dx, touch->dy, max_movement) <= 0);
+				(hypot_cmp(touch->total_dx, touch->total_dy, max_movement) <= 0);
 }
 
 static int can_trigger_hold_move(const struct Gestures* gs,
-				const struct Touch* touches[TOUCHES_MAX], int touches_count,
+				const struct Touch* touches[DIM_TOUCHES], int touches_count,
 				const struct MConfig* cfg, int max_move)
 {
 	struct timeval tv_tmp;
@@ -695,7 +693,7 @@ static int can_trigger_hold_move(const struct Gestures* gs,
 
 static int is_hold_move(struct Gestures* gs)
 {
-	return gs->move_type == GS_HOLD1_MOVE1  ||
+	return gs->move_type == GS_HOLD1_MOVE1 ||
 				gs->move_type == GS_HOLD1_MOVE2 ||
 				gs->move_type == GS_HOLD1_MOVE3;
 }
@@ -719,7 +717,7 @@ static int hold_move_gesture_to_touches(int move_type, int real_touches_count){
  * them.
  */
 static int trigger_hold_move(struct Gestures* gs,
-			const struct MConfig* cfg, const struct Touch* touches[TOUCHES_MAX], int touches_count)
+			const struct MConfig* cfg, const struct Touch* touches[DIM_TOUCHES], int touches_count)
 {
 	int move_type_to_trigger;
 	const struct MConfigSwipe* cfg_swipe;
@@ -899,7 +897,7 @@ static void moving_update(struct Gestures* gs,
 {
 	int i, count, btn_count, dx, dy, dir;
 	double dist;
-	const struct Touch* touches[TOUCHES_MAX];
+	const struct Touch* touches[DIM_TOUCHES];
 	count = btn_count = 0;
 	dx = dy = 0;
 	dir = 0;
@@ -918,7 +916,7 @@ static void moving_update(struct Gestures* gs,
 			dy += ms->touch[i].dy;
 		}
 		else if (!GETBIT(ms->touch[i].flags, GS_TAP)) {
-			if (count < TOUCHES_MAX)
+			if (count < DIM_TOUCHES)
 				touches[count++] = &ms->touch[i];
 		}
 	}
@@ -1044,20 +1042,16 @@ int gestures_delayed(struct MTouch* mt)
 			++taps_released;
 	}
 
-	/* Was finger released and it wasn't a tap, but gesture? */
+	/* Condition: was finger released and wasn't it a tap, but gesture? */
 	if(taps_released != 0 && !is_hold_move(gs)){
 		/* Gesture finished - it's time to send "button up" event immediately without
 		 * checking for delivery time.
 		 */
 
-		/* For hold&move gesture user have to release stationary finger to end gesture.
-		 */
-		//if (!is_hold_and_move(gs) || GETBIT(ms->touch[0].state, MT_RELEASED)){
-			trigger_delayed_button_unsafe(gs);
-			gs->move_dx = gs->move_dy = 0;
-			gs->move_type = GS_NONE;
-			return 2;
-		//}
+		trigger_delayed_button_unsafe(gs);
+		gs->move_dx = gs->move_dy = 0;
+		gs->move_type = GS_NONE;
+		return 2;
 	}
 
 	if(is_timer_infinite(gs))
