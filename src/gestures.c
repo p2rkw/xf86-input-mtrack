@@ -685,13 +685,6 @@ static int can_trigger_hold_move(const struct Gestures* gs,
 	if (get_swipe_dir_n(touches+1, touches_count-1) == TR_NONE)
 		return 0;
 
-	/* Check: are other fingers not stationary */
-	for (i = 1; i < touches_count; ++i) {
-		if (is_touch_stationary(touches[i], max_move))
-			return 0;
-	}
-
-
 	return 1;
 }
 
