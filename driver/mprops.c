@@ -185,6 +185,7 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 
 	init_swipe_props(local->dev, &mprops.hold1_move1, &cfg->hold1_move1, MTRACK_PROP_HOLD1_MOVE1_SETTINGS, MTRACK_PROP_HOLD1_MOVE1_BUTTONS);
 
+#if 0
 	ivals[0] = cfg->hold1_move2_stationary.max_move;
 	ivals[1] = cfg->hold1_move2_stationary.button;
 	mprops.hold1_move2_stationary = atom_init_integer(local->dev, MTRACK_PROP_HOLD1_MOVE2_STATIONARY_SETTINGS, 2, ivals, 32);
@@ -197,6 +198,7 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	mprops.hold1_move3_stationary = atom_init_integer(local->dev, MTRACK_PROP_HOLD1_MOVE3_STATIONARY_SETTINGS, 2, ivals, 32);
 
 	init_swipe_props(local->dev, &mprops.hold1_move3, &cfg->hold1_move3, MTRACK_PROP_HOLD1_MOVE3_SETTINGS, MTRACK_PROP_HOLD1_MOVE3_BUTTONS);
+#endif
 
 	ivals[0] = cfg->drag_enable;
 	ivals[1] = cfg->drag_timeout;
@@ -609,6 +611,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	else if (set_swipe_properties(property, checkonly, prop, &mprops.hold1_move1, &cfg->hold1_move1, &error_code)) {
 		return error_code;
 	}
+#if 0
 	else if (property == mprops.hold1_move2_stationary){
 		if (prop->size != 2 || prop->format != 32 || prop->type != XA_INTEGER)
 			return BadMatch;
@@ -649,6 +652,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	else if (set_swipe_properties(property, checkonly, prop, &mprops.hold1_move3, &cfg->hold1_move3, &error_code)) {
 		return error_code;
 	}
+#endif
 	else if (property == mprops.drag_settings) {
 		if (prop->size != 4 || prop->format != 32 || prop->type != XA_INTEGER)
 			return BadMatch;

@@ -157,10 +157,12 @@ struct MProps {
 	Atom rotate_buttons;
 	Atom hold1_move1_stationary;
 	struct MPropsSwipe hold1_move1;
+#if 0
 	Atom hold1_move2_stationary;
 	struct MPropsSwipe hold1_move2;
 	Atom hold1_move3_stationary;
 	struct MPropsSwipe hold1_move3;
+#endif
 	Atom drag_settings;
 	Atom axis_invert;
 	Atom edge_size;

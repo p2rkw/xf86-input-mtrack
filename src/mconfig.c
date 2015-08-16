@@ -91,6 +91,7 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->hold1_move1.lt_btn = DEFAULT_HOLD1_MOVE1_BTN;
 	cfg->hold1_move1.rt_btn = DEFAULT_HOLD1_MOVE1_BTN;
 
+#if 0
 	cfg->hold1_move2_stationary.max_move = DEFAULT_HOLD1_MOVE2_STATIONARY_MAX_MOVE;
 	cfg->hold1_move2_stationary.button = DEFAULT_HOLD1_MOVE2_STATIONARY_BTN;
 	cfg->hold1_move2.dist = DEFAULT_HOLD1_MOVE2_DIST;
@@ -110,6 +111,7 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->hold1_move3.dn_btn = DEFAULT_HOLD1_MOVE3_BTN;
 	cfg->hold1_move3.lt_btn = DEFAULT_HOLD1_MOVE3_BTN;
 	cfg->hold1_move3.rt_btn = DEFAULT_HOLD1_MOVE3_BTN;
+#endif
 
 	cfg->drag_enable = DEFAULT_DRAG_ENABLE;
 	cfg->drag_timeout = DEFAULT_DRAG_TIMEOUT;
@@ -241,6 +243,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->hold1_move1.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move1LeftButton", DEFAULT_HOLD1_MOVE1_BTN), 0, 32);
 	cfg->hold1_move1.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move1RightButton", DEFAULT_HOLD1_MOVE1_BTN), 0, 32);
 
+#if 0
 	cfg->hold1_move2_stationary.button = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move2StationaryButton", DEFAULT_HOLD1_MOVE2_STATIONARY_BTN), 0, 32);
 	cfg->hold1_move2_stationary.max_move = MAXVAL(xf86SetIntOption(opts, "Hold1Move2StationaryMaxMove", DEFAULT_HOLD1_MOVE2_STATIONARY_MAX_MOVE), 1);
 	cfg->hold1_move2.dist = MAXVAL(xf86SetIntOption(opts, "Hold1Move2Distance", DEFAULT_HOLD1_MOVE2_DIST), 1);
@@ -260,6 +263,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->hold1_move3.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move3DownButton", DEFAULT_HOLD1_MOVE3_BTN), 0, 32);
 	cfg->hold1_move3.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move3LeftButton", DEFAULT_HOLD1_MOVE3_BTN), 0, 32);
 	cfg->hold1_move3.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "Hold1Move3RightButton", DEFAULT_HOLD1_MOVE3_BTN), 0, 32);
+#endif
 
 	cfg->drag_enable = xf86SetBoolOption(opts, "TapDragEnable", DEFAULT_DRAG_ENABLE);
 	cfg->drag_timeout = MAXVAL(xf86SetIntOption(opts, "TapDragTime", DEFAULT_DRAG_TIMEOUT), 1);

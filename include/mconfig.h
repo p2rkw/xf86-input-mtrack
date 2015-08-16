@@ -181,10 +181,15 @@ struct MConfig {
 	int rotate_rt_btn;		// Button to use for rotate right. >= 0, 0 is none
 	struct MConfigStationary{
 		int max_move;			// How far stationary finger can move, before interrupting the gesture. >= 0
-//		int wait;		// How long finher have to be hold down before gesture
 		int button;		// Button to be pressed/released when gesture starts/ends.
-	} hold1_move1_stationary, hold1_move2_stationary, hold1_move3_stationary;
-	struct MConfigSwipe		hold1_move1, hold1_move2, hold1_move3;
+	} hold1_move1_stationary;
+#if 0
+	struct MConfigStationary hold1_move2_stationary, hold1_move3_stationary;
+#endif
+	struct MConfigSwipe		hold1_move1;
+#if 0
+	struct MConfigSwipe		hold1_move2, hold1_move3;
+#endif
 	int drag_enable;		// Enable tap-to-drag? 0 or 1
 	int drag_timeout;		// How long to wait for a move after tapping? > 0
 	int drag_wait;			// How long to wait before triggering button down? >= 0
