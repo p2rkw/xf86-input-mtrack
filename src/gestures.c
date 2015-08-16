@@ -667,6 +667,10 @@ static int can_trigger_hold_move(const struct Gestures* gs,
 	if (touches_count <= 1)
 		return 0;
 
+	/* Condition: allow only translation from 'neutral' move type. */
+	if(gs->move_type != GS_NONE && gs->move_type != GS_MOVE)
+		return 0;
+
 	/* Conditions: was first finger hold in place for some time */
 	if (!is_touch_stationary(touches[0], max_move))
 		return 0;
@@ -691,13 +695,6 @@ static int can_trigger_hold_move(const struct Gestures* gs,
 	return 1;
 }
 
-static int is_hold_move(struct Gestures* gs)
-{
-	return gs->move_type == GS_HOLD1_MOVE1 ||
-				gs->move_type == GS_HOLD1_MOVE2 ||
-				gs->move_type == GS_HOLD1_MOVE3;
-}
-
 /* Map hold-and-move gesture type to touches */
 static int hold_move_gesture_to_touches(int move_type, int real_touches_count){
 	switch (move_type){
@@ -709,6 +706,12 @@ static int hold_move_gesture_to_touches(int move_type, int real_touches_count){
 		return 4;
 	}
 	return real_touches_count;
+}
+
+static int is_hold_move(struct Gestures* gs)
+{
+	static int invalid_mark = -1;
+	return hold_move_gesture_to_touches(gs->move_type, invalid_mark) != invalid_mark;
 }
 
 /* Right now only gesture with one stationary finger and one moving finger is supported.
