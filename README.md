@@ -302,11 +302,15 @@ value. A value of 0 disables rotation left. Defaults to 14.
 For two finger rotation. The button that is triggered by rotating right. Integer
 value. A value of 0 disables rotation right. Defaults to 15.
 
-**Hold1Move1Button** - 
+**Hold1Move1StationaryButton** - 
 For two finger hold-and-move functionality. The button that is triggered by 
 holding one finger and moving another one. Integer value. 
 A value of 0 disables hold-and-move. Value of 0 disables this functionality.
 Defaults to 1.
+
+**Hold1Move1StationaryMaxMove** -
+For two finger hold-and-move functionality. Fow far stationary finger can be
+moved berfore gesture invalidation. Integer value.
 
 **TapDragEnable** - 
 Whether or not to enable tap-to-drag functionality. Boolean value. Defaults to

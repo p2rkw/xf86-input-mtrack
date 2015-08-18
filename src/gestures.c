@@ -320,6 +320,17 @@ static void buttons_update(struct Gestures* gs,
 		}
 	}
 }
+static void abort_tapping(struct Gestures* gs, struct MTState* ms){
+	int i;
+
+	gs->tap_touching = 0;
+	gs->tap_released = 0;
+	timerclear(&gs->tap_timeout);
+
+	foreach_bit(i, ms->touch_used) {
+		CLEARBIT(ms->touch[i].flags, GS_TAP);
+	}
+}
 
 static void tapping_update(struct Gestures* gs,
 			const struct MConfig* cfg,
@@ -327,7 +338,6 @@ static void tapping_update(struct Gestures* gs,
 {
 	int i, n, dist, released_max;
 	struct timeval tv_tmp;
-	struct timeval epoch;
 
 	if (cfg->trackpad_disable >= 1)
 		return;
@@ -343,18 +353,9 @@ static void tapping_update(struct Gestures* gs,
 	else
 		return;
 
-	timerclear(&epoch);
-	timeraddms(&gs->tap_time_down, cfg->tap_timeout, &tv_tmp);
-	if (!timercmp(&gs->tap_time_down, &epoch, ==) && !timercmp(&gs->time, &tv_tmp, <)) {
-		/* too much time passed by from first touch, stop waiting for incoming touches */
-		gs->tap_touching = 0;
-		gs->tap_released = 0;
-		timerclear(&gs->tap_time_down);
-
-		foreach_bit(i, ms->touch_used) {
-			if (GETBIT(ms->touch[i].flags, GS_TAP))
-				CLEARBIT(ms->touch[i].flags, GS_TAP);
-		}
+	if (!isepochtime(&gs->tap_timeout) && timercmp(&gs->time, &gs->tap_timeout, >=)) {
+		/* too much time passed by from first touch, abort tap 'gesture' */
+		abort_tapping(gs, ms);
 	}
 	else {
 		foreach_bit(i, ms->touch_used) {
@@ -374,9 +375,8 @@ static void tapping_update(struct Gestures* gs,
 #ifdef DEBUG_GESTURES
 					xf86Msg(X_INFO, "tapping_update: tap_touching++ (%d): new touch\n", gs->tap_touching);
 #endif
-					timerclear(&tv_tmp);
-					if (timercmp(&gs->tap_time_down, &epoch, ==))
-						timercp(&gs->tap_time_down, &gs->time);
+					if (isepochtime(&gs->tap_timeout))
+						timeraddms(&gs->time, cfg->tap_timeout, &gs->tap_timeout);
 				}
 
 				if (GETBIT(ms->touch[i].flags, GS_TAP)) {
@@ -385,8 +385,9 @@ static void tapping_update(struct Gestures* gs,
 						CLEARBIT(ms->touch[i].flags, GS_TAP);
 						gs->tap_touching--;
 #ifdef DEBUG_GESTURES
-					xf86Msg(X_INFO, "tapping_update: tap_touching-- (%d): moved too far\n", gs->tap_touching);
+						xf86Msg(X_INFO, "tapping_update: tap_touching-- (%d): moved too far\n", gs->tap_touching);
 #endif
+						abort_tapping(gs, ms);
 					}
 					else if (GETBIT(ms->touch[i].state, MT_RELEASED)) {
 						gs->tap_touching--;
@@ -402,14 +403,9 @@ static void tapping_update(struct Gestures* gs,
 	}
 
 	if ((gs->tap_touching == 0 && gs->tap_released > 0) || gs->tap_released >= released_max) {
-		/* in this branch tap was recognized as button click
-		 * clear tap flags from touches
+		/* In this branch tap was recognized as button click
+		 * Determinate which button was "tapped" by counting touches
 		 */
-		foreach_bit(i, ms->touch_used) {
-			if (GETBIT(ms->touch[i].flags, GS_TAP))
-				CLEARBIT(ms->touch[i].flags, GS_TAP);
-		}
-		/* Determinate which button was "tapped" by counting touches */
 		if (gs->tap_released == 1)
 			n = cfg->tap_1touch - 1;
 		else if (gs->tap_released == 2)
@@ -427,11 +423,10 @@ static void tapping_update(struct Gestures* gs,
 
 		gs->move_type = GS_NONE;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
-
-		gs->tap_touching = 0;
-		gs->tap_released = 0;
-		timerclear(&gs->tap_time_down);
 	}
+
+	if (gs->tap_touching == 0)
+		abort_tapping(gs, ms);
 }
 
 static void trigger_move(struct Gestures* gs,
@@ -1024,22 +1019,21 @@ int gestures_delayed(struct MTouch* mt)
 	struct Gestures* gs = &mt->gs;
 	struct MTState* ms = &mt->state;
 	struct timeval now, delta;
-	int i, taps_released;
-
-	taps_released = 0;
+	int i, fingers_released;
 
 	// if there's no delayed button - return
 	if(!IS_VALID_BUTTON(gs->button_delayed))
 		return 0;
 
+	fingers_released = 0;
 	// count released fingers
 	foreach_bit(i, ms->touch_used) {
 		if (GETBIT(ms->touch[i].state, MT_RELEASED))
-			++taps_released;
+			++fingers_released;
 	}
 
-	/* Condition: was finger released and wasn't it a tap, but gesture? */
-	if(taps_released != 0 && !is_hold_move(gs)){
+	/* Condition: was finger released and delay == 0 and it's not hold&move */
+	if(fingers_released != 0 && is_timer_infinite(gs) && !is_hold_move(gs)){
 		/* Gesture finished - it's time to send "button up" event immediately without
 		 * checking for delivery time.
 		 */
