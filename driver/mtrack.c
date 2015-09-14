@@ -23,7 +23,8 @@
 #include "mtouch.h"
 #include "mprops.h"
 #include "capabilities.h"
-#include "os.h" /* xorg/os.h for timers */
+#include "os.h"
+#include "trig.h" /* xorg/os.h for timers */
 
 #include <xf86Module.h>
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
@@ -241,6 +242,39 @@ static void handle_gestures(LocalDevicePtr local,
 		xf86PostMotionEvent(local->dev, 0, 0, 2, gs->move_dx, gs->move_dy);
 }
 
+static CARD32 coasting_delayed(OsTimerPtr timer, CARD32 time, void *arg){
+  LocalDevicePtr local = arg;
+	struct MTouch *mt = local->private;
+	mstime_t delta_millis;
+	struct timeval delta;
+
+	delta_millis = 10.0*mt->cfg.scroll.dist/(double)ABSVAL(mt->gs.move_speed);
+	xf86Msg(X_INFO, "coasting_delayed: speed=%lf, delta_milis=%d\n", mt->gs.move_speed, delta_millis);
+
+	if (ABSVAL(mt->gs.move_speed) > 1.0)
+	  mt->gs.move_speed *= 0.7;
+	else{
+		mt->gs.move_speed = 0.0;
+		mt->is_timer_installed = 0;
+		return 0;
+	}
+
+	TimerSet(mt->timer, 0, delta_millis, coasting_delayed, local);
+
+	if (mt->gs.move_dir == 7 || mt->gs.move_dir == 0 || mt->gs.move_dir == 1){
+		SETBIT(mt->gs.buttons, 3);
+		handle_gestures(local, &mt->gs);
+		CLEARBIT(mt->gs.buttons, 3);
+		handle_gestures(local, &mt->gs);
+	}else{
+		SETBIT(mt->gs.buttons, 4);
+		handle_gestures(local, &mt->gs);
+		CLEARBIT(mt->gs.buttons, 4);
+		handle_gestures(local, &mt->gs);
+	}
+	return 0;
+}
+
 /*
  * Timers documentation:
  * http://www.x.org/releases/X11R7.7/doc/xorg-server/Xserver-spec.html#id2536042
@@ -253,12 +287,17 @@ static CARD32 check_resolve_delayed(OsTimerPtr timer, CARD32 time, void *arg){
 	struct MTouch *mt = local->private;
 	mstime_t delta_millis;
 	struct timeval delta;
-
+// fix this shit:
+if (mt->is_timer_installed == 2 && 0){
+	mt->is_timer_installed = 0;
+	TimerCancel(mt->timer);
+}
 	// If it was to early to trigger delayed button, next timer will be set,
 	// but when called by timer such situation shouldn't take place.
 	switch (mtouch_delayed(mt)){
 	case 1:
-		if(mt->is_timer_installed == 0){
+		if(mt->is_timer_installed != 1){
+			TimerCancel(mt->timer);
 			mt->is_timer_installed = 1;
 			timersub(&mt->gs.button_delayed_time, &mt->gs.time, &delta);
 			delta_millis = timertoms(&delta);
@@ -269,6 +308,16 @@ static CARD32 check_resolve_delayed(OsTimerPtr timer, CARD32 time, void *arg){
 		TimerCancel(mt->timer);
 		mt->is_timer_installed = 0;
 		handle_gestures(local, &mt->gs);
+		break;
+	case 3:
+		TimerCancel(mt->timer);
+		handle_gestures(local, &mt->gs);
+		mt->is_timer_installed = 2;
+
+		delta_millis = 10.0*mt->cfg.scroll.dist/(double)ABSVAL(mt->gs.move_speed);
+		TimerSet(mt->timer, 0, delta_millis, coasting_delayed, local);
+		xf86Msg(X_INFO, "check_resolve_delayed: speed=%lf, delta_milis=%d\n", mt->gs.move_speed, delta_millis);
+
 		break;
 	case 0: break;
 	}

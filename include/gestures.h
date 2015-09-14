@@ -89,6 +89,8 @@ struct Gestures {
 	struct timeval move_wait;
 	struct timeval move_drag_wait;
 	struct timeval move_drag_expire;
+	struct timeval move_start;
+	int total_move_dist;
 };
 
 

@@ -564,13 +564,19 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 	if (gs->move_type != move_type_to_trigger){
 		trigger_delayed_button_unsafe(gs);
 		gs->move_dist = 0;
+		gs->total_move_dist = 0;
+		microtime(&gs->move_start);
 	}
-	else if (gs->move_dir != dir)
+	else if (gs->move_dir != dir){
 		gs->move_dist = 0;
+		gs->total_move_dist = 0;
+		microtime(&gs->move_start);
+	}
 	gs->move_type = move_type_to_trigger;
 	gs->move_dist += (int)ABSVAL(dist);
+	gs->total_move_dist += (int)ABSVAL(dist);
 	gs->move_dir = dir;
-	gs->move_speed = dist/timertomicro(&gs->dt);
+	//gs->move_speed = MAXVAL(gs->move_speed, dist*(1000.0/(double)timertomicro(&gs->dt))); // [px / ms]
 	timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 
 	if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
@@ -1020,7 +1026,7 @@ int gestures_delayed(struct MTouch* mt)
 	struct MTState* ms = &mt->state;
 	struct timeval now, delta;
 	int i, fingers_released;
-
+int button = gs->button_delayed;
 	// if there's no delayed button - return
 	if(!IS_VALID_BUTTON(gs->button_delayed))
 		return 0;
@@ -1032,7 +1038,7 @@ int gestures_delayed(struct MTouch* mt)
 			++fingers_released;
 	}
 
-	/* Condition: was finger released and delay == 0 and it's not hold&move */
+	/* Condition: was finger released and gesture is 'infinite' and it's not hold&move */
 	if(fingers_released != 0 && is_timer_infinite(gs) && !is_hold_move(gs)){
 		/* Gesture finished - it's time to send "button up" event immediately without
 		 * checking for delivery time.
@@ -1044,12 +1050,24 @@ int gestures_delayed(struct MTouch* mt)
 		return 2;
 	}
 
+	/* Condition: check for coasting */
+	if((button == 3 || button == 4) && fingers_released != 0){
+		trigger_delayed_button_unsafe(gs);
+		gs->move_dx = gs->move_dy = 0;
+		gs->move_type = GS_NONE;
+		microtime(&now);
+		timersub(&now, &gs->move_start, &delta);
+		gs->move_speed = gs->total_move_dist/(double)timertomicro(&delta); // [px / ms]
+		xf86Msg(X_INFO, "gestures_delayed: speed=%lf, delta ms=%llu\n", gs->move_speed, (unsigned long long)timertomicro(&delta));
+		return 3;
+	}
+
 	if(is_timer_infinite(gs))
 		return 0;
 
 	microtime(&now);
-	timersub(&now, &mt->gs.time, &mt->gs.dt);
-	timercp(&mt->gs.time, &now);
+	//timersub(&now, &mt->gs.time, &mt->gs.dt);
+	//timercp(&mt->gs.time, &now);
 
 	if(timercmp(&gs->button_delayed_time, &now, >)){
 		 timersub(&gs->button_delayed_time, &now, &delta);
