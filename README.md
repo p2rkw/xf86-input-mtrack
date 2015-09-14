@@ -222,6 +222,10 @@ Integer value. A value of 0 disables scrolling right. Defaults to 7.
 For three finger swiping. How far you must move your fingers before a button
 click is triggered. Integer value. Defaults to 700.
 
+**ScrollHighPrecision** -
+For two finger scrolling. Whether to generate high precision scroll events.
+Boolean value. Defaults to 1.
+
 **SwipeClickTime** -
 For three finger swiping. How long button triggered by swiping
 will be hold down. Integer value representing milliseconds. Defaults to 300.

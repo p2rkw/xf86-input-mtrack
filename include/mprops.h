@@ -62,6 +62,8 @@
 #define MTRACK_PROP_PALM_SIZE "Trackpad Palm Size"
 // int, 2 value - button hold, wait time
 #define MTRACK_PROP_GESTURE_SETTINGS "Trackpad Gesture Settings"
+// int, 1 value - enable high precision scrolling
+#define MTRACK_PROP_SCROLL_HIGH_PRECISION "Trackpad High Precision Scrolling"
 // int, 2 values
 //   first: distance before a scroll event (two finger swipe) is triggered
 //   second: how much milliseconds button will be hold after {up,down,left,right} scroll
@@ -147,6 +149,7 @@ struct MProps {
 	Atom palm_detect;
 	Atom palm_size;
 	Atom gesture_settings;
+	Atom scroll_high_prec;
 	struct MPropsSwipe{
 		Atom settings;
 		Atom buttons;

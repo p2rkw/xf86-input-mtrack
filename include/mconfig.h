@@ -101,6 +101,8 @@
 #define DEFAULT_AXIS_X_INVERT 0
 #define DEFAULT_AXIS_Y_INVERT 0
 #define DEFAULT_SENSITIVITY 1.0
+#define DEFAULT_COASTING 1
+#define DEFAULT_SCROLL_HIGH_PREC 1
 
 #define MCFG_NONE 0
 #define MCFG_SCALE 1
@@ -195,6 +197,8 @@ struct MConfig {
 	int drag_wait;			// How long to wait before triggering button down? >= 0
 	int drag_dist;			// How far is the finger allowed to move during wait time? >= 0
 	double sensitivity;		// Mouse movement multiplier. >= 0
+	int coasting;
+	int scroll_high_prec;		// Enable high precision scrolling. 0 or 1.
 };
 
 /* Load the MConfig struct with its defaults.

@@ -42,6 +42,7 @@ struct MTouch {
 	int is_timer_installed;   // to avoid setting timer multiple times
 	OsTimerPtr timer;
 	int absolute_mode;		// Should absolute mode be enabled ? 0 or 1
+	ValuatorMask* vm;
 };
 
 int mtouch_configure(struct MTouch* mt, int fd);

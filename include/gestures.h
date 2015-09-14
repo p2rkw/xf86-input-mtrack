@@ -60,6 +60,10 @@ struct Gestures {
 	 */
 	int move_dx, move_dy;
 
+	/* Scroll vertical, horizontal.
+	 */
+	double scroll_dx, scroll_dy;
+
 	/* Current time and time delta. Updated after each event and after sleeping.
 	 */
 	struct timeval time;

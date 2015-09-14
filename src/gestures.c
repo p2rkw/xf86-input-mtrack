@@ -50,7 +50,9 @@ static void trigger_button_down(struct Gestures* gs, int button)
 	struct timeval epoch;
 	timerclear(&epoch);
 
-	if (IS_VALID_BUTTON(button) && (button != gs->button_delayed || !IS_VALID_BUTTON(gs->button_delayed))) {
+	if (IS_VALID_BUTTON(button) &&
+			(button != gs->button_delayed || !IS_VALID_BUTTON(gs->button_delayed))
+	) {
 		SETBIT(gs->buttons, button);
 #ifdef DEBUG_GESTURES
 		xf86Msg(X_INFO, "trigger_button_down: %d down\n", button);
@@ -429,6 +431,13 @@ static void tapping_update(struct Gestures* gs,
 		abort_tapping(gs, ms);
 }
 
+
+static void clear_move(struct Gestures* gs)
+{
+	gs->move_dx = gs->move_dy = 0;
+	gs->scroll_dx = gs->scroll_dy = 0;
+}
+
 static void trigger_move(struct Gestures* gs,
 			const struct MConfig* cfg,
 			int dx, int dy)
@@ -585,7 +594,14 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		else
 			timerclear(&tv_tmp); // wait for gesture end
 		gs->move_dist = MODVAL(gs->move_dist, cfg_swipe->dist);
-		trigger_button_click(gs, button - 1, &tv_tmp);
+
+		/* Special case for high precision scrolling */
+		if(cfg->scroll_high_prec && (button == 4 || button == 5)){
+			gs->scroll_dx += avg_move_x;
+			gs->scroll_dy += avg_move_y;
+		}
+		else
+			trigger_button_click(gs, button - 1, &tv_tmp);
 	}
 #ifdef DEBUG_GESTURES
 	xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
