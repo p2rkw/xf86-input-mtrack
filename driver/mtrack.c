@@ -211,40 +211,56 @@ static int device_close(LocalDevicePtr local)
 	return Success;
 }
 
-static void set_and_post_mask(struct Gestures* gs, ValuatorMask* mask, DeviceIntPtr dev){
+static void set_and_post_mask(struct MTouch *mt, DeviceIntPtr dev,
+                              mstime_t delta_t){
+	static const double friction_factor = 0.7;
+	struct Gestures* gs;
+	ValuatorMask* mask;
+
+	gs = &mt->gs;
+	mask = mt->vm;
+
 	valuator_mask_zero(mask);
 
 	if (gs->move_dx)
 		valuator_mask_set_double(mask, 0, gs->move_dx);
 	if (gs->move_dy)
 		valuator_mask_set_double(mask, 1, gs->move_dy);
-	if (gs->scroll_dx)
-		valuator_mask_set_double(mask, 2, gs->scroll_dx);
-	if (gs->scroll_dy)
-		valuator_mask_set_double(mask, 3, gs->scroll_dy);
+	if (gs->scroll_speed_x)
+		valuator_mask_set_double(mask, 2, gs->scroll_speed_x * delta_t);
+	if (gs->scroll_speed_y)
+		valuator_mask_set_double(mask, 3, gs->scroll_speed_y * delta_t);
 
 	xf86PostMotionEventM(dev, Relative, mask);
 
 	/* Once posted, we can clear the move variables */
 	gs->move_dx = gs->move_dy = 0;
-	gs->scroll_dx = gs->scroll_dy = 0.0;
+
+	if (mt->cfg.coasting){
+		/* Simulate friction. Todo: make factor configurable. */
+		mt->gs.scroll_speed_y *= friction_factor;
+		mt->gs.scroll_speed_x *= friction_factor;
+	}
+	else{
+		mt->gs.scroll_speed_y = mt->gs.scroll_speed_x = 0.0;
+	}
 }
 
 static void handle_gestures(LocalDevicePtr local,
 			struct Gestures* gs)
 {
-	const struct MTouch *mt = local->private;
+	struct MTouch *mt = local->private;
 	static bitmask_t buttons_prev = 0U;
 	int i;
 
 	if(mt->absolute_mode == FALSE){
-		if (mt->cfg.scroll_high_prec){
+		if (mt->cfg.scroll_smooth){
 			/* Copy states from button_prev into current buttons state */
 			MODBIT(gs->buttons, 3, GETBIT(buttons_prev, 3));
 			MODBIT(gs->buttons, 4, GETBIT(buttons_prev, 4));
 			MODBIT(gs->buttons, 5, GETBIT(buttons_prev, 5));
 			MODBIT(gs->buttons, 6, GETBIT(buttons_prev, 6));
-			set_and_post_mask(gs, mt->vm, local->dev);
+			set_and_post_mask(mt, local->dev, timertoms(&gs->dt));
 		}
 		else{
 			// mt->absolute_mode == FALSE
@@ -285,31 +301,23 @@ static void handle_gestures(LocalDevicePtr local,
 static CARD32 coasting_delayed(OsTimerPtr timer, CARD32 time, void *arg){
   LocalDevicePtr local = arg;
 	struct MTouch *mt = local->private;
-	mstime_t delta_millis;
-	struct timeval delta;
+	const mstime_t delta_millis = 20; /* Schould be custom? */
 
-	delta_millis = 30; //10.0*mt->cfg.scroll.dist/(double)ABSVAL(mt->gs.move_speed);
-	xf86Msg(X_INFO, "coasting_delayed: speed=%lf, delta_milis=%d\n", mt->gs.move_speed, delta_millis);
+#if DEBUG_DRIVER
+	xf86Msg(X_INFO, "coasting_delayed: speed_x=%lf, speed_y=%lf, dir=%i\n", mt->gs.scroll_speed_x, mt->gs.scroll_speed_y, mt->gs.move_dir);
+#endif
+	set_and_post_mask(mt, local->dev, delta_millis);
 
-	if (ABSVAL(mt->gs.move_speed) > 0.1)
-	  mt->gs.move_speed -= 0.1;
-	else{
-		mt->gs.move_speed = 0.0;
+	if (ABSVAL(mt->gs.scroll_speed_y) < 0.1 && ABSVAL(mt->gs.scroll_speed_x) < 0.1){
+		mt->gs.scroll_speed_x = mt->gs.scroll_speed_y = 0.0;
 		mt->is_timer_installed = 0;
 		TimerCancel(mt->timer);
 		return 0;
 	}
 
 	TimerSet(mt->timer, 0, delta_millis, coasting_delayed, local);
+	mt->is_timer_installed = 2;
 
-	/*if (mt->gs.move_dir == TR_DIR_UP){
-		mt->gs.scroll_dx += delta_millis * mt->gs.move_speed;
-		set_and_post_mask(&mt->gs, mt->vm, local->dev);
-	}else if (mt->gs.move_dir == TR_DIR_DN)*/
-	{
-		mt->gs.scroll_dx += delta_millis * mt->gs.move_speed;
-		set_and_post_mask(&mt->gs, mt->vm, local->dev);
-	}
 	return 0;
 }
 
@@ -325,11 +333,7 @@ static CARD32 check_resolve_delayed(OsTimerPtr timer, CARD32 time, void *arg){
 	struct MTouch *mt = local->private;
 	mstime_t delta_millis;
 	struct timeval delta;
-// fix this shit:
-if (mt->is_timer_installed == 2 && 0){
-	mt->is_timer_installed = 0;
-	TimerCancel(mt->timer);
-}
+
 	// If it was to early to trigger delayed button, next timer will be set,
 	// but when called by timer such situation shouldn't take place.
 	switch (mtouch_delayed(mt)){
@@ -352,10 +356,8 @@ if (mt->is_timer_installed == 2 && 0){
 		handle_gestures(local, &mt->gs);
 		mt->is_timer_installed = 2;
 
-		delta_millis = 30; //10.0*mt->cfg.scroll.dist/(double)ABSVAL(mt->gs.move_speed);
-		TimerSet(mt->timer, 0, delta_millis, coasting_delayed, local);
-		//xf86Msg(X_INFO, "check_resolve_delayed: speed=%lf, delta_milis=%d\n", mt->gs.move_speed, delta_millis);
-
+		/* Install coasting timer */
+		coasting_delayed(mt->timer, -1, arg);
 		break;
 	case 0: break;
 	}

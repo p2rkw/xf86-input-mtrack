@@ -159,7 +159,7 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->gesture_wait;
 	mprops.gesture_settings = atom_init_integer(local->dev, MTRACK_PROP_GESTURE_SETTINGS, 2, ivals, 16);
 
-	ivals[0] = cfg->scroll_high_prec;
+	ivals[0] = cfg->scroll_smooth;
 	mprops.scroll_high_prec = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_HIGH_PRECISION, 1, ivals, 8);
 
 	init_swipe_props(local->dev, &mprops.scroll, &cfg->scroll, MTRACK_PROP_SCROLL_SETTINGS, MTRACK_PROP_SCROLL_BUTTONS);
@@ -528,10 +528,10 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		if (!checkonly) {
-			cfg->scroll_high_prec = ivals8[0];
+			cfg->scroll_smooth = ivals8[0];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set high precision scrolling to %d\n",
-				cfg->scroll_high_prec);
+				cfg->scroll_smooth);
 #endif
 		}
 	}

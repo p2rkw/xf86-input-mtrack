@@ -198,7 +198,7 @@ struct MConfig {
 	int drag_dist;			// How far is the finger allowed to move during wait time? >= 0
 	double sensitivity;		// Mouse movement multiplier. >= 0
 	int coasting;
-	int scroll_high_prec;		// Enable high precision scrolling. 0 or 1.
+	int scroll_smooth;		// Enable high precision scrolling. 0 or 1.
 };
 
 /* Load the MConfig struct with its defaults.
