@@ -449,7 +449,7 @@ static void trigger_move(struct Gestures* gs,
 			gs->move_type = GS_MOVE;
 			gs->move_dist = 0;
 			gs->move_dir = TR_NONE;
-			gs->move_speed = hypot(gs->move_dx, gs->move_dy)/timertomicro(&gs->dt);
+			//gs->move_speed = hypot(gs->move_dx, gs->move_dy)/timertomicro(&gs->dt);
 			timerclear(&gs->move_wait);
 #ifdef DEBUG_GESTURES
 			xf86Msg(X_INFO, "trigger_move: %d, %d (speed %f)\n",
@@ -596,12 +596,11 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		gs->move_dist = MODVAL(gs->move_dist, cfg_swipe->dist);
 
 		/* Special case for high precision scrolling */
-		if(cfg->scroll_high_prec && (button == 4 || button == 5)){
+		if(cfg->scroll_high_prec && button >= 4 && button <= 7){
 			gs->scroll_dx += avg_move_x;
 			gs->scroll_dy += avg_move_y;
 		}
-		else
-			trigger_button_click(gs, button - 1, &tv_tmp);
+		trigger_button_click(gs, button - 1, &tv_tmp);
 	}
 #ifdef DEBUG_GESTURES
 	xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
@@ -817,7 +816,7 @@ static void trigger_scale(struct Gestures* gs,
 		gs->move_type = GS_SCALE;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
-		gs->move_speed = dist/timertomicro(&gs->dt);
+		//gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= cfg->scale_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->scale_dist);
@@ -848,7 +847,7 @@ static void trigger_rotate(struct Gestures* gs,
 		gs->move_type = GS_ROTATE;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
-		gs->move_speed = dist/timertomicro(&gs->dt);
+		//gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= cfg->rotate_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->rotate_dist);
@@ -1041,17 +1040,37 @@ int gestures_delayed(struct MTouch* mt)
 	struct Gestures* gs = &mt->gs;
 	struct MTState* ms = &mt->state;
 	struct timeval now, delta;
-	int i, fingers_released;
-int button = gs->button_delayed;
+	int i, fingers_released, fingers_used;
+  int button;
+
+	button = mt->gs.button_delayed;
+
 	// if there's no delayed button - return
 	if(!IS_VALID_BUTTON(gs->button_delayed))
 		return 0;
 
-	fingers_released = 0;
 	// count released fingers
+	fingers_released = fingers_used = 0;
 	foreach_bit(i, ms->touch_used) {
 		if (GETBIT(ms->touch[i].state, MT_RELEASED))
 			++fingers_released;
+		else if (!GETBIT(ms->touch[i].state, MT_INVALID))
+			++fingers_used;
+	}
+
+	//xf86Msg(X_INFO, "scroll_high_prec=%i, coasting=%i, button=%i\n", mt->cfg.scroll_high_prec, mt->cfg.coasting, button);
+	/* Condition: check for coasting */
+	if(mt->cfg.scroll_high_prec && mt->cfg.coasting &&
+		 fingers_released >= 1 /*&& fingers_used == 0 */&&
+		 button >= 4 && button <= 7){
+		trigger_delayed_button_unsafe(gs);
+		gs->move_dx = gs->move_dy = 0;
+		gs->move_type = GS_NONE;
+		microtime(&now);
+		timersub(&now, &gs->move_start, &delta);
+		gs->move_speed = 100.0; //gs->total_move_dist/(double)timertomicro(&delta); // [px / ms]
+		xf86Msg(X_INFO, "gestures_delayed: speed=%lf, delta ms=%llu\n", gs->move_speed, (unsigned long long)timertomicro(&delta));
+		return 3;
 	}
 
 	/* Condition: was finger released and gesture is 'infinite' and it's not hold&move */
@@ -1064,18 +1083,6 @@ int button = gs->button_delayed;
 		gs->move_dx = gs->move_dy = 0;
 		gs->move_type = GS_NONE;
 		return 2;
-	}
-
-	/* Condition: check for coasting */
-	if((button == 3 || button == 4) && fingers_released != 0){
-		trigger_delayed_button_unsafe(gs);
-		gs->move_dx = gs->move_dy = 0;
-		gs->move_type = GS_NONE;
-		microtime(&now);
-		timersub(&now, &gs->move_start, &delta);
-		gs->move_speed = gs->total_move_dist/(double)timertomicro(&delta); // [px / ms]
-		xf86Msg(X_INFO, "gestures_delayed: speed=%lf, delta ms=%llu\n", gs->move_speed, (unsigned long long)timertomicro(&delta));
-		return 3;
 	}
 
 	if(is_timer_infinite(gs))

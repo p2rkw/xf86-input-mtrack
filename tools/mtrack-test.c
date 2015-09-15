@@ -82,7 +82,7 @@ static void loop_device(int fd)
 		fprintf(stderr, "error: could not open device\n");
 		return;
 	}
-	
+
 	mconfig_defaults(&mt.cfg);
 	printf("width:  %d\n", mt.hs.max_x);
 	printf("height: %d\n", mt.hs.max_y);

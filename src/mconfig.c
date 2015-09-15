@@ -208,6 +208,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->gesture_hold = MAXVAL(xf86SetIntOption(opts, "GestureClickTime", DEFAULT_GESTURE_HOLD), 1);
 	cfg->gesture_wait = MAXVAL(xf86SetIntOption(opts, "GestureWaitTime", DEFAULT_GESTURE_WAIT), 0);
 	cfg->scroll_high_prec = CLAMPVAL(xf86SetIntOption(opts, "ScrollHighPrecision", DEFAULT_SCROLL_HIGH_PREC), 0, 1);
+	cfg->coasting = DEFAULT_COASTING;
 	cfg->scroll.dist = MAXVAL(xf86SetIntOption(opts, "ScrollDistance", DEFAULT_SCROLL_DIST), 1);
 	cfg->scroll.hold = MAXVAL(xf86SetIntOption(opts, "ScrollClickTime", DEFAULT_SCROLL_HOLD), 0);
 	cfg->scroll.drag_sens = MAXVAL(xf86SetIntOption(opts, "ScrollSensitivity", DEFAULT_SWIPE_SENS), 0);
