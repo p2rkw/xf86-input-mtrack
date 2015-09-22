@@ -43,6 +43,9 @@
 
 #define NUM_AXES 4
 
+/* Schould be configurable? */
+#define COASTING_TICK_MS 18
+
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
 typedef InputInfoPtr LocalDevicePtr;
 #endif
@@ -225,10 +228,26 @@ static void set_and_post_mask(struct MTouch *mt, DeviceIntPtr dev,
 		valuator_mask_set_double(mask, 0, gs->move_dx);
 	if (gs->move_dy)
 		valuator_mask_set_double(mask, 1, gs->move_dy);
-	if (gs->scroll_speed_x)
-		valuator_mask_set_double(mask, 2, gs->scroll_speed_x * delta_t);
-	if (gs->scroll_speed_y)
-		valuator_mask_set_double(mask, 3, gs->scroll_speed_y * delta_t);
+
+	switch (gs->move_type){
+	case GS_SCROLL:
+	case GS_SWIPE3:
+	case GS_SWIPE4:
+	//case GS_MOVE:
+	case GS_NONE:
+		/* Only scroll, or swipe or move can trigger coasting right now */
+		/* Continue coasting if enabled */
+		if (gs->scroll_speed_x)
+			valuator_mask_set_double(mask, 2, gs->scroll_speed_x * delta_t);
+		if (gs->scroll_speed_y)
+			valuator_mask_set_double(mask, 3, gs->scroll_speed_y * delta_t);
+		break;
+
+	default:
+		/* Any other movement/gesture type will break coasting. */
+		mt->gs.scroll_speed_y = mt->gs.scroll_speed_x = 0.0f;
+		break;
+	}
 
 	xf86PostMotionEventM(dev, Relative, mask);
 
@@ -241,7 +260,7 @@ static void set_and_post_mask(struct MTouch *mt, DeviceIntPtr dev,
 		mt->gs.scroll_speed_x *= mt->cfg.scroll_coast_accel;
 	}
 	else{
-		mt->gs.scroll_speed_y = mt->gs.scroll_speed_x = 0.0;
+		mt->gs.scroll_speed_y = mt->gs.scroll_speed_x = 0.0f;
 	}
 }
 
@@ -300,14 +319,15 @@ static void handle_gestures(LocalDevicePtr local,
 static CARD32 coasting_delayed(OsTimerPtr timer, CARD32 time, void *arg){
   LocalDevicePtr local = arg;
 	struct MTouch *mt = local->private;
-	const mstime_t delta_millis = 20; /* Schould be custom? */
+	const mstime_t delta_millis = COASTING_TICK_MS;
 
 #if DEBUG_DRIVER
 	xf86Msg(X_INFO, "coasting_delayed: speed_x=%f, speed_y=%f, dir=%i\n", mt->gs.scroll_speed_x, mt->gs.scroll_speed_y, mt->gs.move_dir);
 #endif
 	set_and_post_mask(mt, local->dev, delta_millis);
 
-	if (ABSVAL(mt->gs.scroll_speed_y) < 0.1 && ABSVAL(mt->gs.scroll_speed_x) < 0.1){
+	if (ABSVAL(mt->gs.scroll_speed_y) < mt->cfg.scroll_coast_min_speed &&
+			ABSVAL(mt->gs.scroll_speed_x) < mt->cfg.scroll_coast_min_speed){
 		mt->gs.scroll_speed_x = mt->gs.scroll_speed_y = 0.0;
 		mt->is_timer_installed = 0;
 		TimerCancel(mt->timer);

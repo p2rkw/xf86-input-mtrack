@@ -31,6 +31,10 @@
 
 #define IS_VALID_BUTTON(x) (x >= 0 && x <= 31)
 
+static void break_coasting(struct Gestures* gs){
+	gs->scroll_speed_x = gs->scroll_speed_y = 0.0f;
+}
+
 static void trigger_button_up(struct Gestures* gs, int button)
 {
 	if (IS_VALID_BUTTON(button)) {
@@ -136,6 +140,8 @@ static void trigger_drag_ready(struct Gestures* gs,
 #ifdef DEBUG_GESTURES
 	xf86Msg(X_INFO, "trigger_drag_ready: drag is ready\n");
 #endif
+	/* Break coasting */
+	break_coasting(gs);
 }
 
 static int trigger_drag_start(struct Gestures* gs,
@@ -439,6 +445,7 @@ static void trigger_move(struct Gestures* gs,
 		if (trigger_drag_start(gs, cfg, dx, dy)) {
 			gs->move_dx = (int)(dx*cfg->sensitivity);
 			gs->move_dy = (int)(dy*cfg->sensitivity);
+			break_coasting(gs);
 			gs->move_type = GS_MOVE;
 			gs->move_dist = 0;
 			gs->move_dir = TR_NONE;
@@ -1021,8 +1028,8 @@ static int can_trigger_coasting(const struct MTouch* mt){
 				mt->cfg.scroll_coast_accel > 0.0f &&
 				is_any_swipe(mt->gs.move_type) &&
 				(
-					mt->gs.scroll_speed_x > mt->cfg.scroll_coast_min_speed ||
-					mt->gs.scroll_speed_y > mt->cfg.scroll_coast_min_speed
+					ABSVAL(mt->gs.scroll_speed_x) >= mt->cfg.scroll_coast_min_speed ||
+					ABSVAL(mt->gs.scroll_speed_y) >= mt->cfg.scroll_coast_min_speed
 				);
 }
 
