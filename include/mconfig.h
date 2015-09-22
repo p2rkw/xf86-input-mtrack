@@ -58,9 +58,8 @@
 #define DEFAULT_SCROLL_LT_BTN 6
 #define DEFAULT_SCROLL_RT_BTN 7
 #define DEFAULT_SCROLL_HOLD 20
-#define DEFAULT_SCROLL_COAST_ENABLE 0
-#define DEFAULT_SCROLL_COAST_SPEED 50
-#define DEFAULT_SCROLL_COAST_DECEL 10
+#define DEFAULT_SCROLL_COAST_MIN_SPEED 0
+#define DEFAULT_SCROLL_COAST_ACCEL 0.7f
 #define DEFAULT_SWIPE_DIST 700
 #define DEFAULT_SWIPE_UP_BTN 8
 #define DEFAULT_SWIPE_DN_BTN 9
@@ -104,7 +103,6 @@
 #define DEFAULT_AXIS_X_INVERT 0
 #define DEFAULT_AXIS_Y_INVERT 0
 #define DEFAULT_SENSITIVITY 1.0
-#define DEFAULT_COASTING 1
 #define DEFAULT_SCROLL_HIGH_PREC 1
 
 #define MCFG_NONE 0
@@ -178,9 +176,8 @@ struct MConfig {
 		int lt_btn;		// Button to use for swipe left. >= 0, 0 is none
 		int rt_btn;		// Button to use for swipe right. >= 0, 0 is none
 	} scroll, swipe3, swipe4/*, swipe5*/;
-	int scroll_coast_enable;	// Whether or not to enable scroll coasting. 0 or 1
-	int scroll_coast_speed;		// What speed to start scroll coasting at. >= 0
-	int scroll_coast_decel;		// Amount to decelerate during scroll coasting. >= 0, 0 disables
+	float scroll_coast_min_speed;		// What speed to start scroll coasting at. >= 0
+	float scroll_coast_accel;		// Amount to decelerate during scroll coasting. >= 0, 0 disables
 	int scale_dist;			// Distance needed to trigger a button. >= 0, 0 disables
 	int scale_up_btn;		// Button to use for scale up. >= 0, 0 is none
 	int scale_dn_btn;		// Button to use for scale down. >= 0, 0 is none
@@ -203,8 +200,7 @@ struct MConfig {
 	int drag_wait;			// How long to wait before triggering button down? >= 0
 	int drag_dist;			// How far is the finger allowed to move during wait time? >= 0
 	double sensitivity;		// Mouse movement multiplier. >= 0
-	int coasting;
-	int scroll_smooth;		// Enable high precision scrolling. 0 or 1.
+	int scroll_smooth;		// Enable high precision (smooth) scrolling. 0 or 1.
 };
 
 /* Load the MConfig struct with its defaults.

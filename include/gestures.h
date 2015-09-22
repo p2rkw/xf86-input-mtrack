@@ -62,7 +62,7 @@ struct Gestures {
 
 	/* Scroll vertical, horizontal.
 	 */
-	double scroll_speed_x, scroll_speed_y;
+	float scroll_speed_x, scroll_speed_y;
 
 	/* Current time and time delta. Updated after each event and after sleeping.
 	 */

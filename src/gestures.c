@@ -578,8 +578,8 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 	/* Special case for smooth scrolling */
 	if(cfg->scroll_smooth && button >= 4 && button <= 7){
 		/* Calculate speed vector */
-		gs->scroll_speed_x = avg_move_x/(double)timertoms(&gs->dt);
-		gs->scroll_speed_y = avg_move_y/(double)timertoms(&gs->dt);
+		gs->scroll_speed_x = avg_move_x/(float)timertoms(&gs->dt);
+		gs->scroll_speed_y = avg_move_y/(float)timertoms(&gs->dt);
 		/* Don't modulo move_dist */
 	}
 	else if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
@@ -1016,6 +1016,16 @@ static int is_any_swipe(int move_type){
 	return move_type == GS_SCROLL || move_type == GS_SWIPE3 || move_type == GS_SWIPE4;
 }
 
+static int can_trigger_coasting(const struct MTouch* mt){
+	return mt->cfg.scroll_smooth &&
+				mt->cfg.scroll_coast_accel > 0.0f &&
+				is_any_swipe(mt->gs.move_type) &&
+				(
+					mt->gs.scroll_speed_x > mt->cfg.scroll_coast_min_speed ||
+					mt->gs.scroll_speed_y > mt->cfg.scroll_coast_min_speed
+				);
+}
+
 /*
  * Executed every input time frame, at least once. First time from 'read_input' to check if
  * timer is needed.
@@ -1048,11 +1058,10 @@ int gestures_delayed(struct MTouch* mt)
 			++fingers_used;
 	}
 
-	//xf86Msg(X_INFO, "scroll_high_prec=%i, coasting=%i, button=%i\n", mt->cfg.scroll_high_prec, mt->cfg.coasting, button);
 	/* Condition: check for coasting */
-	if(mt->cfg.scroll_smooth && mt->cfg.coasting &&
-		 fingers_released >= 1 /*&& fingers_used == 0 */&&
-		 /*button >= 4 && button <= 7 &&*/ is_any_swipe(gs->move_type)){
+	if(fingers_released >= 1 /*&& fingers_used == 0 */ &&
+		 /*button >= 4 && button <= 7 &&*/
+		 can_trigger_coasting(mt)){
 		trigger_delayed_button_unsafe(gs);
 		gs->move_dx = gs->move_dy = 0;
 		gs->move_type = GS_NONE;

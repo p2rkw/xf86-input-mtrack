@@ -213,7 +213,6 @@ static int device_close(LocalDevicePtr local)
 
 static void set_and_post_mask(struct MTouch *mt, DeviceIntPtr dev,
                               mstime_t delta_t){
-	static const double friction_factor = 0.7;
 	struct Gestures* gs;
 	ValuatorMask* mask;
 
@@ -236,10 +235,10 @@ static void set_and_post_mask(struct MTouch *mt, DeviceIntPtr dev,
 	/* Once posted, we can clear the move variables */
 	gs->move_dx = gs->move_dy = 0;
 
-	if (mt->cfg.coasting){
-		/* Simulate friction. Todo: make factor configurable. */
-		mt->gs.scroll_speed_y *= friction_factor;
-		mt->gs.scroll_speed_x *= friction_factor;
+	if (mt->cfg.scroll_coast_accel > 0.0f){
+		/* Simulate friction. */
+		mt->gs.scroll_speed_y *= mt->cfg.scroll_coast_accel;
+		mt->gs.scroll_speed_x *= mt->cfg.scroll_coast_accel;
 	}
 	else{
 		mt->gs.scroll_speed_y = mt->gs.scroll_speed_x = 0.0;
@@ -304,7 +303,7 @@ static CARD32 coasting_delayed(OsTimerPtr timer, CARD32 time, void *arg){
 	const mstime_t delta_millis = 20; /* Schould be custom? */
 
 #if DEBUG_DRIVER
-	xf86Msg(X_INFO, "coasting_delayed: speed_x=%lf, speed_y=%lf, dir=%i\n", mt->gs.scroll_speed_x, mt->gs.scroll_speed_y, mt->gs.move_dir);
+	xf86Msg(X_INFO, "coasting_delayed: speed_x=%f, speed_y=%f, dir=%i\n", mt->gs.scroll_speed_x, mt->gs.scroll_speed_y, mt->gs.move_dir);
 #endif
 	set_and_post_mask(mt, local->dev, delta_millis);
 
