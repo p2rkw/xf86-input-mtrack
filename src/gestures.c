@@ -587,6 +587,7 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		/* Calculate speed vector */
 		gs->scroll_speed_x = avg_move_x/(float)timertoms(&gs->dt);
 		gs->scroll_speed_y = avg_move_y/(float)timertoms(&gs->dt);
+		gs->scroll_coast_tick_no = 0;
 		/* Don't modulo move_dist */
 	}
 	else if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
@@ -1025,11 +1026,11 @@ static int is_any_swipe(int move_type){
 
 static int can_trigger_coasting(const struct MTouch* mt){
 	return mt->cfg.scroll_smooth &&
-				mt->cfg.scroll_coast_accel > 0.0f &&
+				mt->cfg.scroll_coast.num_of_ticks > 0 &&
 				is_any_swipe(mt->gs.move_type) &&
 				(
-					ABSVAL(mt->gs.scroll_speed_x) >= mt->cfg.scroll_coast_min_speed ||
-					ABSVAL(mt->gs.scroll_speed_y) >= mt->cfg.scroll_coast_min_speed
+					ABSVAL(mt->gs.scroll_speed_x) >= mt->cfg.scroll_coast.min_speed ||
+					ABSVAL(mt->gs.scroll_speed_y) >= mt->cfg.scroll_coast.min_speed
 				);
 }
 

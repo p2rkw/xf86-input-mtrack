@@ -60,10 +60,6 @@ struct Gestures {
 	 */
 	int move_dx, move_dy;
 
-	/* Scroll vertical, horizontal.
-	 */
-	float scroll_speed_x, scroll_speed_y;
-
 	/* Current time and time delta. Updated after each event and after sleeping.
 	 */
 	struct timeval time;
@@ -94,6 +90,13 @@ struct Gestures {
 	struct timeval move_drag_wait;
 	struct timeval move_drag_expire;
 	struct timeval move_start;
+
+	/* Scroll vertical, horizontal.
+	 */
+	float scroll_speed_x, scroll_speed_y;
+
+	/* Number of scroll coasting frame */
+	int scroll_coast_tick_no;
 };
 
 

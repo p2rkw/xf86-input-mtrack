@@ -43,8 +43,6 @@
 
 #define NUM_AXES 4
 
-/* Schould be configurable? */
-#define COASTING_TICK_MS 18
 
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
 typedef InputInfoPtr LocalDevicePtr;
@@ -218,6 +216,7 @@ static void set_and_post_mask(struct MTouch *mt, DeviceIntPtr dev,
                               mstime_t delta_t){
 	struct Gestures* gs;
 	ValuatorMask* mask;
+	float speed_factor;
 
 	gs = &mt->gs;
 	mask = mt->vm;
@@ -237,10 +236,12 @@ static void set_and_post_mask(struct MTouch *mt, DeviceIntPtr dev,
 	case GS_NONE:
 		/* Only scroll, or swipe or move can trigger coasting right now */
 		/* Continue coasting if enabled */
-		if (gs->scroll_speed_x)
-			valuator_mask_set_double(mask, 2, gs->scroll_speed_x * delta_t);
-		if (gs->scroll_speed_y)
-			valuator_mask_set_double(mask, 3, gs->scroll_speed_y * delta_t);
+		speed_factor = (mt->cfg.scroll_coast.num_of_ticks - gs->scroll_coast_tick_no) / (float)(mt->cfg.scroll_coast.num_of_ticks);
+		if (ABSVAL(gs->scroll_speed_x) > mt->cfg.scroll_coast.min_speed)
+			valuator_mask_set_double(mask, 2, gs->scroll_speed_x * delta_t * speed_factor);
+		if (ABSVAL(gs->scroll_speed_y) > mt->cfg.scroll_coast.min_speed)
+			valuator_mask_set_double(mask, 3, gs->scroll_speed_y * delta_t * speed_factor);
+
 		break;
 
 	default:
@@ -253,15 +254,6 @@ static void set_and_post_mask(struct MTouch *mt, DeviceIntPtr dev,
 
 	/* Once posted, we can clear the move variables */
 	gs->move_dx = gs->move_dy = 0;
-
-	if (mt->cfg.scroll_coast_accel > 0.0f){
-		/* Simulate friction. */
-		mt->gs.scroll_speed_y *= mt->cfg.scroll_coast_accel;
-		mt->gs.scroll_speed_x *= mt->cfg.scroll_coast_accel;
-	}
-	else{
-		mt->gs.scroll_speed_y = mt->gs.scroll_speed_x = 0.0f;
-	}
 }
 
 static void handle_gestures(LocalDevicePtr local,
@@ -319,22 +311,21 @@ static void handle_gestures(LocalDevicePtr local,
 static CARD32 coasting_delayed(OsTimerPtr timer, CARD32 time, void *arg){
   LocalDevicePtr local = arg;
 	struct MTouch *mt = local->private;
-	const mstime_t delta_millis = COASTING_TICK_MS;
 
 #if DEBUG_DRIVER
 	xf86Msg(X_INFO, "coasting_delayed: speed_x=%f, speed_y=%f, dir=%i\n", mt->gs.scroll_speed_x, mt->gs.scroll_speed_y, mt->gs.move_dir);
 #endif
-	set_and_post_mask(mt, local->dev, delta_millis);
+	set_and_post_mask(mt, local->dev, mt->cfg.scroll_coast.tick_ms);
 
-	if (ABSVAL(mt->gs.scroll_speed_y) < mt->cfg.scroll_coast_min_speed &&
-			ABSVAL(mt->gs.scroll_speed_x) < mt->cfg.scroll_coast_min_speed){
+	if (mt->gs.scroll_coast_tick_no >= mt->cfg.scroll_coast.num_of_ticks){
 		mt->gs.scroll_speed_x = mt->gs.scroll_speed_y = 0.0;
 		mt->is_timer_installed = 0;
 		TimerCancel(mt->timer);
 		return 0;
 	}
 
-	TimerSet(mt->timer, 0, delta_millis, coasting_delayed, local);
+	++mt->gs.scroll_coast_tick_no;
+	TimerSet(mt->timer, 0, mt->cfg.scroll_coast.tick_ms, coasting_delayed, local);
 	mt->is_timer_installed = 2;
 
 	return 0;

@@ -168,8 +168,8 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 
 	init_swipe_props(local->dev, &mprops.swipe4, &cfg->swipe4, MTRACK_PROP_SWIPE4_SETTINGS, MTRACK_PROP_SWIPE4_BUTTONS);
 
-	fvals[0] = cfg->scroll_coast_min_speed;
-	fvals[1] = cfg->scroll_coast_accel;
+	fvals[0] = cfg->scroll_coast.min_speed;
+	fvals[1] = cfg->scroll_coast.tick_ms * cfg->scroll_coast.num_of_ticks; /* = duration in miliseconds */
 	mprops.scroll_coast = atom_init_float(local->dev, MTRACK_PROP_SCROLL_COAST, 2, fvals, mprops.float_type);
 
 	ivals[0] = cfg->scale_dist;
@@ -557,11 +557,11 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		if (!checkonly) {
-			cfg->scroll_coast_min_speed = fvals[0];
-			cfg->scroll_coast_accel = fvals[1];
+			cfg->scroll_coast.min_speed = fvals[0];
+			cfg->scroll_coast.num_of_ticks = fvals[1] / cfg->scroll_coast.tick_ms;
 #ifndef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set scroll coasting to %f %f\n",
-				cfg->scroll_coast_min_speed, cfg->scroll_coast_accel);
+			xf86Msg(X_INFO, "mtrack: set scroll coasting to %f %i\n",
+				cfg->scroll_coast.min_speed, (int)cfg->scroll_coast.num_of_ticks);
 #endif
 		}
 	}
