@@ -160,7 +160,7 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	mprops.gesture_settings = atom_init_integer(local->dev, MTRACK_PROP_GESTURE_SETTINGS, 2, ivals, 16);
 
 	ivals[0] = cfg->scroll_smooth;
-	mprops.scroll_high_prec = atom_init_integer(local->dev, MTRACK_PROP_SCROLL_HIGH_PRECISION, 1, ivals, 8);
+	mprops.scroll_smooth = atom_init_integer(local->dev, MTRACK_PROP_SMOOTH_SCROLL, 1, ivals, 8);
 
 	init_swipe_props(local->dev, &mprops.scroll, &cfg->scroll, MTRACK_PROP_SCROLL_SETTINGS, MTRACK_PROP_SCROLL_BUTTONS);
 
@@ -523,7 +523,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (property == mprops.scroll_high_prec) {
+	else if (property == mprops.scroll_smooth) {
 		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
