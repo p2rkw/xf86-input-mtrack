@@ -218,10 +218,6 @@ Integer value. A value of 0 disables scrolling left. Defaults to 6.
 For two finger scrolling. The button that is triggered by scrolling right.
 Integer value. A value of 0 disables scrolling right. Defaults to 7.
 
-**SwipeDistance** - 
-For three finger swiping. How far you must move your fingers before a button
-click is triggered. Integer value. Defaults to 700.
-
 **ScrollSmooth** -
 For two finger scrolling. Whether to generate high precision scroll events.
 Boolean value. Defaults to 1.
@@ -237,6 +233,10 @@ Property: "Trackpad Scroll Coasting"
 How fast scroll should be to enable coasting feature. Floating value. 
 Defaults to 0.1.
 Property: "Trackpad Scroll Coasting"
+
+**SwipeDistance** - 
+For three finger swiping. How far you must move your fingers before a button
+click is triggered. Integer value. Defaults to 700.
 
 **SwipeClickTime** -
 For three finger swiping. How long button triggered by swiping
