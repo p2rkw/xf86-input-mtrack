@@ -1,3 +1,19 @@
+xserver-xorg-input-mtrack (0.4.0) unstable; urgency=low
+
+  * Add smooth scroll
+  * Add scroll/swipe/swipe4 to drag functionality
+  * Add scroll coasting
+  * Add scroll/swipe/swipe4 click time
+  * Add Hold And Move gesture
+  * Replace EdgeSize with BottomEdge property
+  * Replace busy waiting with timers
+  * Fix button down -> up delays
+  * Initial support for absolute mode devices
+  * Improve support for pressure based devices
+  * Many minor improvements/bugfixes
+
+ -- Paweł Turkowski <p2rkw0@gmail.com>  Mon, 28 Sep 2015 01:20:38 +0200
+
 xserver-xorg-input-mtrack (0.2.0) unstable; urgency=low
 
   * Now built via autoconf/automake.
