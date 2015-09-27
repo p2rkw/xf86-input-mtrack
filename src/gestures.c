@@ -449,11 +449,9 @@ static void trigger_move(struct Gestures* gs,
 			gs->move_type = GS_MOVE;
 			gs->move_dist = 0;
 			gs->move_dir = TR_NONE;
-			//gs->move_speed = hypot(gs->move_dx, gs->move_dy)/timertomicro(&gs->dt);
 			timerclear(&gs->move_wait);
 #ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_move: %d, %d (speed %f)\n",
-				gs->move_dx, gs->move_dy, gs->move_speed);
+			xf86Msg(X_INFO, "trigger_move: %d, %d\n", gs->move_dx, gs->move_dy);
 #endif
 		}
 	}
@@ -599,8 +597,8 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		trigger_button_click(gs, button - 1, &tv_tmp);
 	}
 #ifdef DEBUG_GESTURES
-	xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d) (speed %f)\n",
-		dist, dir, gs->move_dist, cfg_swipe->dist, gs->move_speed);
+	xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d)\n",
+		dist, dir, gs->move_dist, cfg_swipe->dist);
 #endif
 	return 1;
 }
@@ -812,7 +810,6 @@ static void trigger_scale(struct Gestures* gs,
 		gs->move_type = GS_SCALE;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
-		//gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= cfg->scale_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->scale_dist);
@@ -823,8 +820,8 @@ static void trigger_scale(struct Gestures* gs,
 				trigger_button_click(gs, cfg->scale_dn_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_scale: scaling %+f in direction %d (at %d of %d) (speed %f)\n",
-			dist, dir, gs->move_dist, cfg->scale_dist, gs->move_speed);
+		xf86Msg(X_INFO, "trigger_scale: scaling %+f in direction %d (at %d of %d)\n",
+			dist, dir, gs->move_dist, cfg->scale_dist);
 #endif
 	}
 }
@@ -843,7 +840,6 @@ static void trigger_rotate(struct Gestures* gs,
 		gs->move_type = GS_ROTATE;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
-		//gs->move_speed = dist/timertomicro(&gs->dt);
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= cfg->rotate_dist) {
 			gs->move_dist = MODVAL(gs->move_dist, cfg->rotate_dist);
@@ -854,8 +850,8 @@ static void trigger_rotate(struct Gestures* gs,
 				trigger_button_click(gs, cfg->rotate_rt_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_rotate: rotating %+f in direction %d (at %d of %d) (speed %f)\n",
-			dist, dir, gs->move_dist, cfg->rotate_dist, gs->move_speed);
+		xf86Msg(X_INFO, "trigger_rotate: rotating %+f in direction %d (at %d of %d)\n",
+			dist, dir, gs->move_dist, cfg->rotate_dist);
 #endif
 	}
 }
