@@ -297,7 +297,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	uint32_t* ivals32;
 	float* fvals;
 
-   int error_code;
+	int error_code;
 
 	if (property == mprops.trackpad_disable) {
 		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
@@ -542,12 +542,6 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	else if (set_swipe_properties(property, checkonly, prop, &mprops.scroll, &cfg->scroll, &error_code)) {
 		return error_code;
 	}
-	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe3, &cfg->swipe3, &error_code)) {
-		return error_code;
-	}
-	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe4, &cfg->swipe4, &error_code)) {
-		return error_code;
-	}
 	else if (property == mprops.scroll_coast) {
 		if (prop->size != 2 || prop->type != mprops.float_type)
 			return BadMatch;
@@ -580,6 +574,12 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 				cfg->scale_dist);
 #endif
 		}
+	}
+	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe3, &cfg->swipe3, &error_code)) {
+		return error_code;
+	}
+	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe4, &cfg->swipe4, &error_code)) {
+		return error_code;
 	}
 	else if (property == mprops.scale_buttons) {
 		if (prop->size != 2 || prop->format != 8 || prop->type != XA_INTEGER)
@@ -745,6 +745,9 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
+
+	SetScrollValuator(dev, 2, SCROLL_TYPE_HORIZONTAL, cfg->scroll.dist, 0);
+	SetScrollValuator(dev, 3, SCROLL_TYPE_VERTICAL, cfg->scroll.dist, 0);
 
 	return Success;
 }

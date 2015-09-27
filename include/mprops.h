@@ -63,10 +63,11 @@
 // int, 2 value - button hold, wait time
 #define MTRACK_PROP_GESTURE_SETTINGS "Trackpad Gesture Settings"
 // int, 1 value - enable high precision scrolling
-#define MTRACK_PROP_SMOOTH_SCROLL "Trackpad High Smooth Scroll"
-// int, 2 values
+#define MTRACK_PROP_SMOOTH_SCROLL "Trackpad Smooth Scroll"
+// int, 3 values
 //   first: distance before a scroll event (two finger swipe) is triggered
 //   second: how much milliseconds button will be hold after {up,down,left,right} scroll
+//   third: sensitivity of the pointer during scroll gesture multiplied by 1000, value of 0 disables drag-to-move
 #define MTRACK_PROP_SCROLL_SETTINGS "Trackpad Scroll Settings"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SCROLL_BUTTONS "Trackpad Scroll Buttons"
@@ -75,12 +76,14 @@
 // int, 2 values
 //   first: distance before a three finger swipe event is triggered
 //   second: how much milliseconds button will be hold after {up,down,left,right} swipe
+//   third: sensitivity of the pointer during three finger swipe gesture multiplied by 1000, value of 0 disables drag-to-move
 #define MTRACK_PROP_SWIPE_SETTINGS "Trackpad Swipe Settings"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SWIPE_BUTTONS "Trackpad Swipe Buttons"
 // int, 2 values
 //   first: distance before a four finger swipe event is triggered
 //   second: how much milliseconds button will be hold after {up,down,left,right} swipe4
+//   third: sensitivity of the pointer during four finger swipe gesture multiplied by 1000, value of 0 disables drag-to-move
 #define MTRACK_PROP_SWIPE4_SETTINGS "Trackpad Swipe4 Settings"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SWIPE4_BUTTONS "Trackpad Swipe4 Buttons"

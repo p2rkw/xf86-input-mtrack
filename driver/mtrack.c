@@ -161,9 +161,9 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 				   1, 0, 1);
 #endif
 	xf86InitValuatorDefaults(dev, 1);
+	mprops_init(&mt->cfg, local);
 	SetScrollValuator(dev, 2, SCROLL_TYPE_HORIZONTAL, mt->cfg.scroll.dist, 0);
 	SetScrollValuator(dev, 3, SCROLL_TYPE_VERTICAL, mt->cfg.scroll.dist, 0);
-	mprops_init(&mt->cfg, local);
 	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
 	TimerInit();
