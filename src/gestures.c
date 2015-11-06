@@ -608,7 +608,7 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		trigger_button_click(gs, button - 1, &tv_tmp);
 	}
 #ifdef DEBUG_GESTURES
-	xf86Msg(X_INFO, "trigger_swipe_button: swiping %+f in direction %d (at %d of %d)\n",
+	xf86Msg(X_INFO, "trigger_swipe_button: swiping %f in direction %d (at %d of %d)\n",
 		dist, dir, gs->move_dist, cfg_swipe->dist);
 #endif
 	return 1;
@@ -831,7 +831,7 @@ static void trigger_scale(struct Gestures* gs,
 				trigger_button_click(gs, cfg->scale_dn_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_scale: scaling %+f in direction %d (at %d of %d)\n",
+		xf86Msg(X_INFO, "trigger_scale: scaling %f in direction %d (at %d of %d)\n",
 			dist, dir, gs->move_dist, cfg->scale_dist);
 #endif
 	}
@@ -861,7 +861,7 @@ static void trigger_rotate(struct Gestures* gs,
 				trigger_button_click(gs, cfg->rotate_rt_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_rotate: rotating %+f in direction %d (at %d of %d)\n",
+		xf86Msg(X_INFO, "trigger_rotate: rotating %f in direction %d (at %d of %d)\n",
 			dist, dir, gs->move_dist, cfg->rotate_dist);
 #endif
 	}
