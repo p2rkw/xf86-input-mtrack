@@ -45,12 +45,19 @@ typedef __u64 mstime_t;
 /* all bit masks have this type */
 typedef unsigned int bitmask_t;
 
+/**
+ * m - bit set (integer)
+ * x - modified bit
+ * b - new value
+ * @{
+ */
 #define BITMASK(x) (1U << (x))
 #define BITONES(x) (BITMASK(x) - 1U)
 #define GETBIT(m, x) (((m) >> (x)) & 1U)
 #define SETBIT(m, x) (m |= BITMASK(x))
 #define CLEARBIT(m, x) (m &= ~BITMASK(x))
 #define MODBIT(m, x, b) ((b) ? SETBIT(m, x) : CLEARBIT(m, x))
+/** }@ */
 
 #define ABSVAL(x) ((x) < 0 ? -1*(x) : (x))
 #define MINVAL(x, y) ((x) < (y) ? (x) : (y))
@@ -58,6 +65,19 @@ typedef unsigned int bitmask_t;
 #define MODVAL(x, y) ((x) - ((int)((x) / (y))) * (y))
 #define SQRVAL(x) ((x) * (x))
 #define CLAMPVAL(x, min, max) MAXVAL(MINVAL(x, max), min)
+#define SGNVAL (x) ((x) < 0 ? -1 : (((x) > 0) ? 1 : 0))
+
+#define LOG_INFO(...) \
+	do{ \
+		xf86Msg(X_INFO, "mtrack %s:%i: ", __FILE__, __LINE__); \
+		xf86Msg(X_INFO, __VA_ARGS__); \
+	}while(0)
+
+#if defined(DEBUG_DRIVER) && (DEBUG_DRIVER != 0)
+# define LOG_DEBUG LOG_INFO
+#else
+# define LOG_DEBUG(...)
+#endif
 
 /* Retrieve the current time and place it in tv.
  */
@@ -131,6 +151,8 @@ static inline int dist2(int dx, int dy)
 	return dx * dx + dy * dy;
 }
 
+
+
 /* Count number of bits (Sean Eron Andersson's Bit Hacks).
  */
 static inline int bitcount(unsigned v)
@@ -152,5 +174,37 @@ static inline int bitcount(unsigned v)
 /* Robust system ioctl calls.
  */
 #define SYSCALL(call) while (((call) == -1) && (errno == EINTR))
+
+/**
+ * \defgroup Gestures.c Functions from gestures.c
+ *
+ *   These functions are implemented in gestures.c
+ *
+ * @{
+ */
+
+struct Gestures;
+
+/**
+ *  Compute x*x+y*y and compare it with value*value.
+ * It's equal to following comparision: sqrt(x*x+y*y) [?] value.
+ * Implementation in gestures.c
+ *
+ * @param x
+ * @param y
+ * @param value
+ * @return -1 when lhs is less than rhs, 0 when equal, 1 when greater
+ */
+int hypot_cmpf(float x, float y, float value);
+
+/**
+ *  It's called 'uncond' because caller have to check that all conditions required to
+ * trigger delayed button were met.
+ *
+ * @return triggered button
+ */
+int trigger_delayed_button_uncond(struct Gestures* gs);
+
+/** }@ */
 
 #endif

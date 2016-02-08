@@ -168,7 +168,7 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 
 	TimerInit();
 	mt->timer = NULL; /* allocated later */
-	mt->is_timer_installed = 0;
+	mt->timer_kind = 0;
 	mt->absolute_mode = FALSE;
 	return Success;
 }
@@ -189,7 +189,7 @@ static int device_on(LocalDevicePtr local)
 	if(mt->timer != NULL)
 		TimerFree(mt->timer);	// release any existing timer
 	mt->timer = NULL;
-	mt->is_timer_installed = 0;
+	mt->timer_kind = 0;
 	return Success;
 }
 
@@ -203,7 +203,7 @@ static int device_off(LocalDevicePtr local)
 	if(mt->timer != NULL)
 		TimerFree(mt->timer);	// release any existing timer
 	mt->timer = NULL;
-	mt->is_timer_installed = 0;
+	mt->timer_kind = 0;
 	return Success;
 }
 
@@ -212,166 +212,260 @@ static int device_close(LocalDevicePtr local)
 	return Success;
 }
 
-static void set_and_post_mask(struct MTouch *mt, DeviceIntPtr dev,
-                              mstime_t delta_t){
-	struct Gestures* gs;
-	ValuatorMask* mask;
-	float speed_factor;
+static void post_button(struct MTouch* mt, int button, int new_state);
 
-	gs = &mt->gs;
-	mask = mt->vm;
+void mt_timer_start(struct MTouch *mt, int kind)
+{
+	struct Gestures* gs = &mt->gs;
+	mstime_t timeout; /*< Set this variable to required timeout. */
 
-	valuator_mask_zero(mask);
+	if(kind == mt->timer_kind){
+		LOG_DEBUG("Timer %i already started\n", kind);
+		return;
+	}
 
-	if (gs->move_dx)
-		valuator_mask_set_double(mask, 0, gs->move_dx);
-	if (gs->move_dy)
-		valuator_mask_set_double(mask, 1, gs->move_dy);
+	mt_timer_stop(mt);
 
-	switch (gs->move_type){
-	case GS_SCROLL:
-	case GS_SWIPE3:
-	case GS_SWIPE4:
-	//case GS_MOVE:
-	case GS_NONE:
-		/* Only scroll, or swipe or move can trigger coasting right now */
-		/* Continue coasting if enabled */
-		speed_factor = (mt->cfg.scroll_coast.num_of_ticks - gs->scroll_coast_tick_no) / (float)(mt->cfg.scroll_coast.num_of_ticks);
-		if (ABSVAL(gs->scroll_speed_x) > mt->cfg.scroll_coast.min_speed)
-			valuator_mask_set_double(mask, 2, gs->scroll_speed_x * delta_t * speed_factor);
-		if (ABSVAL(gs->scroll_speed_y) > mt->cfg.scroll_coast.min_speed)
-			valuator_mask_set_double(mask, 3, gs->scroll_speed_y * delta_t * speed_factor);
+	switch(kind){
+	case MT_TIMER_DELAYED_BUTTON:
+	{
+		struct timeval delta;
 
-		break;
-
-	default:
-		/* Any other movement/gesture type will break coasting. */
-		mt->gs.scroll_speed_y = mt->gs.scroll_speed_x = 0.0f;
+		timersub(&gs->button_delayed_time, &gs->time, &delta);
+		timeout = timertoms(&delta);
 		break;
 	}
 
-	xf86PostMotionEventM(dev, Relative, mask);
+	case MT_TIMER_COASTING:
+		gs->move_dx = gs->move_dy = 0;
+		gs->move_type = GS_NONE;
+		gs->coasting_duration_left = mt->cfg.scroll_coast.duration - 1;
+		timeout = mt->cfg.scroll_coast.tick_ms;
+		break;
 
-	/* Once posted, we can clear the move variables */
-	gs->move_dx = gs->move_dy = 0;
+	case MT_TIMER_ANY:
+	case MT_TIMER_NONE:
+		return; /* do nothing */
+
+	default:
+		LOG_INFO("Unimplemented timer, ID: %i\n", kind);
+		return;
+	}
+
+	LOG_DEBUG("Start timer, ID: %i with timeout: %u\n", kind, timeout);
+	mt->timer = TimerSet(mt->timer, 0, timeout, mt_timer_callback, mt);
+	mt->timer_kind = kind;
 }
 
-static void handle_gestures(LocalDevicePtr local,
-			struct Gestures* gs)
+void mt_timer_stop(struct MTouch *mt)
 {
-	struct MTouch *mt = local->private;
-	static bitmask_t buttons_prev = 0U;
+	struct Gestures* gs = &mt->gs;
+
+	LOG_DEBUG("Stop timer, ID: %i\n", mt->timer_kind);
+	TimerCancel(mt->timer);
+
+	switch(mt->timer_kind){
+	case MT_TIMER_DELAYED_BUTTON:
+	{
+		int button;
+		button = trigger_delayed_button_uncond(gs);
+		post_button(mt, button, GETBIT(gs->buttons, button));
+		gs->move_dx = gs->move_dy = 0;
+		gs->move_type = GS_NONE;
+		break;
+	}
+
+	case MT_TIMER_COASTING:
+		mt->gs.scroll_speed_x = mt->gs.scroll_speed_y = 0.0;
+		break;
+
+	case MT_TIMER_ANY:
+	case MT_TIMER_NONE:
+		break; /* do nothing */
+
+	default:
+		LOG_INFO("Unimplemented timer, ID: %i\n", mt->timer_kind);
+		break;
+	}
+	mt->timer_kind = MT_TIMER_NONE;
+}
+
+CARD32 mt_timer_callback(OsTimerPtr timer, CARD32 time, void *arg)
+{
+	struct MTouch *mt = arg;
+	struct Gestures* gs = &mt->gs;
+	ValuatorMask* mask = mt->valuator_mask;
+
+	switch(mt->timer_kind){
+	case MT_TIMER_DELAYED_BUTTON:
+	{
+		int button;
+		button = trigger_delayed_button_uncond(gs);
+		post_button(mt, button, GETBIT(gs->buttons, button));
+		gs->move_dx = gs->move_dy = 0;
+		gs->move_type = GS_NONE;
+
+		mt_timer_stop(mt);
+		break;
+	}
+
+	case MT_TIMER_COASTING:
+	{
+		if (gs->coasting_duration_left <= 0)
+			return mt_timer_stop(mt), 0;
+
+		mstime_t delta_ms;
+		double coasting_progress;
+
+		valuator_mask_zero(mask);
+		delta_ms = mt->cfg.scroll_coast.tick_ms;
+		coasting_progress = gs->coasting_duration_left / (double)mt->cfg.scroll_coast.duration;
+
+		valuator_mask_set_double(mask, 2, gs->scroll_speed_x * coasting_progress * delta_ms);
+		valuator_mask_set_double(mask, 3, gs->scroll_speed_y * coasting_progress * delta_ms);
+		gs->coasting_duration_left -= delta_ms;
+
+		xf86PostMotionEventM(mt->local_dev, Relative, mask);
+
+		mt_timer_continue(mt, mt->cfg.scroll_coast.tick_ms);
+		break;
+	}
+
+	case MT_TIMER_ANY:
+	case MT_TIMER_NONE:
+		return; /* do nothing */
+
+	default:
+		LOG_INFO("Unimplemented timer id: %i\n", mt->timer_kind);
+		break;
+	}
+	return 0;
+}
+
+void mt_timer_start_or_stop(struct MTouch *mt, int kind)
+{
+	if(kind < 0)
+		mt_timer_stop_if(mt, -kind);
+	else if(kind > 0)
+		mt_timer_start(mt, kind);
+}
+
+void mt_timer_stop_if(struct MTouch *mt, int kind)
+{
+	if(mt->timer_kind == kind || kind == MT_TIMER_ANY || kind == -MT_TIMER_ANY)
+		mt_timer_stop(mt);
+}
+
+void mt_timer_continue(struct MTouch *mt, mstime_t timeout)
+{
+	LOG_DEBUG("Continue timer, ID: %i with timeout: %u\n", mt->timer_kind, timeout);
+	mt->timer = TimerSet(mt->timer, 0, timeout, mt_timer_callback, mt);
+}
+
+/**
+ * @param mt
+ * @return
+ */
+static int can_start_coasting(struct MTouch *mt)
+{
+	struct Gestures* gs = &mt->gs;
+	struct MTState* ms = &mt->state;
+	int i;
+
+	if(mt->cfg.scroll_smooth && mt->cfg.scroll_coast.duration > 0 &&
+		 mt->cfg.scroll_coast.duration > 0 &&
+		 hypot_cmpf(gs->scroll_speed_x, gs->scroll_speed_y, mt->cfg.scroll_coast.min_speed) == 1)
+	{
+		foreach_bit(i, ms->touch_used) {
+			if (GETBIT(ms->touch[i].state, MT_INVALID) ||
+					GETBIT(ms->touch[i].flags, GS_BUTTON) ||
+					GETBIT(ms->touch[i].flags, GS_TAP)
+				 )
+				continue;
+			if(GETBIT(mt->state.touch[i].state, MT_RELEASED))
+				return 1;
+		} /* foreach */
+	}
+	return 0;
+}
+
+static bitmask_t buttons_posted = 0U;
+static void post_gestures(struct MTouch *mt)
+{
+	struct Gestures* gs = &mt->gs;
+
 	int i;
 
 	if(mt->absolute_mode == FALSE){
 		if (mt->cfg.scroll_smooth){
 			/* Copy states from button_prev into current buttons state */
-			MODBIT(gs->buttons, 3, GETBIT(buttons_prev, 3));
-			MODBIT(gs->buttons, 4, GETBIT(buttons_prev, 4));
-			MODBIT(gs->buttons, 5, GETBIT(buttons_prev, 5));
-			MODBIT(gs->buttons, 6, GETBIT(buttons_prev, 6));
-			set_and_post_mask(mt, local->dev, timertoms(&gs->dt));
+			MODBIT(gs->buttons, 3, GETBIT(buttons_posted, 3));
+			MODBIT(gs->buttons, 4, GETBIT(buttons_posted, 4));
+			MODBIT(gs->buttons, 5, GETBIT(buttons_posted, 5));
+			MODBIT(gs->buttons, 6, GETBIT(buttons_posted, 6));
+
+			ValuatorMask* mask;	mask = mt->valuator_mask;
+			valuator_mask_zero(mask);
+
+			if (gs->move_dx)
+				valuator_mask_set_double(mask, 0, gs->move_dx);
+			if (gs->move_dy)
+				valuator_mask_set_double(mask, 1, gs->move_dy);
+			gs->move_dx = gs->move_dy = 0;
+
+			/* if is any swipe */
+			if(gs->move_type == GS_SWIPE2 || gs->move_type == GS_SWIPE3 || gs->move_type == GS_SWIPE4){
+				if(gs->scroll_speed_valid)
+				{
+					const double delta = timertoms(&gs->dt);
+					valuator_mask_set_double(mask, 2, gs->scroll_speed_x * delta);
+					valuator_mask_set_double(mask, 3, gs->scroll_speed_y * delta);
+				}
+				gs->scroll_speed_valid = 0;
+
+				/* Start coasting here if needed. */
+				if(can_start_coasting(mt))
+					mt_timer_start(mt, MT_TIMER_COASTING);
+			}
+
+			xf86PostMotionEventM(mt->local_dev, Relative, mask);
 		}
 		else{
-			// mt->absolute_mode == FALSE
+			// mt->absolute_mode == TRUE
 			if (gs->move_dx != 0 || gs->move_dy != 0)
-				xf86PostMotionEvent(local->dev, 0, 0, 2, gs->move_dx, gs->move_dy);
+				xf86PostMotionEvent(mt->local_dev, 0, 0, 2, gs->move_dx, gs->move_dy);
 		}
 	}
 	else{
 		/* Give the HW coordinates to Xserver as absolute coordinates, these coordinates
 		 * are not scaled, this is oke if the touchscreen has the same resolution as the display.
 		 */
-		xf86PostMotionEvent(local->dev, 1, 0, 2,
+		xf86PostMotionEvent(mt->local_dev, 1, 0, 2,
 			mt->state.touch[0].x + get_cap_xmid(&mt->caps),
 			mt->state.touch[0].y + get_cap_ymid(&mt->caps));
 	}
 
 	for (i = 0; i < 32; i++) {
-		if (GETBIT(gs->buttons, i) == GETBIT(buttons_prev, i))
-			continue;
-		if (GETBIT(gs->buttons, i)) {
-			xf86PostButtonEvent(local->dev, FALSE, i+1, 1, 0, 0);
-#define DEBUG_DRIVER 0
-#if DEBUG_DRIVER
-			xf86Msg(X_INFO, "button %d down\n", i+1);
-#endif
-		}
-		else {
-			xf86PostButtonEvent(local->dev, FALSE, i+1, 0, 0, 0);
-#if DEBUG_DRIVER
-			xf86Msg(X_INFO, "button %d up\n", i+1);
-#endif
-#undef DEBUG_DRIVER
-		}
+		post_button(mt, i, GETBIT(gs->buttons, i));
 	}
-	buttons_prev = gs->buttons;
 }
 
-static CARD32 coasting_delayed(OsTimerPtr timer, CARD32 time, void *arg){
-  LocalDevicePtr local = arg;
-	struct MTouch *mt = local->private;
+static void post_button(struct MTouch* mt, int button, int new_state)
+{
+	struct Gestures* gs = &mt->gs;
 
-#if DEBUG_DRIVER
-	xf86Msg(X_INFO, "coasting_delayed: speed_x=%f, speed_y=%f, dir=%i\n", mt->gs.scroll_speed_x, mt->gs.scroll_speed_y, mt->gs.move_dir);
-#endif
-	set_and_post_mask(mt, local->dev, mt->cfg.scroll_coast.tick_ms);
-
-	if (mt->gs.scroll_coast_tick_no >= mt->cfg.scroll_coast.num_of_ticks){
-		mt->gs.scroll_speed_x = mt->gs.scroll_speed_y = 0.0;
-		mt->is_timer_installed = 0;
-		TimerCancel(mt->timer);
-		return 0;
+	if (new_state == GETBIT(buttons_posted, button))
+		return;
+	if (new_state) {
+		xf86PostButtonEvent(mt->local_dev, FALSE, button+1, 1, 0, 0);
+		LOG_DEBUG("button %d down\n", button+1);
 	}
-
-	++mt->gs.scroll_coast_tick_no;
-	TimerSet(mt->timer, 0, mt->cfg.scroll_coast.tick_ms, coasting_delayed, local);
-	mt->is_timer_installed = 2;
-
-	return 0;
-}
-
-/*
- * Timers documentation:
- * http://www.x.org/releases/X11R7.7/doc/xorg-server/Xserver-spec.html#id2536042
- *
- * This function indirectly may call itself recursively using timer to guarantee correct
- * event delivery time. Ususally recursion ends after first recursive call.
- */
-static CARD32 check_resolve_delayed(OsTimerPtr timer, CARD32 time, void *arg){
-	LocalDevicePtr local = arg;
-	struct MTouch *mt = local->private;
-	mstime_t delta_millis;
-	struct timeval delta;
-
-	// If it was to early to trigger delayed button, next timer will be set,
-	// but when called by timer such situation shouldn't take place.
-	switch (mtouch_delayed(mt)){
-	case 1:
-		if(mt->is_timer_installed != 1){
-			TimerCancel(mt->timer);
-			mt->is_timer_installed = 1;
-			timersub(&mt->gs.button_delayed_time, &mt->gs.time, &delta);
-			delta_millis = timertoms(&delta);
-			mt->timer = TimerSet(mt->timer, 0, delta_millis, check_resolve_delayed, local);
-		}
-		break;
-	case 2:
-		TimerCancel(mt->timer);
-		mt->is_timer_installed = 0;
-		handle_gestures(local, &mt->gs);
-		break;
-	case 3:
-		TimerCancel(mt->timer);
-		handle_gestures(local, &mt->gs);
-		mt->is_timer_installed = 2;
-
-		/* Install coasting timer */
-		coasting_delayed(mt->timer, -1, arg);
-		break;
-	case 0: break;
+	else {
+		xf86PostButtonEvent(mt->local_dev, FALSE, button+1, 0, 0, 0);
+		LOG_DEBUG("button %d up\n", button+1);
 	}
-	return 0;
+	MODBIT(gs->buttons, button, new_state);
+	MODBIT(buttons_posted, button, new_state);
 }
 
 /*
@@ -380,13 +474,9 @@ static CARD32 check_resolve_delayed(OsTimerPtr timer, CARD32 time, void *arg){
  * xorg server, and fired when control return from this function.
  * So to fire event as early as possible this function should return quickly.
  * For delayed events we can't simply wait in this function, because it will delay
- * all events generated by 'handle_gestures'.
+ * all events generated by 'post_gestures'.
  * Moreover we don't know when next input event will occur, so to guarantee proper
  * timing I have to use timer.
- *
- * If mtouch_delayed() retured 1 this means it was to early to trigger delayed button,
- * and new timer have to be installed. Otherwise events generated inside can be handled
- * as usual.
  *
  * More on input event processing:
  * http://www.x.org/wiki/Development/Documentation/InputEventProcessing/
@@ -394,9 +484,14 @@ static CARD32 check_resolve_delayed(OsTimerPtr timer, CARD32 time, void *arg){
 static void read_input(LocalDevicePtr local)
 {
 	struct MTouch *mt = local->private;
-	while (mtouch_read(mt) > 0)
-		handle_gestures(local, &mt->gs);
-	check_resolve_delayed(NULL, 0, local);
+	int timer_kind;
+
+	mt->local_dev = local->dev;
+	while (mtouch_read(mt) > 0){
+		timer_kind = mtouch_delayed(mt);
+		mt_timer_start_or_stop(mt, timer_kind);
+		post_gestures(mt);
+	}
 }
 
 static int switch_mode(ClientPtr client, DeviceIntPtr dev, int mode)
@@ -462,7 +557,7 @@ static int preinit(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
 	xf86OptionListReport(pInfo->options);
 	xf86ProcessCommonOptions(pInfo, pInfo->options);
 	mconfig_configure(&mt->cfg, pInfo->options);
-	mt->vm = valuator_mask_new(1);
+	mt->valuator_mask = valuator_mask_new(1);
 
 	return Success;
 }
@@ -502,8 +597,8 @@ static void uninit(InputDriverPtr drv, InputInfoPtr local, int flags)
 {
 	struct MTouch *mt = local->private;
 
-	if (mt->vm)
-		valuator_mask_free(&mt->vm);
+	if (mt->valuator_mask)
+		valuator_mask_free(&mt->valuator_mask);
 	free(local->private);
 	local->private = 0;
 	xf86DeleteInput(local, 0);

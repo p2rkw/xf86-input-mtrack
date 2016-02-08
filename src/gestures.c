@@ -58,9 +58,8 @@ static void trigger_button_down(struct Gestures* gs, int button)
 			(button != gs->button_delayed || !IS_VALID_BUTTON(gs->button_delayed))
 	) {
 		SETBIT(gs->buttons, button);
-#ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_button_down: %d down\n", button);
-#endif
+
+		LOG_DEBUG("trigger_button_down: %d down\n", button);
 	}
 #ifdef DEBUG_GESTURES
 	else if (IS_VALID_BUTTON(button))
@@ -80,10 +79,7 @@ static void trigger_button_emulation(struct Gestures* gs, int button)
 	}
 }
 
-/* It's called 'unsafe' because caller have to check that all conditions required to
- * trigger delayed button were met.
- */
-static void trigger_delayed_button_unsafe(struct Gestures* gs)
+int trigger_delayed_button_uncond(struct Gestures* gs)
 {
 	int button;
 
@@ -93,10 +89,11 @@ static void trigger_delayed_button_unsafe(struct Gestures* gs)
 	gs->button_delayed = -1;
 	timerclear(&gs->button_delayed_time);
 	gs->move_dist = 0; /* don't count movement from delayed button phase in next stroke */
-#ifdef DEBUG_GESTURES
-	xf86Msg(X_INFO, "trigger_delayed_button: %d up, timer expired\n", button);
-#endif
+
+	LOG_DEBUG("trigger_delayed_button: %d up, timer expired\n", button);
 	trigger_button_up(gs, button);
+
+	return button;
 }
 
 /*
@@ -206,7 +203,7 @@ static void trigger_drag_stop(struct Gestures* gs, int force)
    }
 }
 
-/* Return 0 only if actual time stamp is less than move_wait time stanp. */
+/* Return 0 if current time stamp is greater than move_wait time stamp. */
 static int can_change_gesture_type(struct Gestures* gs, int desired_gesture){
 	if (gs->move_type == desired_gesture)
 		return 1;
@@ -441,7 +438,7 @@ static void trigger_move(struct Gestures* gs,
 			const struct MConfig* cfg,
 			int dx, int dy)
 {
-	if ((gs->move_type == GS_MOVE || !timercmp(&gs->time, &gs->move_wait, <)) && (dx != 0 || dy != 0)) {
+	if ((gs->move_type == GS_MOVE || timercmp(&gs->time, &gs->move_wait, >=)) && (dx != 0 || dy != 0)) {
 		if (trigger_drag_start(gs, cfg, dx, dy)) {
 			gs->move_dx = (int)(dx*cfg->sensitivity);
 			gs->move_dy = (int)(dy*cfg->sensitivity);
@@ -552,10 +549,19 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 
 	if (touches_count <= 0)
 		return 0;
+	/** Is that kind of scroll enabled? */
+	if (!cfg->scroll_smooth && cfg_swipe->dist <= 0)
+		return 0;
 
 	dir = get_swipe_dir_n(touches, touches_count);
 	dir = trig_generalize(dir);
 	button = get_button_for_dir(cfg_swipe, dir);
+	if(button == -1){
+		/* No button? Probably fingers were still down,
+		 * but without movement.
+		 */
+		return 0;
+	}
 
 	trigger_drag_stop(gs, 1);
 	get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
@@ -569,7 +575,7 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		gs->move_dy = 0;
 	}
 	if (gs->move_type != move_type_to_trigger){
-		trigger_delayed_button_unsafe(gs);
+		trigger_delayed_button_uncond(gs);
 		gs->move_dist = 0;
 	}
 	else if (gs->move_dir != dir){
@@ -578,13 +584,15 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 	gs->move_type = move_type_to_trigger;
 	gs->move_dist += (int)ABSVAL(dist);
 	gs->move_dir = dir;
-	timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
+	timeraddms(&gs->time, cfg->gesture_wait + 5 /*bonus from me*/, &gs->move_wait);
 
 	/* Special case for smooth scrolling */
 	if(cfg->scroll_smooth && button >= 4 && button <= 7){
 		/* Calculate speed vector */
-		gs->scroll_speed_x = avg_move_x/(float)timertoms(&gs->dt);
-		gs->scroll_speed_y = avg_move_y/(float)timertoms(&gs->dt);
+		gs->scroll_speed_x = avg_move_x /(double)timertoms(&gs->dt);
+		gs->scroll_speed_y = avg_move_y /(double)timertoms(&gs->dt);
+		gs->scroll_speed_valid = 1;
+		LOG_DEBUG("smooth scrolling: speed: x: %lf, y: %lf\n", gs->scroll_speed_x, gs->scroll_speed_y);
 		/* Detect 'natural scrolling' - situation when user flipped scroll up and
 		 * down buttons.
 		 * Convert active button to direction of speed vector.
@@ -595,11 +603,12 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		case 6: gs->scroll_speed_x = -ABSVAL(gs->scroll_speed_x); break;  /* scroll left */
 		case 7: gs->scroll_speed_x = ABSVAL(gs->scroll_speed_x); break;   /* scroll right */
 		}
-		/* Reset current tick. */
-		gs->scroll_coast_tick_no = 0;
+		/* Reset coasting duration to go. */
+		gs->coasting_duration_left = cfg->scroll_coast.duration - 1;
+
 		/* Don't modulo move_dist */
 	}
-	else if (cfg_swipe->dist > 0 && gs->move_dist >= cfg_swipe->dist) {
+	else if (gs->move_dist >= cfg_swipe->dist) {
 		if(cfg_swipe->hold != 0)
 			timeraddms(&gs->time, cfg_swipe->hold, &tv_tmp);
 		else
@@ -612,6 +621,10 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		dist, dir, gs->move_dist, cfg_swipe->dist);
 #endif
 	return 1;
+}
+
+static int is_any_swipe(int move_type){
+	return move_type == GS_SCROLL || move_type == GS_SWIPE3 || move_type == GS_SWIPE4;
 }
 
 /* Return:
@@ -648,13 +661,22 @@ static int trigger_swipe(struct Gestures* gs,
 		can_transit_swipe = gs->move_type == GS_SCROLL || gs->move_type == GS_SWIPE3;
 		break;
 	default:
-			return 0;
+		goto not_a_swipe;
 	}
 
-	if (can_change_gesture_type(gs, move_type_to_trigger) || can_transit_swipe != FALSE)
-		return trigger_swipe_unsafe(gs, cfg, cfg_swipe, touches, touches_count, move_type_to_trigger);
+	if (can_change_gesture_type(gs, move_type_to_trigger) || can_transit_swipe != FALSE){
+		if (trigger_swipe_unsafe(gs, cfg, cfg_swipe, touches, touches_count, move_type_to_trigger))
+			return 1;
+		goto not_a_swipe;
+	}
 
-	return 0;
+	not_a_swipe:{
+		//gs->scroll_speed_x = gs->scroll_speed_y = 0.0;
+		//if(is_any_swipe(gs->move_type)){
+		//	gs->move_type = GS_NONE;
+		//}
+		return 0;
+	}
 }
 
 /* Compute hypot from x, y and compare it with given value
@@ -662,6 +684,21 @@ static int trigger_swipe(struct Gestures* gs,
 static int hypot_cmp(int x, int y, int value)
 {
 	int lhs, rhs;
+	lhs = x * x + y * y;
+	rhs = value * value;
+
+	if(lhs == rhs)
+		return 0;
+	if(lhs < rhs)
+		return -1;
+	return 1;
+}
+
+/* Compute hypot from x, y and compare it with given value
+ */
+int hypot_cmpf(float x, float y, float value)
+{
+	float lhs, rhs;
 	lhs = x * x + y * y;
 	rhs = value * value;
 
@@ -778,7 +815,7 @@ static int trigger_hold_move(struct Gestures* gs,
 				!is_touch_stationary(touches[0], stationary_max_move)){
 			/* Stationary finger released or moved too far */
 			gs->move_type = GS_NONE;
-			trigger_delayed_button_unsafe(gs);
+			trigger_delayed_button_uncond(gs);
 			trigger_button_up(gs, stationary_btn);
 			return 1;
 		}
@@ -999,7 +1036,7 @@ static void delayed_update(struct Gestures* gs)
 #ifdef DEBUG_GESTURES
 		xf86Msg(X_INFO, "delayed_update: %d delay expired, triggering up\n", gs->button_delayed);
 #endif
-		trigger_delayed_button_unsafe(gs);
+		trigger_delayed_button_uncond(gs);
 	}
 	else {
 #ifdef DEBUG_GESTURES
@@ -1027,65 +1064,39 @@ void gestures_extract(struct MTouch* mt)
 	delayed_update(&mt->gs);
 }
 
-static int is_any_swipe(int move_type){
-	return move_type == GS_SCROLL || move_type == GS_SWIPE3 || move_type == GS_SWIPE4;
-}
-
-static int can_trigger_coasting(const struct MTouch* mt){
-	return mt->cfg.scroll_smooth &&
-				mt->cfg.scroll_coast.num_of_ticks > 0 &&
-				is_any_swipe(mt->gs.move_type) &&
-				(
-					ABSVAL(mt->gs.scroll_speed_x) >= mt->cfg.scroll_coast.min_speed ||
-					ABSVAL(mt->gs.scroll_speed_y) >= mt->cfg.scroll_coast.min_speed
-				);
-}
-
-/*
- * Executed every input time frame, at least once. First time from 'read_input' to check if
+/**
+ *  Executed every input time frame, at least once. First time from 'read_input' to check if
  * timer is needed.
- * Return value 1 means that next timer should be installed with this function as a
- * callabck and gs->button_delayed_delta as delay time.
+ * This function returns timer ID which should be installed/disabled(if negative).
  *
  * Return vale meaning:
  *  - 0 - no delay to handle, don't install timer, do nothing
- *  - 1 - only install timer
- *  - 2 - state was changed, so caller have to cancel timer and handle state change
- *        by calling TimerCancel() and handle_gestures()
- *  - 3 - cancel running timer and install coasting timer
+ *  - MT_TIMER_* - install timer
+ *  - -MT_TIMER_* - remove timer
+ *  - MT_TIMER_ANY - remove any timer
  */
 int gestures_delayed(struct MTouch* mt)
 {
 	struct Gestures* gs = &mt->gs;
 	struct MTState* ms = &mt->state;
 	struct timeval now, delta;
-	int i, fingers_released, fingers_used;
+	int i, fingers_released, fingers_down;
   int button;
 
 	button = mt->gs.button_delayed;
 
 	// count released fingers
-	fingers_released = fingers_used = 0;
+	fingers_released = fingers_down = 0;
 	foreach_bit(i, ms->touch_used) {
 		if (GETBIT(ms->touch[i].state, MT_RELEASED))
 			++fingers_released;
 		else if (!GETBIT(ms->touch[i].state, MT_INVALID))
-			++fingers_used;
+			++fingers_down;
 	}
 
-	/* Condition: check for coasting */
-	if(fingers_released >= 1 /*&& fingers_used == 0 */ &&
-		 /*button >= 4 && button <= 7 &&*/
-		 can_trigger_coasting(mt)){
-		trigger_delayed_button_unsafe(gs);
-		gs->move_dx = gs->move_dy = 0;
-		gs->move_type = GS_NONE;
-		return 3; /* install coasting timer */
-	}
-
-	// if there's no delayed button - return
+	// if there's no delayed button - do nothing
 	if(!IS_VALID_BUTTON(gs->button_delayed))
-		return 0;
+		return MT_TIMER_NONE;
 
 	/* Condition: was finger released and gesture is 'infinite' and it's not hold&move */
 	if(fingers_released != 0 && is_timer_infinite(gs) && !is_hold_move(gs)){
@@ -1093,14 +1104,14 @@ int gestures_delayed(struct MTouch* mt)
 		 * checking for delivery time.
 		 */
 
-		trigger_delayed_button_unsafe(gs);
+		trigger_delayed_button_uncond(gs);
 		gs->move_dx = gs->move_dy = 0;
 		gs->move_type = GS_NONE;
-		return 2;
+		return -MT_TIMER_DELAYED_BUTTON; /* remove delayed button timer */
 	}
 
 	if(is_timer_infinite(gs))
-		return 0;
+		return MT_TIMER_NONE;
 
 	microtime(&now);
 	//timersub(&now, &mt->gs.time, &mt->gs.dt);
@@ -1114,15 +1125,14 @@ int gestures_delayed(struct MTouch* mt)
 		  * is used to setup timer.
 		  */
 		 if(timertoms(&delta) > 1){
-#ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "gestures_delayed: %d delayed, new delta: %d ms\n", gs->button_delayed, timertoms(&delta));
-#endif
-			return 1; /* install timer */
+			LOG_DEBUG("gestures_delayed: %d delayed, new delta: %d ms\n", gs->button_delayed, timertoms(&delta));
+
+			return MT_TIMER_DELAYED_BUTTON;
 		 }
 	}
 
-	trigger_delayed_button_unsafe(gs);
+	trigger_delayed_button_uncond(gs);
 	gs->move_dx = gs->move_dy = 0;
-	return 2;
+	return -MT_TIMER_DELAYED_BUTTON; /* remove delayed button timer */
 }
 

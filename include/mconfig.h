@@ -179,8 +179,8 @@ struct MConfig {
 	} scroll, swipe3, swipe4/*, swipe5*/;
 	struct MConfigSwipeCoasting{
 		float min_speed;		// What speed to start scroll coasting at. >= 0
-		int num_of_ticks;		// How many coasting ticks will be executed >= 0, 0 disables coasting
 		int tick_ms;		// How fast events will be generated during coasting >= 1
+		int duration;		// How long coasting ticks will last >= 0, 0 disables coasting
 	} scroll_coast;
 	int scale_dist;			// Distance needed to trigger a button. >= 0, 0 disables
 	int scale_up_btn;		// Button to use for scale up. >= 0, 0 is none

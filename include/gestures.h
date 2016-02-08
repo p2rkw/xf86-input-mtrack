@@ -93,10 +93,11 @@ struct Gestures {
 
 	/* Scroll vertical, horizontal.
 	 */
-	float scroll_speed_x, scroll_speed_y;
+	double scroll_speed_x, scroll_speed_y;
+	int scroll_speed_valid;
 
-	/* Number of scroll coasting frame */
-	int scroll_coast_tick_no;
+	/* Duration left */
+	int coasting_duration_left;
 };
 
 

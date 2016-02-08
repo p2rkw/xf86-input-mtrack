@@ -49,7 +49,7 @@ double trig_direction(double dx, double dy) {
 
 int trig_generalize(double dir)
 {
-	if (dir == -1)
+	if (dir == TR_NONE)
 		return TR_NONE;
 	else if (dir > 1 && dir <= 3)
 		return TR_DIR_RT;
