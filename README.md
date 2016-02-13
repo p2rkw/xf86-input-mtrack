@@ -50,7 +50,9 @@ The following is a minimal working InputClass section for xorg.conf:
     EndSection
 
 Configuration options may be defined inside the InputClass section to configure
-the driver. Available options and their defaults are as follows.
+the driver. See examples/ directory for example configuration files. Feel free to submit
+yours, named as your laptop's model.
+Available options and their defaults are as follows.
 
 **TrackpadDisable** -
 Disables trackpad touch input. A value of 0 will enable the trackpad. A value
