@@ -43,6 +43,11 @@
 
 #define NUM_AXES 4
 
+#ifdef DEBUG_DRIVER
+# define LOG_DEBUG_DRIVER LOG_DEBUG
+#else
+# define LOG_DEBUG_DRIVER(...)
+#endif
 
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
 typedef InputInfoPtr LocalDevicePtr;
@@ -220,7 +225,7 @@ void mt_timer_start(struct MTouch *mt, int kind)
 	mstime_t timeout; /*< Set this variable to required timeout. */
 
 	if(kind == mt->timer_kind){
-		LOG_DEBUG("Timer %i already started\n", kind);
+		LOG_DEBUG_DRIVER("Timer %i already started\n", kind);
 		return;
 	}
 
@@ -252,7 +257,7 @@ void mt_timer_start(struct MTouch *mt, int kind)
 		return;
 	}
 
-	LOG_DEBUG("Start timer, ID: %i with timeout: %u\n", kind, timeout);
+	LOG_DEBUG_DRIVER("Start timer, ID: %i with timeout: %u\n", kind, timeout);
 	mt->timer = TimerSet(mt->timer, 0, timeout, mt_timer_callback, mt);
 	mt->timer_kind = kind;
 }
@@ -261,7 +266,7 @@ void mt_timer_stop(struct MTouch *mt)
 {
 	struct Gestures* gs = &mt->gs;
 
-	LOG_DEBUG("Stop timer, ID: %i\n", mt->timer_kind);
+	LOG_DEBUG_DRIVER("Stop timer, ID: %i\n", mt->timer_kind);
 	TimerCancel(mt->timer);
 
 	switch(mt->timer_kind){
@@ -358,7 +363,7 @@ void mt_timer_stop_if(struct MTouch *mt, int kind)
 
 void mt_timer_continue(struct MTouch *mt, mstime_t timeout)
 {
-	LOG_DEBUG("Continue timer, ID: %i with timeout: %u\n", mt->timer_kind, timeout);
+	LOG_DEBUG_DRIVER("Continue timer, ID: %i with timeout: %u\n", mt->timer_kind, timeout);
 	mt->timer = TimerSet(mt->timer, 0, timeout, mt_timer_callback, mt);
 }
 
@@ -398,11 +403,11 @@ static void post_gestures(struct MTouch *mt)
 
 	if(mt->absolute_mode == FALSE){
 		if (mt->cfg.scroll_smooth){
-			/* Copy states from button_prev into current buttons state */
-			MODBIT(gs->buttons, 3, GETBIT(buttons_posted, 3));
-			MODBIT(gs->buttons, 4, GETBIT(buttons_posted, 4));
-			MODBIT(gs->buttons, 5, GETBIT(buttons_posted, 5));
-			MODBIT(gs->buttons, 6, GETBIT(buttons_posted, 6));
+			/* Never post these buttons in smooth mode. */
+			CLEARBIT(gs->buttons, 3);
+			CLEARBIT(gs->buttons, 4);
+			CLEARBIT(gs->buttons, 5);
+			CLEARBIT(gs->buttons, 6);
 
 			ValuatorMask* mask;	mask = mt->valuator_mask;
 			valuator_mask_zero(mask);
@@ -429,9 +434,9 @@ static void post_gestures(struct MTouch *mt)
 			}
 
 			xf86PostMotionEventM(mt->local_dev, Relative, mask);
-		}
+		} /* if smooth scroll */
 		else{
-			// mt->absolute_mode == TRUE
+			// mt->absolute_mode == false
 			if (gs->move_dx != 0 || gs->move_dy != 0)
 				xf86PostMotionEvent(mt->local_dev, 0, 0, 2, gs->move_dx, gs->move_dy);
 		}
@@ -458,11 +463,11 @@ static void post_button(struct MTouch* mt, int button, int new_state)
 		return;
 	if (new_state) {
 		xf86PostButtonEvent(mt->local_dev, FALSE, button+1, 1, 0, 0);
-		LOG_DEBUG("button %d down\n", button+1);
+		LOG_DEBUG_DRIVER("button %d down\n", button+1);
 	}
 	else {
 		xf86PostButtonEvent(mt->local_dev, FALSE, button+1, 0, 0, 0);
-		LOG_DEBUG("button %d up\n", button+1);
+		LOG_DEBUG_DRIVER("button %d up\n", button+1);
 	}
 	MODBIT(gs->buttons, button, new_state);
 	MODBIT(buttons_posted, button, new_state);

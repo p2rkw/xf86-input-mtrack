@@ -29,6 +29,12 @@
 #include "mtouch.h"
 #include "trig.h"
 
+#ifdef DEBUG_GESTURES
+# define LOG_DEBUG_GESTURES LOG_DEBUG
+#else
+# define LOG_DEBUG_GESTURES(...)
+#endif
+
 #define IS_VALID_BUTTON(x) (x >= 0 && x <= 31)
 
 static void break_coasting(struct Gestures* gs){
@@ -59,7 +65,7 @@ static void trigger_button_down(struct Gestures* gs, int button)
 	) {
 		SETBIT(gs->buttons, button);
 
-		LOG_DEBUG("trigger_button_down: %d down\n", button);
+		LOG_DEBUG_GESTURES("trigger_button_down: %d down\n", button);
 	}
 #ifdef DEBUG_GESTURES
 	else if (IS_VALID_BUTTON(button))
@@ -90,7 +96,7 @@ int trigger_delayed_button_uncond(struct Gestures* gs)
 	timerclear(&gs->button_delayed_time);
 	gs->move_dist = 0; /* don't count movement from delayed button phase in next stroke */
 
-	LOG_DEBUG("trigger_delayed_button: %d up, timer expired\n", button);
+	LOG_DEBUG_GESTURES("trigger_delayed_button: %d up, timer expired\n", button);
 	trigger_button_up(gs, button);
 
 	return button;
@@ -592,7 +598,7 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		gs->scroll_speed_x = avg_move_x /(double)timertoms(&gs->dt);
 		gs->scroll_speed_y = avg_move_y /(double)timertoms(&gs->dt);
 		gs->scroll_speed_valid = 1;
-		LOG_DEBUG("smooth scrolling: speed: x: %lf, y: %lf\n", gs->scroll_speed_x, gs->scroll_speed_y);
+		LOG_DEBUG_GESTURES("smooth scrolling: speed: x: %lf, y: %lf\n", gs->scroll_speed_x, gs->scroll_speed_y);
 		/* Detect 'natural scrolling' - situation when user flipped scroll up and
 		 * down buttons.
 		 * Convert active button to direction of speed vector.
@@ -1125,7 +1131,7 @@ int gestures_delayed(struct MTouch* mt)
 		  * is used to setup timer.
 		  */
 		 if(timertoms(&delta) > 1){
-			LOG_DEBUG("gestures_delayed: %d delayed, new delta: %d ms\n", gs->button_delayed, timertoms(&delta));
+			LOG_DEBUG_GESTURES("gestures_delayed: %d delayed, new delta: %d ms\n", gs->button_delayed, timertoms(&delta));
 
 			return MT_TIMER_DELAYED_BUTTON;
 		 }
