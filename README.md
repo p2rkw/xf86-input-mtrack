@@ -38,6 +38,19 @@ installation prefix to /usr like so:
     ./configure --prefix=/usr
     dpkg-buildpackage
 
+Bug Reporting
+-------------
+
+If you found a bug, and you are going to submit it, first run
+
+    xinput --list
+
+then find your touchpad name/ID on the list and create report with output of
+
+    xinput --list-props <your touchpad ID>
+
+attached.
+
 Configuration
 -------------
 
