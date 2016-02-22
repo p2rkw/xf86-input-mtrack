@@ -61,6 +61,21 @@ The following is a minimal working InputClass section for xorg.conf:
         Identifier      "Touchpads"
         Driver          "mtrack"
     EndSection
+    
+This configuration is similar to the 3 finger drag feature of OSX:
+    
+    Section "InputClass"
+        MatchIsTouchpad "on"
+        Identifier      "Touchpads"
+        Driver          "mtrack"
+        Option "SwipeDistance" "1"
+        Option "SwipeLeftButton" "1"
+        Option "SwipeRightButton" "1"
+        Option "SwipeUpButton" "1"
+        Option "SwipeDownButton" "1"
+        Option "SwipeClickTime" "0"
+        Option "SwipeSensitivity" "1000"
+    EndSection
 
 Configuration options may be defined inside the InputClass section to configure
 the driver. See examples/ directory for example configuration files. Feel free to submit
