@@ -599,17 +599,7 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		gs->scroll_speed_y = avg_move_y /(double)timertoms(&gs->dt);
 		gs->scroll_speed_valid = 1;
 		LOG_DEBUG_GESTURES("smooth scrolling: speed: x: %lf, y: %lf\n", gs->scroll_speed_x, gs->scroll_speed_y);
-		/* Detect 'natural scrolling' - situation when user flipped scroll up and
-		 * down buttons.
-		 * Convert active button to direction of speed vector.
-		 */
-		switch(button){
-		case 4: gs->scroll_speed_y = -ABSVAL(gs->scroll_speed_y); break;  /* scroll up - always negative */
-		case 5: gs->scroll_speed_y = ABSVAL(gs->scroll_speed_y); break;   /* scroll down - always positve */
-		case 6: gs->scroll_speed_x = -ABSVAL(gs->scroll_speed_x); break;  /* scroll left */
-		case 7: gs->scroll_speed_x = ABSVAL(gs->scroll_speed_x); break;   /* scroll right */
-		}
-		/* Reset coasting duration to go. */
+		/* Reset coasting duration 'to go' ticks. */
 		gs->coasting_duration_left = cfg->scroll_coast.duration - 1;
 
 		/* Don't modulo move_dist */

@@ -96,6 +96,23 @@ static void initButtonLabels(Atom map[DIM_BUTTON])
 }
 #endif
 
+static void initAxle(DeviceIntPtr dev, int axnum, Atom* label, int min, int max, int resolution)
+{
+	xf86InitValuatorAxisStruct(dev, axnum,
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
+		*label,
+#endif
+		min, max,
+		/*resolution*/ resolution,
+		/*min res*/ 0,
+		/*max res*/ resolution
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
+		, Absolute
+#endif
+	);
+	xf86InitValuatorDefaults(dev, axnum);
+}
+
 static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 {
 	struct MTouch *mt = local->private;
@@ -142,33 +159,16 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 #error "Unsupported ABI_XINPUT_VERSION"
 #endif
 
-	xf86InitValuatorAxisStruct(dev, 0,
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
-				   axes_labels[0],
-#endif
-				   mt->caps.abs[MTDEV_POSITION_X].minimum,
-				   mt->caps.abs[MTDEV_POSITION_X].maximum,
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
-				   1, 0, 1, Absolute);
-#else
-				   1, 0, 1);
-#endif
-	xf86InitValuatorDefaults(dev, 0);
-	xf86InitValuatorAxisStruct(dev, 1,
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
-				   axes_labels[1],
-#endif
-				   mt->caps.abs[MTDEV_POSITION_Y].minimum,
-				   mt->caps.abs[MTDEV_POSITION_Y].maximum,
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
-				   1, 0, 1, Absolute);
-#else
-				   1, 0, 1);
-#endif
-	xf86InitValuatorDefaults(dev, 1);
+	initAxle(dev, 0, &axes_labels[0], mt->caps.abs[MTDEV_POSITION_X].minimum, mt->caps.abs[MTDEV_POSITION_X].maximum, mt->caps.abs[MTDEV_POSITION_X].resolution);
+	initAxle(dev, 1, &axes_labels[1], mt->caps.abs[MTDEV_POSITION_Y].minimum, mt->caps.abs[MTDEV_POSITION_Y].maximum, mt->caps.abs[MTDEV_POSITION_Y].resolution);
+
+	initAxle(dev, 2, &axes_labels[2], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
+	initAxle(dev, 3, &axes_labels[3], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
+
 	mprops_init(&mt->cfg, local);
-	SetScrollValuator(dev, 2, SCROLL_TYPE_HORIZONTAL, mt->cfg.scroll.dist, 0);
-	SetScrollValuator(dev, 3, SCROLL_TYPE_VERTICAL, mt->cfg.scroll.dist, 0);
+	SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, mt->cfg.scroll.dist, SCROLL_FLAG_PREFERRED);
+	SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, mt->cfg.scroll.dist, SCROLL_FLAG_NONE);
+
 	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
 	TimerInit();
@@ -326,8 +326,8 @@ CARD32 mt_timer_callback(OsTimerPtr timer, CARD32 time, void *arg)
 		delta_ms = mt->cfg.scroll_coast.tick_ms;
 		coasting_progress = gs->coasting_duration_left / (double)mt->cfg.scroll_coast.duration;
 
-		valuator_mask_set_double(mask, 2, gs->scroll_speed_x * coasting_progress * delta_ms);
-		valuator_mask_set_double(mask, 3, gs->scroll_speed_y * coasting_progress * delta_ms);
+		valuator_mask_set_double(mask, 2, gs->scroll_speed_y * coasting_progress * delta_ms);
+		valuator_mask_set_double(mask, 3, gs->scroll_speed_x * coasting_progress * delta_ms);
 		gs->coasting_duration_left -= delta_ms;
 
 		xf86PostMotionEventM(mt->local_dev, Relative, mask);
@@ -404,10 +404,10 @@ static void post_gestures(struct MTouch *mt)
 	if(mt->absolute_mode == FALSE){
 		if (mt->cfg.scroll_smooth){
 			/* Never post these buttons in smooth mode. */
-			CLEARBIT(gs->buttons, 3);
-			CLEARBIT(gs->buttons, 4);
-			CLEARBIT(gs->buttons, 5);
-			CLEARBIT(gs->buttons, 6);
+			CLEARBIT(gs->buttons, MT_BUTTON_WHEEL_UP);
+			CLEARBIT(gs->buttons, MT_BUTTON_WHEEL_DOWN);
+			CLEARBIT(gs->buttons, MT_BUTTON_HWHEEL_LEFT);
+			CLEARBIT(gs->buttons, MT_BUTTON_HWHEEL_RIGHT);
 
 			ValuatorMask* mask;	mask = mt->valuator_mask;
 			valuator_mask_zero(mask);
@@ -423,8 +423,8 @@ static void post_gestures(struct MTouch *mt)
 				if(gs->scroll_speed_valid)
 				{
 					const double delta = timertoms(&gs->dt);
-					valuator_mask_set_double(mask, 2, gs->scroll_speed_x * delta);
-					valuator_mask_set_double(mask, 3, gs->scroll_speed_y * delta);
+					valuator_mask_set_double(mask, 2, gs->scroll_speed_y * delta);
+					valuator_mask_set_double(mask, 3, gs->scroll_speed_x * delta);
 				}
 				gs->scroll_speed_valid = 0;
 
@@ -562,7 +562,7 @@ static int preinit(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
 	xf86OptionListReport(pInfo->options);
 	xf86ProcessCommonOptions(pInfo, pInfo->options);
 	mconfig_configure(&mt->cfg, pInfo->options);
-	mt->valuator_mask = valuator_mask_new(1);
+	mt->valuator_mask = valuator_mask_new(4);
 
 	return Success;
 }

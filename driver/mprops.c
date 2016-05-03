@@ -239,11 +239,36 @@ int check_buttons_property(XIPropertyValuePtr prop, uint8_t** buttons_ret_arr, i
 	return Success;
 }
 
+/**
+ * This code tries to detect does buttons were configured to send scroll events,
+ * and if so is scrolling direction reversed (OSX like "natural" (ekhm...)) scrolling.
+ */
+static int updateSwipeValuators(DeviceIntPtr dev, struct MConfigSwipe* cfg_swipe){
+#define MT_BTN_TO_X(btn) (btn+1)
+
+	/* consider SCROLL_FLAG_DONT_EMULATE */
+
+	if(cfg_swipe->up_btn == MT_BTN_TO_X(MT_BUTTON_WHEEL_UP))
+		SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, cfg_swipe->dist, SCROLL_FLAG_PREFERRED);
+	else if(cfg_swipe->up_btn == MT_BTN_TO_X(MT_BUTTON_WHEEL_DOWN)){
+		SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, -cfg_swipe->dist, SCROLL_FLAG_PREFERRED);
+	}
+
+	if(cfg_swipe->lt_btn == MT_BTN_TO_X(MT_BUTTON_HWHEEL_LEFT))
+		SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, cfg_swipe->dist, SCROLL_FLAG_NONE);
+	else if(cfg_swipe->lt_btn == MT_BTN_TO_X(MT_BUTTON_HWHEEL_RIGHT)){
+		SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, -cfg_swipe->dist, SCROLL_FLAG_NONE);
+	}
+
+#undef MT_BTN_TO_X
+}
+
 /* Return:
  * 1 - property was recognized and handled with or without error, check error code for details
  * 0 - property not recognized, don't trust returned error code - it's invalid
  */
-static int set_swipe_properties(Atom property, BOOL checkonly, XIPropertyValuePtr prop,
+static int set_swipe_properties(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop,
+				                       BOOL checkonly,
                                 struct MPropsSwipe* props_swipe,
                                 struct MConfigSwipe* cfg_swipe, int* error_code){
 
@@ -268,6 +293,7 @@ static int set_swipe_properties(Atom property, BOOL checkonly, XIPropertyValuePt
 			xf86Msg(X_INFO, "mtrack: set swipe settings: dist: %d hold: %d\n",
 				cfg_swipe->dist, cfg_swipe->hold);
 #endif
+			updateSwipeValuators(dev, cfg_swipe);
 		}
 	}
 	else if (property == props_swipe->buttons) {
@@ -277,6 +303,8 @@ static int set_swipe_properties(Atom property, BOOL checkonly, XIPropertyValuePt
 				cfg_swipe->dn_btn = ivals8[1];
 				cfg_swipe->lt_btn = ivals8[2];
 				cfg_swipe->rt_btn = ivals8[3];
+
+				updateSwipeValuators(dev, cfg_swipe);
 			}
 		}
 		else
@@ -539,7 +567,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (set_swipe_properties(property, checkonly, prop, &mprops.scroll, &cfg->scroll, &error_code)) {
+	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.scroll, &cfg->scroll, &error_code)) {
 		return error_code;
 	}
 	else if (property == mprops.scroll_coast) {
@@ -575,10 +603,10 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe3, &cfg->swipe3, &error_code)) {
+	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.swipe3, &cfg->swipe3, &error_code)) {
 		return error_code;
 	}
-	else if (set_swipe_properties(property, checkonly, prop, &mprops.swipe4, &cfg->swipe4, &error_code)) {
+	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.swipe4, &cfg->swipe4, &error_code)) {
 		return error_code;
 	}
 	else if (property == mprops.scale_buttons) {
@@ -648,7 +676,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (set_swipe_properties(property, checkonly, prop, &mprops.hold1_move1, &cfg->hold1_move1, &error_code)) {
+	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.hold1_move1, &cfg->hold1_move1, &error_code)) {
 		return error_code;
 	}
 #if 0
@@ -669,7 +697,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (set_swipe_properties(property, checkonly, prop, &mprops.hold1_move2, &cfg->hold1_move2, &error_code)) {
+	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.hold1_move2, &cfg->hold1_move2, &error_code)) {
 		return error_code;
 	}
 	else if (property == mprops.hold1_move3_stationary){
@@ -689,7 +717,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (set_swipe_properties(property, checkonly, prop, &mprops.hold1_move3, &cfg->hold1_move3, &error_code)) {
+	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.hold1_move3, &cfg->hold1_move3, &error_code)) {
 		return error_code;
 	}
 #endif
@@ -745,9 +773,6 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-
-	SetScrollValuator(dev, 2, SCROLL_TYPE_HORIZONTAL, cfg->scroll.dist, 0);
-	SetScrollValuator(dev, 3, SCROLL_TYPE_VERTICAL, cfg->scroll.dist, 0);
 
 	return Success;
 }
