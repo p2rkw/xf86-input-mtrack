@@ -239,30 +239,6 @@ int check_buttons_property(XIPropertyValuePtr prop, uint8_t** buttons_ret_arr, i
 	return Success;
 }
 
-/**
- * This code tries to detect does buttons were configured to send scroll events,
- * and if so is scrolling direction reversed (OSX like "natural" (ekhm...)) scrolling.
- */
-static int updateSwipeValuators(DeviceIntPtr dev, struct MConfigSwipe* cfg_swipe){
-#define MT_BTN_TO_X(btn) (btn+1)
-
-	/* consider SCROLL_FLAG_DONT_EMULATE */
-
-	if(cfg_swipe->up_btn == MT_BTN_TO_X(MT_BUTTON_WHEEL_UP))
-		SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, cfg_swipe->dist, SCROLL_FLAG_PREFERRED);
-	else if(cfg_swipe->up_btn == MT_BTN_TO_X(MT_BUTTON_WHEEL_DOWN)){
-		SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, -cfg_swipe->dist, SCROLL_FLAG_PREFERRED);
-	}
-
-	if(cfg_swipe->lt_btn == MT_BTN_TO_X(MT_BUTTON_HWHEEL_LEFT))
-		SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, cfg_swipe->dist, SCROLL_FLAG_NONE);
-	else if(cfg_swipe->lt_btn == MT_BTN_TO_X(MT_BUTTON_HWHEEL_RIGHT)){
-		SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, -cfg_swipe->dist, SCROLL_FLAG_NONE);
-	}
-
-#undef MT_BTN_TO_X
-}
-
 /* Return:
  * 1 - property was recognized and handled with or without error, check error code for details
  * 0 - property not recognized, don't trust returned error code - it's invalid
@@ -293,7 +269,7 @@ static int set_swipe_properties(DeviceIntPtr dev, Atom property, XIPropertyValue
 			xf86Msg(X_INFO, "mtrack: set swipe settings: dist: %d hold: %d\n",
 				cfg_swipe->dist, cfg_swipe->hold);
 #endif
-			updateSwipeValuators(dev, cfg_swipe);
+			mprops_update_scroll_valuators(dev, cfg_swipe);
 		}
 	}
 	else if (property == props_swipe->buttons) {
@@ -304,7 +280,7 @@ static int set_swipe_properties(DeviceIntPtr dev, Atom property, XIPropertyValue
 				cfg_swipe->lt_btn = ivals8[2];
 				cfg_swipe->rt_btn = ivals8[3];
 
-				updateSwipeValuators(dev, cfg_swipe);
+				mprops_update_scroll_valuators(dev, cfg_swipe);
 			}
 		}
 		else
@@ -777,3 +753,22 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	return Success;
 }
 
+int mprops_update_scroll_valuators(DeviceIntPtr dev, struct MConfigSwipe* cfg_scroll){
+#define MT_BTN_TO_X(btn) (btn+1)
+
+	/* consider SCROLL_FLAG_DONT_EMULATE */
+
+	if(cfg_scroll->up_btn == MT_BTN_TO_X(MT_BUTTON_WHEEL_UP))
+		SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, cfg_scroll->dist, SCROLL_FLAG_PREFERRED);
+	else if(cfg_scroll->up_btn == MT_BTN_TO_X(MT_BUTTON_WHEEL_DOWN)){
+		SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, -cfg_scroll->dist, SCROLL_FLAG_PREFERRED);
+	}
+
+	if(cfg_scroll->lt_btn == MT_BTN_TO_X(MT_BUTTON_HWHEEL_LEFT))
+		SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, cfg_scroll->dist, SCROLL_FLAG_NONE);
+	else if(cfg_scroll->lt_btn == MT_BTN_TO_X(MT_BUTTON_HWHEEL_RIGHT)){
+		SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, -cfg_scroll->dist, SCROLL_FLAG_NONE);
+	}
+
+#undef MT_BTN_TO_X
+}

@@ -166,8 +166,7 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 	initAxle(dev, 3, &axes_labels[3], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
 
 	mprops_init(&mt->cfg, local);
-	SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, mt->cfg.scroll.dist, SCROLL_FLAG_PREFERRED);
-	SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, mt->cfg.scroll.dist, SCROLL_FLAG_NONE);
+	mprops_update_scroll_valuators(dev, &mt->cfg.scroll);
 
 	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
@@ -563,6 +562,7 @@ static int preinit(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
 	xf86ProcessCommonOptions(pInfo, pInfo->options);
 	mconfig_configure(&mt->cfg, pInfo->options);
 	mt->valuator_mask = valuator_mask_new(4);
+	mprops_update_scroll_valuators(pInfo->dev, &mt->cfg.scroll);
 
 	return Success;
 }
