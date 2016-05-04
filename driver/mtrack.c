@@ -64,7 +64,7 @@ static void pointer_control(DeviceIntPtr dev, PtrCtrl *ctrl)
 }
 
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
-static void initAxesLabels(Atom map[NUM_AXES])
+static void init_axes_labels(Atom map[NUM_AXES])
 {
 	memset(map, 0, NUM_AXES * sizeof(Atom));
 	PROPMAP(map, 0, AXIS_LABEL_PROP_REL_X);
@@ -73,7 +73,7 @@ static void initAxesLabels(Atom map[NUM_AXES])
 	PROPMAP(map, 3, AXIS_LABEL_PROP_REL_VSCROLL);
 }
 
-static void initButtonLabels(Atom map[DIM_BUTTON])
+static void init_button_labels(Atom map[DIM_BUTTON])
 {
 	memset(map, 0, DIM_BUTTON * sizeof(Atom));
 	PROPMAP(map, MT_BUTTON_LEFT, BTN_LABEL_PROP_BTN_LEFT);
@@ -96,7 +96,19 @@ static void initButtonLabels(Atom map[DIM_BUTTON])
 }
 #endif
 
-static void initAxle(DeviceIntPtr dev, int axnum, Atom* label, int min, int max, int resolution)
+/**
+ * How to handle multitouch: http://www.x.org/wiki/Development/Documentation/Multitouch/
+ * Howto about xinput: http://www.x.org/wiki/Development/Documentation/XorgInputHOWTO/
+ * Example usage: https://gitlab.com/at-home-modifier/at-home-modifier-evdev/commit/d171b3d9194581cb6ed59dbe45d6cbf009dc0eaa?view=parallel
+ * Patch were smooth scrolling were introduced: https://lists.x.org/archives/xorg-devel/2011-September/025835.html
+ * @param dev
+ * @param axnum
+ * @param label
+ * @param min
+ * @param max
+ * @param resolution
+ */
+static void init_axle(DeviceIntPtr dev, int axnum, Atom* label, int min, int max, int resolution)
 {
 	xf86InitValuatorAxisStruct(dev, axnum,
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
@@ -121,8 +133,8 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 	};
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
 	Atom axes_labels[NUM_AXES], btn_labels[DIM_BUTTON];
-	initAxesLabels(axes_labels);
-	initButtonLabels(btn_labels);
+	init_axes_labels(axes_labels);
+	init_button_labels(btn_labels);
 #endif
 
 	local->fd = xf86OpenSerial(local->options);
@@ -159,11 +171,11 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 #error "Unsupported ABI_XINPUT_VERSION"
 #endif
 
-	initAxle(dev, 0, &axes_labels[0], mt->caps.abs[MTDEV_POSITION_X].minimum, mt->caps.abs[MTDEV_POSITION_X].maximum, mt->caps.abs[MTDEV_POSITION_X].resolution);
-	initAxle(dev, 1, &axes_labels[1], mt->caps.abs[MTDEV_POSITION_Y].minimum, mt->caps.abs[MTDEV_POSITION_Y].maximum, mt->caps.abs[MTDEV_POSITION_Y].resolution);
+	init_axle(dev, 0, &axes_labels[0], mt->caps.abs[MTDEV_POSITION_X].minimum, mt->caps.abs[MTDEV_POSITION_X].maximum, mt->caps.abs[MTDEV_POSITION_X].resolution);
+	init_axle(dev, 1, &axes_labels[1], mt->caps.abs[MTDEV_POSITION_Y].minimum, mt->caps.abs[MTDEV_POSITION_Y].maximum, mt->caps.abs[MTDEV_POSITION_Y].resolution);
 
-	initAxle(dev, 2, &axes_labels[2], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
-	initAxle(dev, 3, &axes_labels[3], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
+	init_axle(dev, 2, &axes_labels[2], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
+	init_axle(dev, 3, &axes_labels[3], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
 
 	mprops_init(&mt->cfg, local);
 	mprops_update_scroll_valuators(dev, &mt->cfg.scroll);
