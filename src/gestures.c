@@ -312,10 +312,11 @@ static void buttons_update(struct Gestures* gs,
 				foreach_bit(i, ms->touch_used) {
 					timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
 					if ((cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) &&
-                            !(GETBIT(ms->touch[i].state, MT_THUMB) && cfg->ignore_thumb) &&
-                            !(GETBIT(ms->touch[i].state, MT_PALM) && cfg->ignore_palm)) {
+						!(GETBIT(ms->touch[i].state, MT_THUMB) && cfg->ignore_thumb) &&
+						!(GETBIT(ms->touch[i].state, MT_PALM) && cfg->ignore_palm) &&
+						!(GETBIT(ms->touch[i].state, MT_EDGE))) {
 						touching++;
-                    }
+					}
 				}
 
 				if (cfg->button_integrated)
@@ -1131,4 +1132,3 @@ int gestures_delayed(struct MTouch* mt)
 	gs->move_dx = gs->move_dy = 0;
 	return -MT_TIMER_DELAYED_BUTTON; /* remove delayed button timer */
 }
-
