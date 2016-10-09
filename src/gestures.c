@@ -447,8 +447,8 @@ static void trigger_move(struct Gestures* gs,
 {
 	if ((gs->move_type == GS_MOVE || timercmp(&gs->time, &gs->move_wait, >=)) && (dx != 0 || dy != 0)) {
 		if (trigger_drag_start(gs, cfg, dx, dy)) {
-			gs->move_dx = (int)(dx*cfg->sensitivity);
-			gs->move_dy = (int)(dy*cfg->sensitivity);
+			gs->move_dx = dx*cfg->sensitivity;
+			gs->move_dy = dy*cfg->sensitivity;
 			break_coasting(gs);
 			gs->move_type = GS_MOVE;
 			gs->move_dist = 0;
@@ -575,11 +575,10 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 	// hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
 	dist = hypot(avg_move_x, avg_move_y);
 	if(cfg_swipe->drag_sens){
-		gs->move_dx = (int)(cfg->sensitivity * avg_move_x * cfg_swipe->drag_sens * 0.001);
-		gs->move_dy = (int)(cfg->sensitivity * avg_move_y * cfg_swipe->drag_sens * 0.001);
+		gs->move_dx = cfg->sensitivity * avg_move_x * cfg_swipe->drag_sens * 0.001;
+		gs->move_dy = cfg->sensitivity * avg_move_y * cfg_swipe->drag_sens * 0.001;
 	} else{
-		gs->move_dx = 0;
-		gs->move_dy = 0;
+		gs->move_dx = gs->move_dy = 0.0;
 	}
 	if (gs->move_type != move_type_to_trigger){
 		trigger_delayed_button_uncond(gs);
@@ -850,8 +849,7 @@ static void trigger_scale(struct Gestures* gs,
 		trigger_drag_stop(gs, 1);
 		if (gs->move_type != GS_SCALE || gs->move_dir != dir)
 			gs->move_dist = 0;
-		gs->move_dx = 0;
-		gs->move_dy = 0;
+		gs->move_dx = gs->move_dy = 0.0;
 		gs->move_type = GS_SCALE;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
@@ -880,8 +878,8 @@ static void trigger_rotate(struct Gestures* gs,
 		trigger_drag_stop(gs, 1);
 		if (gs->move_type != GS_ROTATE || gs->move_dir != dir)
 			gs->move_dist = 0;
-		gs->move_dx = 0;
-		gs->move_dy = 0;
+		gs->move_dx = 0.0;
+		gs->move_dy = 0.0;
 		gs->move_type = GS_ROTATE;
 		gs->move_dist += (int)ABSVAL(dist);
 		gs->move_dir = dir;
@@ -904,8 +902,7 @@ static void trigger_rotate(struct Gestures* gs,
 static void trigger_reset(struct Gestures* gs)
 {
 	trigger_drag_stop(gs, 0);
-	gs->move_dx = 0;
-	gs->move_dy = 0;
+	gs->move_dx = gs->move_dy = 0.0;
 	/* Don't	reset scroll speed cuz it may break things. */
 	gs->move_type = GS_NONE;
 	gs->move_dist = 0;
@@ -953,8 +950,7 @@ static void moving_update(struct Gestures* gs,
 	dir = 0;
 
 	// Reset movement.
-	gs->move_dx = 0;
-	gs->move_dy = 0;
+	gs->move_dx = gs->move_dy = 0.0;
 
 	// Count touches and aggregate touch movements.
 	foreach_bit(i, ms->touch_used) {
@@ -1102,7 +1098,7 @@ int gestures_delayed(struct MTouch* mt)
 		 */
 
 		trigger_delayed_button_uncond(gs);
-		gs->move_dx = gs->move_dy = 0;
+		gs->move_dx = gs->move_dy = 0.0;
 		gs->move_type = GS_NONE;
 		return -MT_TIMER_DELAYED_BUTTON; /* remove delayed button timer */
 	}
@@ -1129,6 +1125,6 @@ int gestures_delayed(struct MTouch* mt)
 	}
 
 	trigger_delayed_button_uncond(gs);
-	gs->move_dx = gs->move_dy = 0;
+	gs->move_dx = gs->move_dy = 0.0;
 	return -MT_TIMER_DELAYED_BUTTON; /* remove delayed button timer */
 }

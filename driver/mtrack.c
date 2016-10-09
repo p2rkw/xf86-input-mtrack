@@ -253,7 +253,7 @@ void mt_timer_start(struct MTouch *mt, int kind)
 	}
 
 	case MT_TIMER_COASTING:
-		gs->move_dx = gs->move_dy = 0;
+		gs->move_dx = gs->move_dy = 0.0;
 		gs->move_type = GS_NONE;
 		gs->coasting_duration_left = mt->cfg.scroll_coast.duration - 1;
 		timeout = mt->cfg.scroll_coast.tick_ms;
@@ -286,7 +286,7 @@ void mt_timer_stop(struct MTouch *mt)
 		int button;
 		button = trigger_delayed_button_uncond(gs);
 		post_button(mt, button, GETBIT(gs->buttons, button));
-		gs->move_dx = gs->move_dy = 0;
+		gs->move_dx = gs->move_dy = 0.0;
 		gs->move_type = GS_NONE;
 		break;
 	}
@@ -318,7 +318,7 @@ CARD32 mt_timer_callback(OsTimerPtr timer, CARD32 time, void *arg)
 		int button;
 		button = trigger_delayed_button_uncond(gs);
 		post_button(mt, button, GETBIT(gs->buttons, button));
-		gs->move_dx = gs->move_dy = 0;
+		gs->move_dx = gs->move_dy = 0.0;
 		gs->move_type = GS_NONE;
 
 		mt_timer_stop(mt);
@@ -349,7 +349,7 @@ CARD32 mt_timer_callback(OsTimerPtr timer, CARD32 time, void *arg)
 
 	case MT_TIMER_ANY:
 	case MT_TIMER_NONE:
-		return; /* do nothing */
+		return 0; /* do nothing */
 
 	default:
 		LOG_INFO("Unimplemented timer id: %i\n", mt->timer_kind);
@@ -427,7 +427,7 @@ static void post_gestures(struct MTouch *mt)
 				valuator_mask_set_double(mask, 0, gs->move_dx);
 			if (gs->move_dy)
 				valuator_mask_set_double(mask, 1, gs->move_dy);
-			gs->move_dx = gs->move_dy = 0;
+			gs->move_dx = gs->move_dy = 0.0;
 
 			/* if is any swipe */
 			if(gs->move_type == GS_SWIPE2 || gs->move_type == GS_SWIPE3 || gs->move_type == GS_SWIPE4){
@@ -448,8 +448,8 @@ static void post_gestures(struct MTouch *mt)
 		} /* if smooth scroll */
 		else{
 			// mt->absolute_mode == false
-			if (gs->move_dx != 0 || gs->move_dy != 0)
-				xf86PostMotionEvent(mt->local_dev, 0, 0, 2, gs->move_dx, gs->move_dy);
+			if (gs->move_dx != 0.0 || gs->move_dy != 0.0)
+				xf86PostMotionEvent(mt->local_dev, 0, 0, 2, (int)gs->move_dx, (int)gs->move_dy);
 		}
 	}
 	else{

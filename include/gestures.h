@@ -58,7 +58,7 @@ struct Gestures {
 
 	/* Pointer movement is tracked here.
 	 */
-	int move_dx, move_dy;
+	double move_dx, move_dy;
 
 	/* Current time and time delta. Updated after each event and after sleeping.
 	 */
