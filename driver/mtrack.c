@@ -572,9 +572,14 @@ static int preinit(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
 	xf86CollectInputOptions(pInfo, NULL);
 	xf86OptionListReport(pInfo->options);
 	xf86ProcessCommonOptions(pInfo, pInfo->options);
-	mconfig_configure(&mt->cfg, pInfo->options);
+	mconfig_configure(&mt->cfg, pInfo->options); // set the defaults
 	mt->valuator_mask = valuator_mask_new(4);
-	mprops_update_scroll_valuators(pInfo->dev, &mt->cfg.scroll);
+	if(pInfo->dev != NULL){
+		// Try to set valuators as early as possible,
+		// however this might not be executed due to null ptr 'dev' from pInfo.
+		// In this case valuators will be set by: device_control::device_init::mprops_update_scroll_valuators
+		mprops_update_scroll_valuators(pInfo->dev, &mt->cfg.scroll);
+	}
 
 	return Success;
 }
