@@ -334,7 +334,7 @@ static void buttons_update(struct Gestures* gs,
 }
 
 /*
- * So, tapping, tap begins with 0 fingers on trackpad,
+ * So, tapping. Tap begins with 0 fingers on trackpad,
  * then one or more are coming down, stay down for a moment,
  * and then all of them are released more or less simultaneously
  *
@@ -345,19 +345,16 @@ static void buttons_update(struct Gestures* gs,
  *  too much time passed by
  *  one of the fingers moved too far
  */
-#define DEBUG_GESTURES
 static void abort_tapping(struct Gestures* gs, struct MTState* ms){
 	int i;
 
-	//if(gs->tap_touching != 0){
-		gs->tap_touching = 0;
-		gs->tap_released = 0;
-		timerclear(&gs->tap_timeout);
+	gs->tap_touching = 0;
+	gs->tap_released = 0;
+	timerclear(&gs->tap_timeout);
 
-		foreach_bit(i, ms->touch_used) {
-			CLEARBIT(ms->touch[i].flags, MT_TAP);
-		}
-	//}
+	foreach_bit(i, ms->touch_used) {
+		CLEARBIT(ms->touch[i].flags, MT_TAP);
+	}
 }
 
 static void tapping_update(struct Gestures* gs,
@@ -469,85 +466,7 @@ static void tapping_update(struct Gestures* gs,
 	gs->move_type = GS_NONE;
 	timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 	abort_tapping(gs, ms);
-
-#if 0
-	if (isepochtime(&gs->tap_timeout) == 0 && timercmp(&gs->time, &gs->tap_timeout, >=)) {
-		/* too much time passed by from first touch, stop waiting for incoming touches */
-		abort_tapping(gs, ms);
-	}
-	else {
-		foreach_bit(i, ms->touch_used) {
-			if (GETBIT(ms->touch[i].flags, MT_INVALID) || GETBIT(ms->touch[i].flags_old, GS_BUTTON)) {
-				if (GETBIT(ms->touch[i].flags_old, GS_TAP)) {
-					CLEARBIT(ms->touch[i].flags_old, GS_TAP);
-					gs->tap_touching--;
-#ifdef DEBUG_GESTURES
-					xf86Msg(X_INFO, "tapping_update: tap_touching-- (%d): invalid or button\n", gs->tap_touching);
-#endif
-				}
-			}
-			else {
-				if (GETBIT(ms->touch[i].flags, MT_NEW)) {
-					SETBIT(ms->touch[i].flags_old, GS_TAP);
-					gs->tap_touching++;
-#ifdef DEBUG_GESTURES
-					xf86Msg(X_INFO, "tapping_update: tap_touching++ (%d): new touch\n", gs->tap_touching);
-#endif
-					if (isepochtime(&gs->tap_timeout))
-						timeraddms(&gs->time, cfg->tap_timeout, &gs->tap_timeout);
-				}
-
-				if (GETBIT(ms->touch[i].flags_old, GS_TAP)) {
-					dist = dist2(ms->touch[i].total_dx, ms->touch[i].total_dy);
-					if (dist >= SQRVAL(cfg->tap_dist)) {
-						CLEARBIT(ms->touch[i].flags_old, GS_TAP);
-						gs->tap_touching--;
-#ifdef DEBUG_GESTURES
-						xf86Msg(X_INFO, "tapping_update: tap_touching-- (%d): moved too far\n", gs->tap_touching);
-#endif
-						abort_tapping(gs, ms);
-					}
-					else if (GETBIT(ms->touch[i].flags, MT_RELEASED)) {
-						gs->tap_touching--;
-						gs->tap_released++;
-#ifdef DEBUG_GESTURES
-					xf86Msg(X_INFO, "tapping_update: tap_touching-- (%d): released\n", gs->tap_touching);
-					xf86Msg(X_INFO, "tapping_update: tap_released++ (%d) (max %d): released\n", gs->tap_released, released_max);
-#endif
-					}
-				}
-			}
-		}
-	}
-
-	if ((gs->tap_touching == 0 && gs->tap_released > 0) || gs->tap_released >= released_max) {
-		/* In this branch tap was recognized as button click
-		 * Determinate which button was "tapped" by counting touches
-		 */
-		if (gs->tap_released == 1)
-			n = cfg->tap_1touch - 1;
-		else if (gs->tap_released == 2)
-			n = cfg->tap_2touch - 1;
-		else if (gs->tap_released == 3)
-			n = cfg->tap_3touch - 1;
-		else
-			n = cfg->tap_4touch - 1;
-
-		/* How long button should be hold down */
-		timeraddms(&gs->time, cfg->tap_hold, &tv_tmp);
-		trigger_button_click(gs, n, &tv_tmp);
-		if (cfg->drag_enable && n == 0)
-			trigger_drag_ready(gs, cfg);
-
-		gs->move_type = GS_NONE;
-		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
-	}
-
-	if (gs->tap_touching == 0)
-		abort_tapping(gs, ms);
-#endif
 }
-#undef DEBUG_GESTURES
 
 static void trigger_move(struct Gestures* gs,
 			const struct MConfig* cfg,
