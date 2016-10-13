@@ -172,7 +172,6 @@ static int touch_append(struct MTState* ms,
 		y = get_cap_y(caps, fs->position_y);
 		x = cfg->axis_x_invert ? -x : x;
 		y = cfg->axis_y_invert ? -y : y;
-		ms->touch[n].state = 0U;
 		ms->touch[n].flags = 0U;
 		timercp(&ms->touch[n].down, &hs->evtime);
 		ms->touch[n].direction = TR_NONE;
@@ -183,7 +182,7 @@ static int touch_append(struct MTState* ms,
 		ms->touch[n].dy = 0;
 		ms->touch[n].total_dx = 0;
 		ms->touch[n].total_dy = 0;
-		SETBIT(ms->touch[n].state, MT_NEW);
+		SETBIT(ms->touch[n].flags, MT_NEW);
 		SETBIT(ms->touch_used, n);
 	}
 	return n;
@@ -211,7 +210,7 @@ static void touch_update(struct MTState* ms,
 	ms->touch[touch].x = x;
 	ms->touch[touch].y = y;
 	ms->touch[touch].direction = trig_direction(ms->touch[touch].dx, ms->touch[touch].dy);
-	CLEARBIT(ms->touch[touch].state, MT_NEW);
+	CLEARBIT(ms->touch[touch].flags, MT_NEW);
 }
 
 /* Release a touch.
@@ -222,8 +221,8 @@ static void touch_release(struct MTState* ms,
 	ms->touch[touch].dx = 0;
 	ms->touch[touch].dy = 0;
 	ms->touch[touch].direction = TR_NONE;
-	CLEARBIT(ms->touch[touch].state, MT_NEW);
-	SETBIT(ms->touch[touch].state, MT_RELEASED);
+	CLEARBIT(ms->touch[touch].flags, MT_NEW);
+	SETBIT(ms->touch[touch].flags, MT_RELEASED);
 }
 
 /* Invalidate all touches.
@@ -232,7 +231,7 @@ static void touches_invalidate(struct MTState* ms)
 {
 	int i;
 	foreach_bit(i, ms->touch_used)
-		SETBIT(ms->touch[i].state, MT_INVALID);
+		SETBIT(ms->touch[i].flags, MT_INVALID);
 }
 
 /* Update all touches.
@@ -264,29 +263,29 @@ static void touches_update(struct MTState* ms,
 		if (n >= 0) {
 			// Track and invalidate thumb, palm, and edge touches.
 			if (is_thumb(cfg, &hs->data[i]))
-				SETBIT(ms->touch[n].state, MT_THUMB);
+				SETBIT(ms->touch[n].flags, MT_THUMB);
 			else
-				CLEARBIT(ms->touch[n].state, MT_THUMB);
+				CLEARBIT(ms->touch[n].flags, MT_THUMB);
 
 			if (is_palm(cfg, &hs->data[i]))
-				SETBIT(ms->touch[n].state, MT_PALM);
+				SETBIT(ms->touch[n].flags, MT_PALM);
 			else
-				CLEARBIT(ms->touch[n].state, MT_PALM);
+				CLEARBIT(ms->touch[n].flags, MT_PALM);
 
 			if (is_edge(cfg, &hs->data[i])) {
-				if (GETBIT(ms->touch[n].state, MT_NEW))
-					SETBIT(ms->touch[n].state, MT_EDGE);
+				if (GETBIT(ms->touch[n].flags, MT_NEW))
+					SETBIT(ms->touch[n].flags, MT_EDGE);
 			}
 			else
-				CLEARBIT(ms->touch[n].state, MT_EDGE);
+				CLEARBIT(ms->touch[n].flags, MT_EDGE);
 
-			MODBIT(ms->touch[n].state, MT_INVALID,
-				GETBIT(ms->touch[n].state, MT_THUMB) && cfg->ignore_thumb ||
-				GETBIT(ms->touch[n].state, MT_PALM) && cfg->ignore_palm ||
-				GETBIT(ms->touch[n].state, MT_EDGE));
+			MODBIT(ms->touch[n].flags, MT_INVALID,
+				GETBIT(ms->touch[n].flags, MT_THUMB) && cfg->ignore_thumb ||
+				GETBIT(ms->touch[n].flags, MT_PALM) && cfg->ignore_palm ||
+				GETBIT(ms->touch[n].flags, MT_EDGE));
 
-			disable |= cfg->disable_on_thumb && GETBIT(ms->touch[n].state, MT_THUMB);
-			disable |= cfg->disable_on_palm && GETBIT(ms->touch[n].state, MT_PALM);
+			disable |= cfg->disable_on_thumb && GETBIT(ms->touch[n].flags, MT_THUMB);
+			disable |= cfg->disable_on_palm && GETBIT(ms->touch[n].flags, MT_PALM);
 		}
 	}
 
@@ -301,7 +300,7 @@ static void touches_clean(struct MTState* ms)
 	int i, used;
 	used = ms->touch_used;
 	foreach_bit(i, used) {
-		if (GETBIT(ms->touch[i].state, MT_RELEASED))
+		if (GETBIT(ms->touch[i].flags, MT_RELEASED))
 			CLEARBIT(ms->touch_used, i);
 	}
 }
@@ -357,8 +356,6 @@ void mtstate_extract(struct MTState* ms,
 			const struct HWState* hs,
 			const struct Capabilities* caps)
 {
-	ms->state = 0;
-
 	touches_clean(ms);
 	touches_update(ms, cfg, hs, caps);
 

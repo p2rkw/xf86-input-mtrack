@@ -190,7 +190,7 @@ struct MConfig {
 	int rotate_rt_btn;		// Button to use for rotate right. >= 0, 0 is none
 	struct MConfigStationary{
 		int max_move;			// How far stationary finger can move, before interrupting the gesture. >= 0
-		int button;		// Button to be pressed/released when gesture starts/ends.
+		int button;		// Button to be pressed/released when gesture starts/ends. >= 0, 0 disables
 	} hold1_move1_stationary;
 #if 0
 	struct MConfigStationary hold1_move2_stationary, hold1_move3_stationary;

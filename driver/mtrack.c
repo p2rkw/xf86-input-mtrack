@@ -393,12 +393,12 @@ static int can_start_coasting(struct MTouch *mt)
 		 hypot_cmpf(gs->scroll_speed_x, gs->scroll_speed_y, mt->cfg.scroll_coast.min_speed) == 1)
 	{
 		foreach_bit(i, ms->touch_used) {
-			if (GETBIT(ms->touch[i].state, MT_INVALID) ||
-					GETBIT(ms->touch[i].flags, GS_BUTTON) ||
-					GETBIT(ms->touch[i].flags, GS_TAP)
+			if (GETBIT(ms->touch[i].flags, MT_INVALID) ||
+					GETBIT(ms->touch[i].flags, MT_BUTTON) ||
+					GETBIT(ms->touch[i].flags, MT_TAP)
 				 )
 				continue;
-			if(GETBIT(mt->state.touch[i].state, MT_RELEASED))
+			if(GETBIT(mt->state.touch[i].flags, MT_RELEASED))
 				return 1;
 		} /* foreach */
 	}

@@ -34,9 +34,10 @@
 #define MT_THUMB 3
 #define MT_PALM 4
 #define MT_EDGE 5
+#define MT_TAP 6
+#define MT_BUTTON 7
 
 struct Touch {
-	bitmask_t state;
 	bitmask_t flags;
 	double direction;
 	int tracking_id;
@@ -46,9 +47,8 @@ struct Touch {
 };
 
 struct MTState {
-	bitmask_t state;
-	struct Touch touch[DIM_TOUCHES];
 	bitmask_t touch_used;
+	struct Touch touch[DIM_TOUCHES];
 };
 
 /* Initialize an MTState struct.

@@ -30,9 +30,6 @@
 
 struct MTouch;
 
-#define GS_TAP 0
-#define GS_BUTTON 1
-
 #define GS_NONE 0
 #define GS_MOVE 1
 #define GS_SCROLL 2
