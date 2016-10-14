@@ -227,8 +227,9 @@ static void buttons_update(struct Gestures* gs,
 		return;
 
 	static bitmask_t button_prev = 0U;
-	int i, down, emulate, touching;
+	int i, down, up, emulate, touching;
 	down = 0;
+	up = 0;
 	emulate = GETBIT(hs->button, 0) && !GETBIT(button_prev, 0);
 
 	for (i = 0; i < 32; i++) {
@@ -238,10 +239,19 @@ static void buttons_update(struct Gestures* gs,
 			down++;
 			trigger_button_down(gs, i);
 		}
-		else
+		else {
+			up++;
 			trigger_button_up(gs, i);
+		}
 	}
 	button_prev = hs->button;
+
+	if (up) {
+		foreach_bit(i, ms->touch_used) {
+			if (cfg->button_integrated && GETBIT(ms->touch[i].flags, MT_BUTTON))
+				CLEARBIT(ms->touch[i].flags, MT_BUTTON);
+		}
+	}
 
 	if (down) {
 		int earliest, latest, lowest, moving = 0;
