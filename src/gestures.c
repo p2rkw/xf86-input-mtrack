@@ -897,7 +897,7 @@ static int trigger_hold_move(struct Gestures* gs,
 	return 0;
 }
 
-#if defined(DEBUG_GESTURES) || 1
+#if defined(DEBUG_GESTURES)
 #define LOG_SCALE LOG_INFO
 #else
 #define LOG_SCALE(...)
@@ -926,7 +926,7 @@ static int calc_scale_dir(const struct Touch* t0, const struct Touch* t1){
 	return dist_sq > dist_prev_sq ? ZOOM_IN : ZOOM_OUT;
 }
 
-static int trigger_scale2(struct Gestures* gs, const struct MConfig* cfg,
+static int trigger_scale(struct Gestures* gs, const struct MConfig* cfg,
 													const struct Touch* t0, const struct Touch* t1){
 	double d0, d1, angles_diff, max_error;
 	int dir;
@@ -989,35 +989,6 @@ static int trigger_scale2(struct Gestures* gs, const struct MConfig* cfg,
 #undef ZOOM_OUT
 #undef ZOOM_UNKNOWN
 
-static void trigger_scale(struct Gestures* gs,
-			const struct MConfig* cfg,
-			double dist, int dir)
-{
-	if (gs->move_type == GS_SCALE || !timercmp(&gs->time, &gs->move_wait, <)) {
-		struct timeval tv_tmp;
-		trigger_drag_stop(gs, 1);
-		if (gs->move_type != GS_SCALE || gs->move_dir != dir)
-			gs->move_dist = 0;
-		gs->move_dx = gs->move_dy = 0.0;
-		gs->move_type = GS_SCALE;
-		gs->move_dist += (int)ABSVAL(dist);
-		gs->move_dir = dir;
-		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
-		if (gs->move_dist >= cfg->scale_dist) {
-			gs->move_dist = MODVAL(gs->move_dist, cfg->scale_dist);
-			timeraddms(&gs->time, cfg->gesture_hold, &tv_tmp);
-			if (dir == TR_DIR_UP)
-				trigger_button_click(gs, cfg->scale_up_btn - 1, &tv_tmp);
-			else if (dir == TR_DIR_DN)
-				trigger_button_click(gs, cfg->scale_dn_btn - 1, &tv_tmp);
-		}
-#ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_scale: scaling %f in direction %d (at %d of %d)\n",
-			dist, dir, gs->move_dist, cfg->scale_dist);
-#endif
-	}
-}
-
 static void trigger_rotate(struct Gestures* gs,
 			const struct MConfig* cfg,
 			double dist, int dir)
@@ -1070,20 +1041,6 @@ static int get_rotate_dir(const struct Touch* t1,
 		return TR_DIR_RT;
 	else if (trig_angles_acute(t1->direction, d2) < 2 && trig_angles_acute(t2->direction, d1) < 2)
 		return TR_DIR_LT;
-	return TR_NONE;
-}
-
-static int get_scale_dir(const struct Touch* t1,
-			const struct Touch* t2)
-{
-	double v;
-	if (trig_angles_acute(t1->direction, t2->direction) >= 2) {
-		v = trig_direction(t2->x - t1->x, t2->y - t1->y);
-		if (trig_angles_acute(v, t1->direction) < 2)
-			return TR_DIR_DN;
-		else
-			return TR_DIR_UP;
-	}
 	return TR_NONE;
 }
 
@@ -1141,14 +1098,7 @@ static void moving_update(struct Gestures* gs,
 				ABSVAL(hypot(touches[1]->dx, touches[1]->dy));
 			trigger_rotate(gs, cfg, dist/2, dir);
 		}
-#if 0
-		else if ((dir = get_scale_dir(touches[0], touches[1])) != TR_NONE) {
-			dist = ABSVAL(hypot(touches[0]->dx, touches[0]->dy)) +
-				ABSVAL(hypot(touches[1]->dx, touches[1]->dy));
-			trigger_scale(gs, cfg, dist/2, dir);
-		}
-#endif
-		else if(trigger_scale2(gs,cfg, touches[0], touches[1])){
+		else if(trigger_scale(gs,cfg, touches[0], touches[1])){
 			/* nothing to do */
 		}
 	}
