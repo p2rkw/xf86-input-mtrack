@@ -79,7 +79,7 @@ static void trigger_button_emulation(struct Gestures* gs, int button)
 		CLEARBIT(gs->buttons, 0);
 		SETBIT(gs->buttons, button);
 		gs->button_emulate = button;
-#ifdef DEBUG_GESTURES
+#if defined(DEBUG_GESTURES)
 		xf86Msg(X_INFO, "trigger_button_emulation: %d emulated\n", button);
 #endif
 	}
@@ -246,13 +246,6 @@ static void buttons_update(struct Gestures* gs,
 	}
 	button_prev = hs->button;
 
-	if (up) {
-		foreach_bit(i, ms->touch_used) {
-			if (cfg->button_integrated && GETBIT(ms->touch[i].flags, MT_BUTTON))
-				CLEARBIT(ms->touch[i].flags, MT_BUTTON);
-		}
-	}
-
 	if (down) {
 		int earliest, latest, lowest, moving = 0;
 		gs->move_type = GS_NONE;
@@ -263,10 +256,10 @@ static void buttons_update(struct Gestures* gs,
 		foreach_bit(i, ms->touch_used) {
 			if (!cfg->button_zones && GETBIT(ms->touch[i].flags, MT_INVALID))
 				continue;
+			if (cfg->button_integrated)
+				SETBIT(ms->touch[i].flags, MT_BUTTON); /* Mark all existing touches as physical button press */
 			if (lowest == -1 || ms->touch[i].y > ms->touch[lowest].y)
 				lowest = i;
-			if (cfg->button_integrated && !GETBIT(ms->touch[i].flags, MT_BUTTON))
-				SETBIT(ms->touch[i].flags, MT_BUTTON);
 			if (earliest == -1 || timercmp(&ms->touch[i].down, &ms->touch[earliest].down, <))
 				earliest = i;
 			if (latest == -1 || timercmp(&ms->touch[i].down, &ms->touch[latest].down, >))
@@ -288,7 +281,7 @@ static void buttons_update(struct Gestures* gs,
 
 				if (zones > 0) {
 					width = ((double)cfg->pad_width)/((double)zones);
-					pos = cfg->pad_width / 2 + ms->touch[lowest].x;
+					pos = cfg->pad_width / 2 + ms->touch[lowest].x; /* Why not mean x of all touches? */
 #ifdef DEBUG_GESTURES
 					xf86Msg(X_INFO, "buttons_update: pad width %d, zones %d, zone width %f, x %d\n",
 						cfg->pad_width, zones, width, pos);
@@ -338,6 +331,15 @@ static void buttons_update(struct Gestures* gs,
 					trigger_button_emulation(gs, cfg->button_2touch - 1);
 				else if (touching == 3 && cfg->button_3touch > 0)
 					trigger_button_emulation(gs, cfg->button_3touch - 1);
+			}
+		}
+	} /* if (down)*/
+
+	if (up) {
+		foreach_bit(i, ms->touch_used) {
+			if (cfg->button_integrated) { /* <-- I know it can be outide loop, but this is less error prone */
+				/* Physical button is no longer down, so unmark touches */
+				CLEARBIT(ms->touch[i].flags, MT_BUTTON);
 			}
 		}
 	}
