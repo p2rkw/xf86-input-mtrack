@@ -69,7 +69,7 @@ typedef unsigned int bitmask_t;
 
 #define LOG_INFO(...) \
 	do{ \
-		xf86Msg(X_INFO, "mtrack %s:%i: ", __FILE__, __LINE__); \
+		xf86Msg(X_INFO, "mtrack[%i] %s:%i: ", get_next_log_number(), __FILE__, __LINE__); \
 		xf86Msg(X_INFO, __VA_ARGS__); \
 	}while(0)
 
@@ -78,6 +78,11 @@ typedef unsigned int bitmask_t;
 #else
 # define LOG_DEBUG(...)
 #endif
+
+static int get_next_log_number(){
+	static int last = 0;
+	return ++last;
+}
 
 /* Retrieve the current time and place it in tv.
  */

@@ -369,6 +369,12 @@ static void abort_tapping(struct Gestures* gs, struct MTState* ms){
 	}
 }
 
+#ifdef DEBUG_GESTURES
+#define LOG_TAP LOG_INFO
+#else
+#define LOG_TAP(...)
+#endif
+
 static void tapping_update(struct Gestures* gs,
 			const struct MConfig* cfg,
 			struct MTState* ms)
@@ -389,23 +395,25 @@ static void tapping_update(struct Gestures* gs,
 		if (timercmp(&gs->time, &gs->tap_timeout, >=)) {
 			/* too much time passed by from first touch, stop waiting for incoming touches */
 			abort_tapping(gs, ms);
-			xf86Msg(X_INFO, "tapping_update: break: too slow; !isepoch:%d, timercmp:%d\n", !isepochtime(&gs->tap_timeout), timercmp(&gs->time, &gs->tap_timeout, >=));
+			LOG_TAP("tapping_update: break: too slow; !isepoch:%d, timercmp:%d\n", !isepochtime(&gs->tap_timeout), timercmp(&gs->time, &gs->tap_timeout, >=));
 			return;
 		}
 		foreach_bit(i, ms->touch_used) {
 			iTouch = ms->touch + i;
 			if (GETBIT(iTouch->flags, MT_TAP)) {
+				/* Finger moved too far. */
 				dist = dist2(iTouch->total_dx, iTouch->total_dy);
 				if (dist >= SQRVAL(cfg->tap_dist)) {
 					abort_tapping(gs, ms);
-					xf86Msg(X_INFO, "tapping_update: break: too far\n");
+					LOG_TAP("tapping_update: break: too far\n");
 					return;
 				}
 			}
 			if (GETBIT(iTouch->flags, MT_INVALID) ||
 					GETBIT(iTouch->flags, MT_BUTTON)){
+				/* Invalid or physical button */
 				abort_tapping(gs, ms);
-				xf86Msg(X_INFO, "tapping_update: break: invalid or button\n");
+				LOG_TAP("tapping_update: break: invalid or button\n");
 				return;
 			}
 
@@ -418,7 +426,7 @@ static void tapping_update(struct Gestures* gs,
 						)
 			){
 				abort_tapping(gs, ms);
-				xf86Msg(X_INFO, "tapping_update: break: not NEW, TAP, or RELEASED\n");
+				LOG_TAP("tapping_update: break: not NEW, TAP, or RELEASED\n");
 				return;
 			}
 		}
@@ -434,7 +442,7 @@ static void tapping_update(struct Gestures* gs,
 			gs->tap_touching += 1;
 			SETBIT(iTouch->flags, MT_TAP);
 			if(gs->tap_touching == 1){ /* That was first touch, start timer */
-				xf86Msg(X_INFO, "tapping_update: start new tap; timeout=%d\n", cfg->tap_timeout);
+				LOG_TAP("tapping_update: start new tap; timeout=%d\n", cfg->tap_timeout);
 				timeraddms(&gs->time, cfg->tap_timeout, &gs->tap_timeout);
 			}
 		}
@@ -452,7 +460,7 @@ static void tapping_update(struct Gestures* gs,
 				gs->tap_touching = 0;
 				return; /* Pretty common situation; do nothing */
 			}
-			xf86Msg(X_INFO, "tapping_update: touch released; gs->tap_touching=%d, gs->tap_released=%d\n", gs->tap_touching, gs->tap_released);
+			LOG_TAP("tapping_update: touch released; gs->tap_touching=%d, gs->tap_released=%d\n", gs->tap_touching, gs->tap_released);
 		}
 	}
 
@@ -466,7 +474,7 @@ static void tapping_update(struct Gestures* gs,
 	case 3: button = cfg->tap_3touch - 1; break;
 	case 4: button = cfg->tap_4touch - 1; break;
 	default:
-		xf86Msg(X_INFO, "tapping_update: Something went really bad; final_touch_count=%d\n", final_touch_count);
+		LOG_TAP("tapping_update: Something went really bad; final_touch_count=%d\n", final_touch_count);
 		button = cfg->tap_4touch - 1;
 	}
 
@@ -479,6 +487,7 @@ static void tapping_update(struct Gestures* gs,
 	timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 	abort_tapping(gs, ms);
 }
+#undef LOG_TAP
 
 static void trigger_move(struct Gestures* gs,
 			const struct MConfig* cfg,
