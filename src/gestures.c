@@ -776,7 +776,8 @@ static int can_trigger_hold_move(const struct Gestures* gs,
 	/* Conditions: was first finger hold in place for some time */
 	if (!is_touch_stationary(touches[0], max_move))
 		return 0;
-	timeraddms(&touches[0]->down, cfg->tap_timeout * 1.2, &tv_tmp);
+	/* todo: make this time configurable */
+	timeraddms(&touches[0]->down, MAXVAL(cfg->tap_timeout * 1.2, 350), &tv_tmp);
 	if (timercmp(&gs->time, &tv_tmp, <)) /* time < down + wait ?*/
 		return 0;
 
@@ -895,6 +896,98 @@ static int trigger_hold_move(struct Gestures* gs,
 
 	return 0;
 }
+
+#if defined(DEBUG_GESTURES) || 1
+#define LOG_SCALE LOG_INFO
+#else
+#define LOG_SCALE(...)
+#endif
+
+
+#define ZOOM_IN TR_DIR_UP
+#define ZOOM_OUT TR_DIR_DN
+#define ZOOM_UNKNOWN TR_NONE
+static int calc_scale_dir(const struct Touch* t0, const struct Touch* t1){
+	int dist_sq, dist_prev_sq;
+	int x0_prev, y0_prev;
+	int x1_prev, y1_prev;
+
+	x0_prev = t0->x - t0->dx;
+	y0_prev = t0->y - t0->dy;
+	x1_prev = t1->x - t1->dx;
+	y1_prev = t1->y - t1->dy;
+
+	dist_sq = dist2(t0->x - t1->x, t0->y - t1->y);
+	dist_prev_sq = dist2(x0_prev - x1_prev, y0_prev - y1_prev);
+
+
+	if(dist_prev_sq == dist_sq)
+		return ZOOM_UNKNOWN;
+	return dist_sq > dist_prev_sq ? ZOOM_IN : ZOOM_OUT;
+}
+
+static int trigger_scale2(struct Gestures* gs, const struct MConfig* cfg,
+													const struct Touch* t0, const struct Touch* t1){
+	double d0, d1, angles_diff, max_error;
+	int dir;
+	int dist;
+
+	max_error = 45; /* = sum of difference of directions, in degrees  */
+	max_error = max_error * 8.0/360.0; /* Convert degrees to our from 0 to 8 angle system */
+	dir = TR_NONE;
+
+	if (gs->move_type != GS_SCALE && timercmp(&gs->time, &gs->move_wait, <)) {
+		return 0;
+	}
+
+	d0 = t0->direction;
+	d1 = t1->direction;
+
+	if(d0 == TR_NONE && d1 == TR_NONE){
+		LOG_SCALE("trigger_scale: no directions\n");
+		return 0;
+	}
+	/* Handle scaling with one finger */
+	if(d0 == TR_NONE || d1 == TR_NONE){
+		LOG_SCALE("trigger_scale: scaling with one finger\n");
+		return 0;
+	}
+
+	/* Check if both vectors are on more or less same axis, but with different directions: */
+	angles_diff = trig_angles_acute(d0, d1); /* less eq 4.0 */
+	angles_diff = trig_angles_sub(4.0, angles_diff);
+	if(angles_diff > max_error){
+		LOG_SCALE("trigger_scale: movement foo tar from scaling axis, diff: %lf, max_error: %lf\n", angles_diff, max_error);
+		return 0;
+	}
+
+	dist = dist2(t0->dx,t0->dy) + dist2(t1->dx, t1->dy);
+	/* Determinate is it zoom in or zoom out */
+	dir = calc_scale_dir(t0, t1);
+
+	struct timeval tv_tmp;
+	trigger_drag_stop(gs, 1);
+	if (gs->move_type != GS_SCALE || gs->move_dir != dir)
+		gs->move_dist = 0;
+	gs->move_dx = gs->move_dy = 0.0;
+	gs->move_type = GS_SCALE;
+	gs->move_dist += (int)ABSVAL(dist);
+	gs->move_dir = dir;
+	timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
+	if (gs->move_dist >= cfg->scale_dist) {
+		gs->move_dist = MODVAL(gs->move_dist, cfg->scale_dist);
+		timeraddms(&gs->time, cfg->gesture_hold, &tv_tmp);
+		if (dir == ZOOM_IN)
+			trigger_button_click(gs, cfg->scale_up_btn - 1, &tv_tmp);
+		else if (dir == ZOOM_OUT)
+			trigger_button_click(gs, cfg->scale_dn_btn - 1, &tv_tmp);
+	}
+
+	return 1;
+}
+#undef ZOOM_IN
+#undef ZOOM_OUT
+#undef ZOOM_UNKNOWN
 
 static void trigger_scale(struct Gestures* gs,
 			const struct MConfig* cfg,
@@ -1048,10 +1141,15 @@ static void moving_update(struct Gestures* gs,
 				ABSVAL(hypot(touches[1]->dx, touches[1]->dy));
 			trigger_rotate(gs, cfg, dist/2, dir);
 		}
+#if 0
 		else if ((dir = get_scale_dir(touches[0], touches[1])) != TR_NONE) {
 			dist = ABSVAL(hypot(touches[0]->dx, touches[0]->dy)) +
 				ABSVAL(hypot(touches[1]->dx, touches[1]->dy));
 			trigger_scale(gs, cfg, dist/2, dir);
+		}
+#endif
+		else if(trigger_scale2(gs,cfg, touches[0], touches[1])){
+			/* nothing to do */
 		}
 	}
 	else if ((count == 3 || count == 4) && cfg->trackpad_disable < 1) {
