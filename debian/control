@@ -1,7 +1,7 @@
 Source: xserver-xorg-input-mtrack
 Section: misc
 Priority: optional
-Maintainer: Ryan Bourgeois <bluedragonx@gmail.com>, Paweł Turkowski <p2rkw0@gmail.com>
+Maintainer: Paweł Turkowski <p2rkw0@gmail.com>
 Build-Depends:
 	debhelper (>= 5),
 	xserver-xorg-dev (>= 2:1.7.6),

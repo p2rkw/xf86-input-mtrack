@@ -1,3 +1,17 @@
+xserver-xorg-input-mtrack (0.4.1) unstable; urgency=low
+
+  * Smooth scroll: detect and handle flipped up&down, left&right buttons
+  * Add examples with my current configuration as first example.
+  * Proper initialization of scroll axes(2 and 3).
+  * Setup scroll valuators also during device initialization.
+  * Do not consider edge clicks when calculating emulated buttons
+  * Change type of variables holding movement delta to double for better precision.
+  * Rewrite tap implementation from scratch. Remove 'status' field from Touch structure.
+  * Clear the MT_BUTTON bit of touches when an integrated button is released.
+  * Scale gesture reimplementation.
+
+ -- Paweł Turkowski <p2rkw0@gmail.com>  Wed, 02 Nov 2016 00:13:04 +0100
+
 xserver-xorg-input-mtrack (0.4.0) unstable; urgency=low
 
   * Add smooth scroll

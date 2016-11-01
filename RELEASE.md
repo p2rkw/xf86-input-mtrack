@@ -1,3 +1,14 @@
+## v0.4.1
+* Smooth scroll: detect and handle flipped up&down, left&right buttons
+* Add examples with my current configuration as first example.
+* Proper initialization of scroll axes(2 and 3).
+* Setup scroll valuators also during device initialization.
+* Do not consider edge clicks when calculating emulated buttons
+* Change type of variables holding movement delta to double for better precision.
+* Rewrite tap implementation from scratch. Remove 'status' field from Touch structure.
+* Clear the MT_BUTTON bit of touches when an integrated button is released.
+* Scale gesture reimplementation.
+
 ## v0.4.0
 * Add smooth scroll
 * Add scroll/swipe/swipe4 to drag functionality
