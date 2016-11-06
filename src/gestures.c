@@ -75,6 +75,7 @@ static void trigger_button_down(struct Gestures* gs, int button)
 
 static void trigger_button_emulation(struct Gestures* gs, int button)
 {
+#if 0
 	if (IS_VALID_BUTTON(button) && GETBIT(gs->buttons, 0)) {
 		CLEARBIT(gs->buttons, 0);
 		SETBIT(gs->buttons, button);
@@ -82,6 +83,18 @@ static void trigger_button_emulation(struct Gestures* gs, int button)
 #if defined(DEBUG_GESTURES)
 		xf86Msg(X_INFO, "trigger_button_emulation: %d emulated\n", button);
 #endif
+	}
+#else
+	trigger_button_down(gs, button);
+	gs->integrated_emulated_button = button + 1;
+#endif
+}
+
+static void trigger_button_emulation_end(struct Gestures* gs)
+{
+	if(gs->integrated_emulated_button > 0){
+		trigger_button_up(gs, gs->integrated_emulated_button - 1);
+		gs->integrated_emulated_button = 0;
 	}
 }
 
@@ -218,6 +231,12 @@ static int can_change_gesture_type(struct Gestures* gs, int desired_gesture){
 	return timercmp(&gs->time, &gs->move_wait, >);
 }
 
+#ifdef DEBUG_GESTURES
+#define LOG_EMULATED LOG_INFO
+#else
+#define LOG_EMULATED(...)
+#endif
+
 static void buttons_update(struct Gestures* gs,
 			const struct MConfig* cfg,
 			const struct HWState* hs,
@@ -227,26 +246,28 @@ static void buttons_update(struct Gestures* gs,
 		return;
 
 	static bitmask_t button_prev = 0U;
-	int i, down, up, emulate, touching;
-	down = 0;
-	up = 0;
-	emulate = GETBIT(hs->button, 0) && !GETBIT(button_prev, 0);
+	int i, integrated_down, integrated_up;
+	int integrated_just_clicked, integrated_just_released;
+	int touching;
+
+	integrated_down = 0;
+	integrated_up = 0;
+	integrated_just_clicked = GETBIT(hs->button, 0) && !GETBIT(button_prev, 0);
+	integrated_just_released = !GETBIT(hs->button, 0) && GETBIT(button_prev, 0);
 
 	for (i = 0; i < 32; i++) {
 		if (GETBIT(hs->button, i) == GETBIT(button_prev, i))
 			continue;
 		if (GETBIT(hs->button, i)) {
-			down++;
-			trigger_button_down(gs, i);
+			integrated_down++;
 		}
 		else {
-			up++;
-			trigger_button_up(gs, i);
+			integrated_up++;
 		}
 	}
 	button_prev = hs->button;
 
-	if (down) {
+	if (integrated_down) {
 		int earliest, latest, lowest, moving = 0;
 		gs->move_type = GS_NONE;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
@@ -266,7 +287,7 @@ static void buttons_update(struct Gestures* gs,
 				latest = i;
 		}
 
-		if (emulate) {
+		if (integrated_just_clicked) {
 			if (cfg->button_zones && lowest >= 0) {
 				int zones, left, right, pos;
 				double width;
@@ -282,23 +303,17 @@ static void buttons_update(struct Gestures* gs,
 				if (zones > 0) {
 					width = ((double)cfg->pad_width)/((double)zones);
 					pos = cfg->pad_width / 2 + ms->touch[lowest].x; /* Why not mean x of all touches? */
-#ifdef DEBUG_GESTURES
-					xf86Msg(X_INFO, "buttons_update: pad width %d, zones %d, zone width %f, x %d\n",
+					LOG_EMULATED("buttons_update: pad width %d, zones %d, zone width %f, x %d\n",
 						cfg->pad_width, zones, width, pos);
-#endif
 					for (i = 0; i < zones; i++) {
 						left = width*i;
 						right = width*(i+1);
 						if ((i == 0 || pos >= left) && (i == zones - 1 || pos <= right)) {
-#ifdef DEBUG_GESTURES
-							xf86Msg(X_INFO, "buttons_update: button %d, left %d, right %d (found)\n", i, left, right);
-#endif
+							LOG_EMULATED("buttons_update: button %d, left %d, right %d (found)\n", i, left, right);
 							break;
 						}
-#ifdef DEBUG_GESTURES
 						else
-							xf86Msg(X_INFO, "buttons_update: button %d, left %d, right %d\n", i, left, right);
-#endif
+							LOG_EMULATED("buttons_update: button %d, left %d, right %d\n", i, left, right);
 					}
 
 					if (i == 0)
@@ -313,17 +328,17 @@ static void buttons_update(struct Gestures* gs,
 				touching = 0;
 				struct timeval expire;
 				foreach_bit(i, ms->touch_used) {
+					microtime(&expire);
 					timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
 					if ((cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) &&
-						!(GETBIT(ms->touch[i].flags, MT_THUMB) && cfg->ignore_thumb) &&
-						!(GETBIT(ms->touch[i].flags, MT_PALM) && cfg->ignore_palm) &&
+						!(cfg->ignore_thumb && GETBIT(ms->touch[i].flags, MT_THUMB)) &&
+						!(cfg->ignore_palm && GETBIT(ms->touch[i].flags, MT_PALM)) &&
 						!(GETBIT(ms->touch[i].flags, MT_EDGE))) {
 						touching++;
+						LOG_EMULATED("buttons_update: latest >=0: touching++ =%d\n", touching);
 					}
 				}
-
-				if (cfg->button_integrated)
-					touching--;
+				LOG_EMULATED("buttons_update: latest >=0: touching=%d\n", touching);
 
 				if (touching == 1 && cfg->button_1touch > 0)
 					trigger_button_emulation(gs, cfg->button_1touch - 1);
@@ -335,13 +350,14 @@ static void buttons_update(struct Gestures* gs,
 		}
 	} /* if (down)*/
 
-	if (up) {
+	if (integrated_just_released) {
 		foreach_bit(i, ms->touch_used) {
 			if (cfg->button_integrated) { /* <-- I know it can be outide loop, but this is less error prone */
 				/* Physical button is no longer down, so unmark touches */
 				CLEARBIT(ms->touch[i].flags, MT_BUTTON);
 			}
 		}
+		trigger_button_emulation_end(gs);
 	}
 }
 
