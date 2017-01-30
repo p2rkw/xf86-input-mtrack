@@ -643,8 +643,21 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 	/* Special case for smooth scrolling */
 	if(cfg->scroll_smooth && button >= 4 && button <= 7){
 		/* Calculate speed vector */
-		gs->scroll_speed_x = avg_move_x /(double)timertoms(&gs->dt);
-		gs->scroll_speed_y = avg_move_y /(double)timertoms(&gs->dt);
+		/* Forbid perpendicular movement: this conditions will disable h-scroll
+		 * while v-scroll is active. See Github #19 */
+		if(dir == TR_DIR_UP || dir == TR_DIR_DN){
+			gs->scroll_speed_x = 0.0;
+			gs->scroll_speed_y = avg_move_y / (double)timertoms(&gs->dt);
+		}
+		else if(dir == TR_DIR_LT || dir == TR_DIR_RT){
+			gs->scroll_speed_x = avg_move_x / (double)timertoms(&gs->dt);
+			gs->scroll_speed_y = 0.0;
+		}
+		else{
+			xf86Msg(X_INFO, "smooth scrolling: 'dir' not generalized or TR_NONE\n");
+			gs->scroll_speed_y = gs->scroll_speed_x = 0.0;
+		}
+
 		gs->scroll_speed_valid = 1;
 		LOG_DEBUG_GESTURES("smooth scrolling: speed: x: %lf, y: %lf\n", gs->scroll_speed_x, gs->scroll_speed_y);
 		/* Reset coasting duration 'to go' ticks. */
