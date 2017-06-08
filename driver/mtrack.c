@@ -69,8 +69,8 @@ static void init_axes_labels(Atom map[NUM_AXES])
 	memset(map, 0, NUM_AXES * sizeof(Atom));
 	PROPMAP(map, 0, AXIS_LABEL_PROP_REL_X);
 	PROPMAP(map, 1, AXIS_LABEL_PROP_REL_Y);
-	PROPMAP(map, 2, AXIS_LABEL_PROP_REL_HSCROLL);
-	PROPMAP(map, 3, AXIS_LABEL_PROP_REL_VSCROLL);
+	PROPMAP(map, 2, AXIS_LABEL_PROP_REL_VSCROLL);
+	PROPMAP(map, 3, AXIS_LABEL_PROP_REL_HSCROLL);
 }
 
 static void init_button_labels(Atom map[DIM_BUTTON])
