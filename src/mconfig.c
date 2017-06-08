@@ -33,7 +33,10 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->thumb_ratio = DEFAULT_THUMB_RATIO;
 	cfg->thumb_size = DEFAULT_THUMB_SIZE;
 	cfg->palm_size = DEFAULT_PALM_SIZE;
-	cfg->edge_size = DEFAULT_EDGE_SIZE;
+	cfg->edge_left_size = DEFAULT_EDGE_LEFT_SIZE;
+	cfg->edge_right_size = DEFAULT_EDGE_RIGHT_SIZE;
+	cfg->edge_top_size = DEFAULT_EDGE_TOP_SIZE;
+	cfg->edge_bottom_size = DEFAULT_EDGE_BOTTOM_SIZE;
 
 	// Configure Gestures
 	cfg->trackpad_disable = DEFAULT_TRACKPAD_DISABLE;
@@ -188,7 +191,10 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->thumb_ratio = CLAMPVAL(xf86SetIntOption(opts, "ThumbRatio", DEFAULT_THUMB_RATIO), 0, 100);
 	cfg->thumb_size = CLAMPVAL(xf86SetIntOption(opts, "ThumbSize", DEFAULT_THUMB_SIZE), 0, 100);
 	cfg->palm_size = CLAMPVAL(xf86SetIntOption(opts, "PalmSize", DEFAULT_PALM_SIZE), 0, 100);
-	cfg->edge_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeSize", DEFAULT_EDGE_SIZE), 0, 100);
+	cfg->edge_left_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeLeftSize", DEFAULT_EDGE_LEFT_SIZE), 0, 100);
+	cfg->edge_right_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeRightSize", DEFAULT_EDGE_RIGHT_SIZE), 0, 100);
+	cfg->edge_top_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeTopSize", DEFAULT_EDGE_TOP_SIZE), 0, 100);
+	cfg->edge_bottom_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeBottomSize", DEFAULT_EDGE_BOTTOM_SIZE), 0, 100);
 
 	// Configure Gestures
 	cfg->trackpad_disable = CLAMPVAL(xf86SetIntOption(opts, "TrackpadDisable", DEFAULT_TRACKPAD_DISABLE), 0, 3);

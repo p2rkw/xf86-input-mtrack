@@ -217,8 +217,11 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->axis_y_invert;
 	mprops.axis_invert = atom_init_integer(local->dev, MTRACK_PROP_AXIS_INVERT, 2, ivals, 8);
 
-	ivals[0] = cfg->edge_size;
-	mprops.edge_size = atom_init_integer(local->dev, MTRACK_PROP_EDGE_SIZE, 1, ivals, 8);
+	ivals[0] = cfg->edge_left_size;
+	ivals[1] = cfg->edge_right_size;
+	ivals[2] = cfg->edge_top_size;
+	ivals[3] = cfg->edge_bottom_size;
+	mprops.edge_sizes = atom_init_integer(local->dev, MTRACK_PROP_EDGE_SIZES, 4, ivals, 8);
 }
 
 int check_buttons_property(XIPropertyValuePtr prop, uint8_t** buttons_ret_arr, int buttons_count)
@@ -733,19 +736,22 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (property == mprops.edge_size) {
-		if (prop->size != 1 || prop->format != 8 || prop->type != XA_INTEGER)
+	else if (property == mprops.edge_sizes) {
+		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_PCNT(ivals8[0]))
+		if (!VALID_PCNT(ivals8[0]) || !VALID_PCNT(ivals8[1]) || !VALID_PCNT(ivals8[2]) || !VALID_PCNT(ivals8[3]))
 			return BadMatch;
 
 		if (!checkonly) {
-			cfg->edge_size = ivals8[0];
+			cfg->edge_left_size = ivals8[0];
+			cfg->edge_right_size = ivals8[1];
+			cfg->edge_top_size = ivals8[2];
+			cfg->edge_bottom_size = ivals8[3];
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set edge size to %d\n",
-				cfg->edge_size);
+			xf86Msg(X_INFO, "mtrack: set edge sizes to %d %d %d %d\n",
+				cfg->edge_left_size, cfg->edge_right_size, cfg->edge_top_size, cfg->edge_bottom_size);
 #endif
 		}
 	}

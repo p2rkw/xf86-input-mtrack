@@ -132,8 +132,8 @@
 #define MTRACK_PROP_DRAG_SETTINGS "Trackpad Drag Settings"
 // int, 2 values - invert x axis, invert y axis
 #define MTRACK_PROP_AXIS_INVERT "Trackpad Axis Inversion"
-// int, 1 value - size of edge region that is ignored
-#define MTRACK_PROP_EDGE_SIZE "Trackpad Edge Size"
+// int, 4 value - size of edge regions that are ignored: left, right, top, bottom
+#define MTRACK_PROP_EDGE_SIZES "Trackpad Edge Sizes"
 
 struct MProps {
 	// Properties Config
@@ -174,7 +174,7 @@ struct MProps {
 #endif
 	Atom drag_settings;
 	Atom axis_invert;
-	Atom edge_size;
+	Atom edge_sizes;
 };
 
 void mprops_init(struct MConfig* cfg, InputInfoPtr local);
