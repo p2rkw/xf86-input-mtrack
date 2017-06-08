@@ -209,7 +209,9 @@ static void touch_update(struct MTState* ms,
 	ms->touch[touch].total_dy += ms->touch[touch].dy;
 	ms->touch[touch].x = x;
 	ms->touch[touch].y = y;
-	ms->touch[touch].direction = trig_direction(ms->touch[touch].dx, ms->touch[touch].dy);
+	if (ms->touch[touch].dx != 0 || ms->touch[touch].dy != 0) {
+		ms->touch[touch].direction = trig_direction(ms->touch[touch].dx, ms->touch[touch].dy);
+	}
 	CLEARBIT(ms->touch[touch].flags, MT_NEW);
 }
 
