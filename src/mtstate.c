@@ -348,18 +348,18 @@ static void mtstate_output(const struct MTState* ms,
 			n, timertoms(&hs->evtime), timertoms(&tv));
 	}
 	foreach_bit(i, ms->touch_used) {
-		if (GETBIT(ms->touch[i].state, MT_RELEASED)) {
+		if (GETBIT(ms->touch[i].flags, MT_RELEASED)) {
 			timersub(&hs->evtime, &ms->touch[i].down, &tv);
 			xf86Msg(X_INFO, "  released p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
 						ms->touch[i].direction, timertoms(&ms->touch[i].down), timertoms(&tv));
 		}
-		else if (GETBIT(ms->touch[i].state, MT_NEW)) {
+		else if (GETBIT(ms->touch[i].flags, MT_NEW)) {
 			xf86Msg(X_INFO, "  new      p(%d, %d) d(%+d, %+d) dir(%f) down(%llu)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
 						ms->touch[i].direction, timertoms(&ms->touch[i].down));
 		}
-		else if (GETBIT(ms->touch[i].state, MT_INVALID)) {
+		else if (GETBIT(ms->touch[i].flags, MT_INVALID)) {
 			timersub(&hs->evtime, &ms->touch[i].down, &tv);
 			xf86Msg(X_INFO, "  invalid  p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
