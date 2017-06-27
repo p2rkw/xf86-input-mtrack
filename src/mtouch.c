@@ -65,7 +65,7 @@ int mtouch_close(struct MTouch* mt)
 	if (use_grab) {
 		SYSCALL(ret = ioctl(mt->fd, EVIOCGRAB, 0));
 		if (ret)
-			xf86Msg(X_WARNING, "mtouch: ungrab failed\n");
+			LOG_WARNING("mtouch: ungrab failed\n");
 	}
 	mtdev_close(&mt->dev);
 	return 0;

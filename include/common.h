@@ -67,11 +67,22 @@ typedef unsigned int bitmask_t;
 #define CLAMPVAL(x, min, max) MAXVAL(MINVAL(x, max), min)
 #define SGNVAL (x) ((x) < 0 ? -1 : (((x) > 0) ? 1 : 0))
 
+#define LOG_ERROR(...) \
+	do{ \
+		xf86Msg(X_ERROR, "mtrack[%i] %s:%i: ", get_next_log_number(), __FILE__, __LINE__); \
+		xf86Msg(X_ERROR, __VA_ARGS__); \
+	}while(0)
+#define LOG_WARNING(...) \
+	do{ \
+		xf86Msg(X_WARNING, "mtrack[%i] %s:%i: ", get_next_log_number(), __FILE__, __LINE__); \
+		xf86Msg(X_WARNING, __VA_ARGS__); \
+	}while(0)
 #define LOG_INFO(...) \
 	do{ \
 		xf86Msg(X_INFO, "mtrack[%i] %s:%i: ", get_next_log_number(), __FILE__, __LINE__); \
 		xf86Msg(X_INFO, __VA_ARGS__); \
 	}while(0)
+#define LOG_DISABLED(...) do { } while(0)
 
 #define LOG_INFO_ENABLED(...) LOG_INFO(__VA_ARGS__)
 #define LOG_INFO_DISABLED(...)
@@ -81,7 +92,7 @@ typedef unsigned int bitmask_t;
 #if defined(DEBUG_DRIVER) && (DEBUG_DRIVER != 0)
 # define LOG_DEBUG LOG_INFO
 #else
-# define LOG_DEBUG(...)
+# define LOG_DEBUG LOG_DISABLED
 #endif
 
 static int get_next_log_number(){
