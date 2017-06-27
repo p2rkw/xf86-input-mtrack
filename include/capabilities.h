@@ -43,6 +43,8 @@ int get_cap_wsize(const struct Capabilities *cap);
 
 int get_cap_xmid(const struct Capabilities *cap);
 int get_cap_ymid(const struct Capabilities *cap);
+int get_cap_xmin(const struct Capabilities *cap);
+int get_cap_ymin(const struct Capabilities *cap);
 
 int translate_cap_x(const struct Capabilities *cap, int x);
 int translate_cap_y(const struct Capabilities *cap, int y);

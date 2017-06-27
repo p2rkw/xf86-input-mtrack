@@ -23,6 +23,7 @@
 #include "mtouch.h"
 #include <fcntl.h>
 #include <stdarg.h>
+#include <unistd.h>
 
 void xf86Msg(int type, const char *format, ...)
 {
