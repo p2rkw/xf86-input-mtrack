@@ -628,6 +628,18 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 
 	dir = trig_generalize(get_swipe_dir_n(touches, touches_count));
 	button = get_button_for_dir(cfg_swipe, dir);
+
+	// Update gesture move_dist before aborting
+	// If we abort because button == -1,
+	// there can still be a little bit of movement.
+	// This means that if a movement was slow or in a strange direction,
+	// this will not be added to move_dist.
+	// To prevent that, we do this calculation before aborting.
+	get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
+	// hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
+	dist = hypot(avg_move_x, avg_move_y);
+	gs->move_dist += ABSVAL(dist);
+
 	if(button == -1){
 		/* No button? Probably fingers were still down,
 		 * but without movement.
@@ -636,9 +648,6 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 	}
 
 	trigger_drag_stop(gs, 1);
-	get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
-	// hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
-	dist = hypot(avg_move_x, avg_move_y);
 	if(cfg_swipe->drag_sens){
 		gs->move_dx = cfg->sensitivity * avg_move_x * cfg_swipe->drag_sens * 0.001;
 		gs->move_dy = cfg->sensitivity * avg_move_y * cfg_swipe->drag_sens * 0.001;
@@ -647,14 +656,20 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 	}
 	if (gs->move_type != move_type_to_trigger){
 		trigger_delayed_button_uncond(gs);
-		gs->move_dist = 0;
+		gs->move_dist = ABSVAL(dist);
 	}
-	else if (gs->move_dir != dir){
-		gs->move_dist = 0;
+	else if (gs->move_dir != dir && dir != TR_NONE){
+		// Reset move_dist since we're now swiping in a different direction.
+		// Don't reset if we simply don't know what direction we're going in.
+		// NOTE: That this means you can "wiggle" your fingers to build up
+		// move_dist without ever moving your fingers! The fix is a major
+		// redesign to how swiping works.
+		gs->move_dist = ABSVAL(dist);
 	}
 	gs->move_type = move_type_to_trigger;
-	gs->move_dist += ABSVAL(dist);
-	gs->move_dir = dir;
+	// Only update dir if we know what direction we're going in (don't set it to TR_NONE)
+	if (dir != TR_NONE)
+		gs->move_dir = dir;
 	timeraddms(&gs->time, cfg->gesture_wait + 5 /*bonus from me*/, &gs->move_wait);
 
 	/* Special case for smooth scrolling */
