@@ -23,6 +23,12 @@
 #include "mtstate.h"
 #include "trig.h"
 
+#ifdef DEBUG_MTSTATE
+# define LOG_DEBUG_MTSTATE LOG_DEBUG
+#else
+# define LOG_DEBUG_MTSTATE LOG_DISABLED
+#endif
+
 static int inline percentage(int dividend, int divisor)
 {
 	return (double)dividend / (double)divisor * 100;
@@ -81,17 +87,13 @@ static int is_thumb(const struct MConfig* cfg,
 	int size = touch_range_ratio(cfg, hw->touch_major);
 
 	if (pct < cfg->thumb_ratio && size > cfg->thumb_size) {
-#if DEBUG_MTSTATE
-		xf86Msg(X_INFO, "is_thumb: yes %d > %d && %d > %d\n",
+		LOG_DEBUG_MTSTATE("is_thumb: yes %d > %d && %d > %d\n",
 			pct, cfg->thumb_ratio, size, cfg->thumb_size);
-#endif
 		return 1;
 	}
 	else {
-#if DEBUG_MTSTATE
-		xf86Msg(X_INFO, "is_thumb: no  %d > %d && %d > %d\n",
+		LOG_DEBUG_MTSTATE("is_thumb: no  %d > %d && %d > %d\n",
 			pct, cfg->thumb_ratio, size, cfg->thumb_size);
-#endif
 		return 0;
 	}
 }
@@ -116,15 +118,11 @@ static int is_palm(const struct MConfig* cfg,
 	}
 
 	if (ratio > cfg->palm_size) {
-#if DEBUG_MTSTATE
-		xf86Msg(X_INFO, "is_palm: yes %d > %d\n", ratio, cfg->palm_size);
-#endif
+		LOG_DEBUG_MTSTATE("is_palm: yes %d > %d\n", ratio, cfg->palm_size);
 		return 1;
 	}
 	else {
-#if DEBUG_MTSTATE
-		xf86Msg(X_INFO, "is_palm: no  %d > %d\n", ratio, cfg->palm_size);
-#endif
+		LOG_DEBUG_MTSTATE("is_palm: no  %d > %d\n", ratio, cfg->palm_size);
 		return 0;
 	}
 }
@@ -192,7 +190,7 @@ static int touch_append(struct MTState* ms,
 	int n = firstbit(~ms->touch_used);
 	const struct FingerState* fs = &hs->data[fn];
 	if (n < 0)
-		xf86Msg(X_WARNING, "Too many touches to track. Ignoring touch %d.\n", fs->tracking_id);
+		LOG_WARNING("Too many touches to track. Ignoring touch %d.\n", fs->tracking_id);
 	else {
 		/* Set origin (0,0) of 'struct Touch' coordinate system to central point of the device */
 		x = translate_cap_x(caps, fs->position_x);
@@ -344,29 +342,29 @@ static void mtstate_output(const struct MTState* ms,
 	n = bitcount(ms->touch_used);
 	if (bitcount(ms->touch_used) > 0) {
 		microtime(&tv);
-		xf86Msg(X_INFO, "mtstate: %d touches at event time %llu (rt %llu)\n",
+		LOG_INFO("mtstate: %d touches at event time %llu (rt %llu)\n",
 			n, timertoms(&hs->evtime), timertoms(&tv));
 	}
 	foreach_bit(i, ms->touch_used) {
 		if (GETBIT(ms->touch[i].flags, MT_RELEASED)) {
 			timersub(&hs->evtime, &ms->touch[i].down, &tv);
-			xf86Msg(X_INFO, "  released p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
+			LOG_INFO("  released p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
 						ms->touch[i].direction, timertoms(&ms->touch[i].down), timertoms(&tv));
 		}
 		else if (GETBIT(ms->touch[i].flags, MT_NEW)) {
-			xf86Msg(X_INFO, "  new      p(%d, %d) d(%+d, %+d) dir(%f) down(%llu)\n",
+			LOG_INFO("  new      p(%d, %d) d(%+d, %+d) dir(%f) down(%llu)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
 						ms->touch[i].direction, timertoms(&ms->touch[i].down));
 		}
 		else if (GETBIT(ms->touch[i].flags, MT_INVALID)) {
 			timersub(&hs->evtime, &ms->touch[i].down, &tv);
-			xf86Msg(X_INFO, "  invalid  p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
+			LOG_INFO("  invalid  p(%d, %d) d(%+d, %+d) dir(%f) down(%llu) time(%lld)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
 						ms->touch[i].direction, timertoms(&ms->touch[i].down), timertoms(&tv));
 		}
 		else {
-			xf86Msg(X_INFO, "  touching p(%d, %d) d(%+d, %+d) dir(%f) down(%llu)\n",
+			LOG_INFO("  touching p(%d, %d) d(%+d, %+d) dir(%f) down(%llu)\n",
 						ms->touch[i].x, ms->touch[i].y, ms->touch[i].dx, ms->touch[i].dy,
 						ms->touch[i].direction, timertoms(&ms->touch[i].down));
 		}

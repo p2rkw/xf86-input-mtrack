@@ -143,8 +143,8 @@ void mconfig_init(struct MConfig* cfg,
 		cfg->touch_type = MCFG_SCALE;
 		cfg->touch_min = caps->abs[MTDEV_TOUCH_MAJOR].minimum;
 		cfg->touch_max = caps->abs[MTDEV_TOUCH_MAJOR].maximum;
-		xf86Msg(X_INFO, "Touchpad supports regular and approaching touches.\n");
-		xf86Msg(X_INFO, "  touch_min = %d, touch_max = %d\n", cfg->touch_min, cfg->touch_max);
+		LOG_INFO("Touchpad supports regular and approaching touches.\n");
+		LOG_INFO("  touch_min = %d, touch_max = %d\n", cfg->touch_min, cfg->touch_max);
 	}
 	else if (caps->has_abs[MTDEV_TOUCH_MAJOR] && caps->has_abs[MTDEV_PRESSURE]) {
 		cfg->touch_min = caps->abs[MTDEV_TOUCH_MAJOR].minimum;
@@ -156,31 +156,31 @@ void mconfig_init(struct MConfig* cfg,
 			cfg->touch_type = MCFG_PRESSURE_SIZE;
 		else
 			cfg->touch_type = MCFG_SIZE_PRESSURE;
-		xf86Msg(X_INFO, "Touchpad is pressure based, but supports regular touches also.\n");
-		xf86Msg(X_INFO, "  touch_min = %d, touch_max = %d\n", cfg->touch_min, cfg->touch_max);
-		xf86Msg(X_INFO, "  pressure_min = %d, pressure_max = %d\n", cfg->pressure_min, cfg->pressure_max);
+		LOG_INFO("Touchpad is pressure based, but supports regular touches also.\n");
+		LOG_INFO("  touch_min = %d, touch_max = %d\n", cfg->touch_min, cfg->touch_max);
+		LOG_INFO("  pressure_min = %d, pressure_max = %d\n", cfg->pressure_min, cfg->pressure_max);
 	}
 	else if (caps->has_abs[MTDEV_TOUCH_MAJOR]) {
 		cfg->touch_type = MCFG_SIZE;
 		cfg->touch_min = caps->abs[MTDEV_TOUCH_MAJOR].minimum;
 		cfg->touch_max = caps->abs[MTDEV_TOUCH_MAJOR].maximum;
-		xf86Msg(X_INFO, "Touchpad supports regular touches.\n");
-		xf86Msg(X_INFO, "  touch_min = %d, touch_max = %d\n", cfg->touch_min, cfg->touch_max);
+		LOG_INFO("Touchpad supports regular touches.\n");
+		LOG_INFO("  touch_min = %d, touch_max = %d\n", cfg->touch_min, cfg->touch_max);
 	}
 	else if (caps->has_abs[MTDEV_PRESSURE]) {
 		cfg->touch_type = MCFG_PRESSURE;
 		cfg->pressure_min = caps->abs[MTDEV_PRESSURE].minimum;
 		cfg->pressure_max = caps->abs[MTDEV_PRESSURE].maximum;
-		xf86Msg(X_INFO, "Touchpad is pressure based.\n");
-		xf86Msg(X_INFO, "  pressure_min = %d, pressure_max = %d\n", cfg->pressure_min, cfg->pressure_max);
+		LOG_INFO("Touchpad is pressure based.\n");
+		LOG_INFO("  pressure_min = %d, pressure_max = %d\n", cfg->pressure_min, cfg->pressure_max);
 	}
 	else {
 		cfg->touch_type = MCFG_NONE;
-		xf86Msg(X_WARNING, "Touchpad has minimal capabilities. Some features will be unavailable.\n");
+		LOG_WARNING("Touchpad has minimal capabilities. Some features will be unavailable.\n");
 	}
 
 	if (cfg->touch_minor)
-		xf86Msg(X_INFO, "Touchpad supports minor touch widths.\n");
+		LOG_INFO("Touchpad supports minor touch widths.\n");
 }
 
 void mconfig_configure(struct MConfig* cfg,
