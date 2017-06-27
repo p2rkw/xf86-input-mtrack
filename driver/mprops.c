@@ -23,6 +23,12 @@
 #include "common.h"
 #include "mtouch.h"
 
+#ifdef DEBUG_PROPS
+# define LOG_DEBUG_PROPS LOG_DEBUG
+#else
+# define LOG_DEBUG_PROPS LOG_DISABLED
+#endif
+
 #define MAX_INT_VALUES 4
 #define MAX_FLOAT_VALUES 4
 #define MAX_BUTTON_VALUES 6
@@ -128,7 +134,7 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	if (!mprops.float_type) {
 		mprops.float_type = MakeAtom(XATOM_FLOAT, strlen(XATOM_FLOAT), TRUE);
 		if (!mprops.float_type) {
-			xf86Msg(X_ERROR, "mtrack: %s: Failed to init float atom. Property support is disabled.\n", local->name);
+			LOG_ERROR("%s: Failed to init float atom. Property support is disabled.\n", local->name);
 			return;
 		}
 	}
@@ -298,10 +304,8 @@ static int set_swipe_properties(DeviceIntPtr dev, Atom property, XIPropertyValue
 			cfg_swipe->dist = ivals32[0];
 			cfg_swipe->hold = ivals32[1];
 			cfg_swipe->drag_sens = ivals32[2];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set swipe settings: dist: %d hold: %d\n",
+			LOG_DEBUG_PROPS("set swipe settings: dist: %d hold: %d\n",
 				cfg_swipe->dist, cfg_swipe->hold);
-#endif
 		}
 	}
 	else if (property == props_swipe->buttons) {
@@ -343,12 +347,10 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 
 		if (!checkonly) {
 			cfg->trackpad_disable = ivals8[0];
-#ifdef DEBUG_PROPS
 			if (cfg->trackpad_disable)
-				xf86Msg(X_INFO, "mtrack: trackpad input disabled\n");
+				LOG_DEBUG_PROPS("trackpad input disabled\n");
 			else
-				xf86Msg(X_INFO, "mtrack: trackpad input enabled\n");
-#endif
+				LOG_DEBUG_PROPS("trackpad input enabled\n");
 		}
 	}
 	else if (property == mprops.sensitivity) {
@@ -361,9 +363,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 
 		if (!checkonly) {
 			cfg->sensitivity = fvals[0];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set sensitivity to %f\n", cfg->sensitivity);
-#endif
+			LOG_DEBUG_PROPS("set sensitivity to %f\n", cfg->sensitivity);
 		}
 	}
 	else if (property == mprops.pressure) {
@@ -377,10 +377,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->touch_down = ivals8[0];
 			cfg->touch_up = ivals8[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set touch pressure to %d %d\n",
+			LOG_DEBUG_PROPS("set touch pressure to %d %d\n",
 				cfg->touch_down, cfg->touch_up);
-#endif
 		}
 	}
 	else if (property == mprops.button_settings) {
@@ -394,10 +392,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->button_enable = ivals8[0];
 			cfg->button_integrated = ivals8[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set button settings to %d %d\n",
+			LOG_DEBUG_PROPS("set button settings to %d %d\n",
 				cfg->button_enable, cfg->button_integrated);
-#endif
 		}
 	}
 	else if (property == mprops.button_emulate_settings) {
@@ -412,10 +408,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->button_zones = ivals16[0];
 			cfg->button_move = ivals16[1];
 			cfg->button_expire = ivals16[2];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set button emulate settings to %d %d %d\n",
+			LOG_DEBUG_PROPS("set button emulate settings to %d %d %d\n",
 				cfg->button_zones, cfg->button_move, cfg->button_expire);
-#endif
 		}
 	}
 	else if (property == mprops.button_emulate_values) {
@@ -430,10 +424,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->button_1touch = ivals8[0];
 			cfg->button_2touch = ivals8[1];
 			cfg->button_3touch = ivals8[2];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set button emulation to %d %d %d\n",
+			LOG_DEBUG_PROPS("set button emulation to %d %d %d\n",
 				cfg->button_1touch, cfg->button_2touch, cfg->button_3touch);
-#endif
 		}
 	}
 	else if (property == mprops.tap_settings) {
@@ -448,10 +440,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->tap_hold = ivals32[0];
 			cfg->tap_timeout = ivals32[1];
 			cfg->tap_dist = ivals32[2];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set tap settings to %d %d %d\n",
+			LOG_DEBUG_PROPS("set tap settings to %d %d %d\n",
 				cfg->tap_hold, cfg->tap_timeout, cfg->tap_dist);
-#endif
 		}
 	}
 	else if (property == mprops.tap_emulate) {
@@ -467,10 +457,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->tap_2touch = ivals8[1];
 			cfg->tap_3touch = ivals8[2];
 			cfg->tap_4touch = ivals8[3];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set tap emulation to %d %d %d %d\n",
+			LOG_DEBUG_PROPS("set tap emulation to %d %d %d %d\n",
 				cfg->tap_1touch, cfg->tap_2touch, cfg->tap_3touch, cfg->tap_4touch);
-#endif
 		}
 	}
 	else if (property == mprops.thumb_detect) {
@@ -484,10 +472,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->ignore_thumb = ivals8[0];
 			cfg->disable_on_thumb = ivals8[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set thumb detect to %d %d\n",
+			LOG_DEBUG_PROPS("set thumb detect to %d %d\n",
 				cfg->ignore_thumb, cfg->disable_on_thumb);
-#endif
 		}
 	}
 	else if (property == mprops.thumb_size) {
@@ -501,10 +487,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->thumb_size = ivals32[0];
 			cfg->thumb_ratio = ivals32[0];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set thumb size to %d %d\n",
+			LOG_DEBUG_PROPS("set thumb size to %d %d\n",
 				cfg->thumb_size, cfg->thumb_ratio);
-#endif
 		}
 	}
 	else if (property == mprops.palm_detect) {
@@ -518,10 +502,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->ignore_palm = ivals8[0];
 			cfg->disable_on_palm = ivals8[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set palm detect to %d %d\n",
+			LOG_DEBUG_PROPS("set palm detect to %d %d\n",
 				cfg->ignore_palm, cfg->disable_on_palm);
-#endif
 		}
 	}
 	else if (property == mprops.palm_size) {
@@ -534,10 +516,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 
 		if (!checkonly) {
 			cfg->palm_size = ivals32[0];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set palm size to %d\n",
+			LOG_DEBUG_PROPS("set palm size to %d\n",
 				cfg->palm_size);
-#endif
 		}
 	}
 	else if (property == mprops.gesture_settings) {
@@ -551,10 +531,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->gesture_hold = ivals16[0];
 			cfg->gesture_wait = ivals16[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set gesture settings to %d %d\n",
+			LOG_DEBUG_PROPS("set gesture settings to %d %d\n",
 				cfg->gesture_hold, cfg->gesture_wait);
-#endif
 		}
 	}
 	else if (property == mprops.scroll_smooth) {
@@ -567,10 +545,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 
 		if (!checkonly) {
 			cfg->scroll_smooth = ivals8[0];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set high precision scrolling to %d\n",
+			LOG_DEBUG_PROPS("set high precision scrolling to %d\n",
 				cfg->scroll_smooth);
-#endif
 		}
 	}
 	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.scroll, &cfg->scroll, &error_code)) {
@@ -587,10 +563,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->scroll_coast.min_speed = fvals[0];
 			cfg->scroll_coast.duration = fvals[1];
-#ifndef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set scroll coasting to %f %i\n",
+			LOG_DEBUG_PROPS("set scroll coasting to %f %f\n",
 				cfg->scroll_coast.min_speed, cfg->scroll_coast.duration);
-#endif
 		}
 	}
 	else if (property == mprops.edge_scroll) {
@@ -619,10 +593,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 
 		if (!checkonly) {
 			cfg->scale_dist = ivals32[0];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set scale distance to %d\n",
+			LOG_DEBUG_PROPS("set scale distance to %d\n",
 				cfg->scale_dist);
-#endif
 		}
 	}
 	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.swipe3, &cfg->swipe3, &error_code)) {
@@ -642,10 +614,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->scale_up_btn = ivals8[0];
 			cfg->scale_dn_btn = ivals8[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set scale buttons to %d %d\n",
+			LOG_DEBUG_PROPS("set scale buttons to %d %d\n",
 				cfg->scale_up_btn, cfg->scale_dn_btn);
-#endif
 		}
 	}
 	else if (property == mprops.rotate_dist) {
@@ -658,10 +628,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 
 		if (!checkonly) {
 			cfg->rotate_dist = ivals32[0];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set rotate distance to %d\n",
+			LOG_DEBUG_PROPS("set rotate distance to %d\n",
 				cfg->rotate_dist);
-#endif
 		}
 	}
 	else if (property == mprops.rotate_buttons) {
@@ -675,10 +643,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->rotate_lt_btn = ivals8[0];
 			cfg->rotate_rt_btn = ivals8[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set rotate buttons to %d %d\n",
+			LOG_DEBUG_PROPS("set rotate buttons to %d %d\n",
 				cfg->rotate_lt_btn, cfg->rotate_rt_btn);
-#endif
 		}
 	}
 	else if (property == mprops.hold1_move1_stationary){
@@ -692,10 +658,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->hold1_move1_stationary.max_move = ivals32[0];
 			cfg->hold1_move1_stationary.button = ivals32[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: hold1_move1: max_move %d; button: %d\n",
+			LOG_DEBUG_PROPS("hold1_move1: max_move %d; button: %d\n",
 				cfg->hold1_move1_stationary.max_move, cfg->hold1_move1_stationary.button);
-#endif
 		}
 	}
 	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.hold1_move1, &cfg->hold1_move1, &error_code)) {
@@ -713,10 +677,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->hold1_move2_stationary.max_move = ivals32[0];
 			cfg->hold1_move2_stationary.button = ivals32[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: hold1_move2: max_move %d; button: %d\n",
+			LOG_DEBUG_PROPS("hold1_move2: max_move %d; button: %d\n",
 				cfg->hold1_move2_stationary.max_move, cfg->hold1_move2_stationary.button);
-#endif
 		}
 	}
 	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.hold1_move2, &cfg->hold1_move2, &error_code)) {
@@ -733,10 +695,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->hold1_move3_stationary.max_move = ivals32[0];
 			cfg->hold1_move3_stationary.button = ivals32[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: hold1_move1: max_move %d; button: %d\n",
+			LOG_DEBUG_PROPS("hold1_move1: max_move %d; button: %d\n",
 				cfg->hold1_move3_stationary.max_move, cfg->hold1_move3_stationary.button);
-#endif
 		}
 	}
 	else if (set_swipe_properties(dev, property, prop, checkonly, &mprops.hold1_move3, &cfg->hold1_move3, &error_code)) {
@@ -756,10 +716,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->drag_timeout = ivals32[1];
 			cfg->drag_wait = ivals32[2];
 			cfg->drag_dist = ivals32[3];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set drag settings to %d %d %d %d\n",
+			LOG_DEBUG_PROPS("set drag settings to %d %d %d %d\n",
 				cfg->drag_enable, cfg->drag_timeout, cfg->drag_wait, cfg->drag_dist);
-#endif
 		}
 	}
 	else if (property == mprops.axis_invert) {
@@ -773,10 +731,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		if (!checkonly) {
 			cfg->axis_x_invert = ivals8[0];
 			cfg->axis_y_invert = ivals8[1];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set axis inversion to %d %d\n",
+			LOG_DEBUG_PROPS("set axis inversion to %d %d\n",
 				cfg->axis_x_invert, cfg->axis_y_invert);
-#endif
 		}
 	}
 	else if (property == mprops.edge_sizes) {
@@ -792,10 +748,8 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->edge_bottom_size = ivals8[1];
 			cfg->edge_left_size = ivals8[2];
 			cfg->edge_right_size = ivals8[3];
-#ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set edge sizes to %d %d %d %d\n",
+			LOG_DEBUG_PROPS("set edge sizes to %d %d %d %d\n",
 				cfg->edge_left_size, cfg->edge_right_size, cfg->edge_top_size, cfg->edge_bottom_size);
-#endif
 		}
 	}
 

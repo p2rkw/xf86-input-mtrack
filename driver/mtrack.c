@@ -46,7 +46,7 @@
 #ifdef DEBUG_DRIVER
 # define LOG_DEBUG_DRIVER LOG_DEBUG
 #else
-# define LOG_DEBUG_DRIVER(...)
+# define LOG_DEBUG_DRIVER LOG_DISABLED
 #endif
 
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
@@ -58,9 +58,7 @@ typedef InputInfoPtr LocalDevicePtr;
 
 static void pointer_control(DeviceIntPtr dev, PtrCtrl *ctrl)
 {
-#if DEBUG_DRIVER
-	xf86Msg(X_INFO, "pointer_control\n");
-#endif
+	LOG_DEBUG_DRIVER("pointer_control\n");
 }
 
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
@@ -146,11 +144,11 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 
 	local->fd = xf86OpenSerial(local->options);
 	if (local->fd < 0) {
-		xf86Msg(X_ERROR, "mtrack: cannot open device %s\n", local->name);
+		LOG_ERROR("cannot open device %s\n", local->name);
 		return !Success;
 	}
 	if (mtouch_configure(mt, local->fd)) {
-		xf86Msg(X_ERROR, "mtrack: cannot configure device %s\n", local->name);
+		LOG_ERROR("cannot configure device %s\n", local->name);
 		return !Success;
 	}
 	xf86CloseSerial(local->fd);
@@ -205,11 +203,11 @@ static int device_on(LocalDevicePtr local)
 	struct MTouch *mt = local->private;
 	local->fd = xf86OpenSerial(local->options);
 	if (local->fd < 0) {
-		xf86Msg(X_ERROR, "mtrack: cannot open device\n");
+		LOG_ERROR("cannot open device\n");
 		return !Success;
 	}
 	if (mtouch_open(mt, local->fd)) {
-		xf86Msg(X_ERROR, "mtrack: cannot grab device\n");
+		LOG_ERROR("cannot grab device\n");
 		return !Success;
 	}
 	/*
@@ -229,7 +227,7 @@ static int device_off(LocalDevicePtr local)
 	struct MTouch *mt = local->private;
 	xf86RemoveEnabledDevice(local);
 	if (mtouch_close(mt))
-		xf86Msg(X_WARNING, "mtrack: cannot ungrab device\n");
+		LOG_WARNING("cannot ungrab device\n");
 	xf86CloseSerial(local->fd);
 	if(mt->timer != NULL)
 		TimerFree(mt->timer);	// release any existing timer
@@ -544,11 +542,11 @@ static int switch_mode(ClientPtr client, DeviceIntPtr dev, int mode)
 	switch (mode) {
 	case Absolute:
 		mt->absolute_mode = TRUE;
-		xf86Msg(X_INFO, "switch_mode: switing to absolute mode\n");
+		LOG_INFO("switch_mode: switing to absolute mode\n");
 		break;
 	case Relative:
 		mt->absolute_mode = FALSE;
-		xf86Msg(X_INFO, "switch_mode: switing to relative mode\n");
+		LOG_INFO("switch_mode: switing to relative mode\n");
 		break;
 	default:
 		return XI_BadMode;
@@ -562,19 +560,19 @@ static Bool device_control(DeviceIntPtr dev, int mode)
 	LocalDevicePtr local = dev->public.devicePrivate;
 	switch (mode) {
 	case DEVICE_INIT:
-		xf86Msg(X_INFO, "device control: init\n");
+		LOG_INFO("device control: init\n");
 		return device_init(dev, local);
 	case DEVICE_ON:
-		xf86Msg(X_INFO, "device control: on\n");
+		LOG_INFO("device control: on\n");
 		return device_on(local);
 	case DEVICE_OFF:
-		xf86Msg(X_INFO, "device control: off\n");
+		LOG_INFO("device control: off\n");
 		return device_off(local);
 	case DEVICE_CLOSE:
-		xf86Msg(X_INFO, "device control: close\n");
+		LOG_INFO("device control: close\n");
 		return device_close(local);
 	default:
-		xf86Msg(X_INFO, "device control: default\n");
+		LOG_INFO("device control: default\n");
 		return BadValue;
 	}
 }

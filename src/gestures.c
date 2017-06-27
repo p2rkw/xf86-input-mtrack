@@ -31,9 +31,12 @@
 
 #ifdef DEBUG_GESTURES
 # define LOG_DEBUG_GESTURES LOG_DEBUG
+# define LOG_EMULATED LOG_INFO
 #else
-# define LOG_DEBUG_GESTURES(...)
+# define LOG_DEBUG_GESTURES LOG_DISABLED
+# define LOG_EMULATED LOG_DISABLED
 #endif
+
 
 #define IS_VALID_BUTTON(x) (x >= 0 && x <= 31)
 
@@ -49,9 +52,7 @@ static void trigger_button_up(struct Gestures* gs, int button)
 			gs->button_emulate = 0;
 		}
 		CLEARBIT(gs->buttons, button);
-#ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_button_up: %d up\n", button);
-#endif
+		LOG_DEBUG_GESTURES("trigger_button_up: %d up\n", button);
 	}
 }
 
@@ -67,10 +68,8 @@ static void trigger_button_down(struct Gestures* gs, int button)
 
 		LOG_DEBUG_GESTURES("trigger_button_down: %d down\n", button);
 	}
-#ifdef DEBUG_GESTURES
 	else if (IS_VALID_BUTTON(button))
-		xf86Msg(X_INFO, "trigger_button_down: %d down ignored, in delayed mode\n", button);
-#endif
+		LOG_DEBUG_GESTURES("trigger_button_down: %d down ignored, in delayed mode\n", button);
 }
 
 static void trigger_button_emulation(struct Gestures* gs, int button)
@@ -80,9 +79,7 @@ static void trigger_button_emulation(struct Gestures* gs, int button)
 		CLEARBIT(gs->buttons, 0);
 		SETBIT(gs->buttons, button);
 		gs->button_emulate = button;
-#if defined(DEBUG_GESTURES)
-		xf86Msg(X_INFO, "trigger_button_emulation: %d emulated\n", button);
-#endif
+		LOG_DEBUG_GESTURES("trigger_button_emulation: %d emulated\n", button);
 	}
 #else
 	trigger_button_down(gs, button);
@@ -139,12 +136,12 @@ static void trigger_button_click(struct Gestures* gs,
 
 #ifdef DEBUG_GESTURES
 		timersub(&gs->button_delayed_time, &gs->time, &delta);
-		xf86Msg(X_INFO, "trigger_button_click: %d placed in delayed mode; delta: %lld ms\n", button, timertoms(&delta));
+		LOG_DEBUG_GESTURES("trigger_button_click: %d placed in delayed mode; delta: %lld ms\n", button, timertoms(&delta));
 #endif
 	}
 #ifdef DEBUG_GESTURES
 	else
-		xf86Msg(X_INFO, "trigger_button_click: %d ignored, in delayed mode\n", button);
+		LOG_DEBUG_GESTURES("trigger_button_click: %d ignored, in delayed mode\n", button);
 #endif
 }
 
@@ -153,9 +150,7 @@ static void trigger_drag_ready(struct Gestures* gs,
 {
 	gs->move_drag = GS_DRAG_READY;
 	timeraddms(&gs->time, cfg->drag_timeout, &gs->move_drag_expire);
-#ifdef DEBUG_GESTURES
-	xf86Msg(X_INFO, "trigger_drag_ready: drag is ready\n");
-#endif
+	LOG_DEBUG_GESTURES("trigger_drag_ready: drag is ready\n");
 	/* Break coasting */
 	break_coasting(gs);
 }
@@ -169,18 +164,14 @@ static int trigger_drag_start(struct Gestures* gs,
 		if (cfg->drag_wait == 0) {
  			gs->move_drag = GS_DRAG_ACTIVE;
 			trigger_button_down(gs, 0);
-#ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_drag_start: drag is active\n");
-#endif
+			LOG_DEBUG_GESTURES("trigger_drag_start: drag is active\n");
 		}
 		else {
 			gs->move_drag = GS_DRAG_WAIT;
 			gs->move_drag_dx = dx;
 			gs->move_drag_dy = dy;
 			timeraddms(&gs->time, cfg->drag_wait, &gs->move_drag_wait);
-#ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_drag_start: drag in wait\n");
-#endif
+			LOG_DEBUG_GESTURES("trigger_drag_start: drag in wait\n");
 		}
 	}
 	else if (gs->move_drag == GS_DRAG_WAIT) {
@@ -189,15 +180,11 @@ static int trigger_drag_start(struct Gestures* gs,
 		if (!timercmp(&gs->time, &gs->move_drag_wait, <)) {
 			gs->move_drag = GS_DRAG_ACTIVE;
 			trigger_button_down(gs, 0);
-#ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_drag_start: drag is active\n");
-#endif
+			LOG_DEBUG_GESTURES("trigger_drag_start: drag is active\n");
 		}
 		else if (dist2(gs->move_drag_dx, gs->move_drag_dy) > SQRVAL(cfg->drag_dist)) {
 			gs->move_drag = GS_NONE;
-#ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_drag_start: drag canceled, moved too far\n");
-#endif
+			LOG_DEBUG_GESTURES("trigger_drag_start: drag canceled, moved too far\n");
 		}
 	}
 	return gs->move_drag != GS_DRAG_WAIT;
@@ -208,17 +195,13 @@ static void trigger_drag_stop(struct Gestures* gs, int force)
 	if (gs->move_drag == GS_DRAG_READY && force) {
 		gs->move_drag = GS_NONE;
 		timerclear(&gs->move_drag_expire);
-#ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_drag_stop: drag canceled\n");
-#endif
+		LOG_DEBUG_GESTURES("trigger_drag_stop: drag canceled\n");
 	}
 	else if (gs->move_drag == GS_DRAG_ACTIVE) {
 		gs->move_drag = GS_NONE;
 		timerclear(&gs->move_drag_expire);
 		trigger_button_up(gs, 0);
-#ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_drag_stop: drag stopped\n");
-#endif
+		LOG_DEBUG_GESTURES("trigger_drag_stop: drag stopped\n");
    }
 }
 
@@ -230,12 +213,6 @@ static int can_change_gesture_type(struct Gestures* gs, int desired_gesture){
 		return 1;
 	return timercmp(&gs->time, &gs->move_wait, >);
 }
-
-#ifdef DEBUG_GESTURES
-#define LOG_EMULATED LOG_INFO
-#else
-#define LOG_EMULATED(...)
-#endif
 
 static void buttons_update(struct Gestures* gs,
 			const struct MConfig* cfg,
@@ -519,9 +496,7 @@ static void trigger_move(struct Gestures* gs,
 			gs->move_dist = 0;
 			gs->move_dir = TR_NONE;
 			timerclear(&gs->move_wait);
-#ifdef DEBUG_GESTURES
-			xf86Msg(X_INFO, "trigger_move: %.2f, %.2f\n", gs->move_dx, gs->move_dy);
-#endif
+			LOG_DEBUG_GESTURES("trigger_move: %.2f, %.2f\n", gs->move_dx, gs->move_dy);
 		}
 	}
 }
@@ -711,11 +686,8 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		gs->move_dist = MODVAL(gs->move_dist, cfg_swipe->dist);
 		trigger_button_click(gs, button - 1, &tv_tmp);
 	}
-#ifdef DEBUG_GESTURES
-	xf86Msg(X_INFO, "trigger_swipe_button: swiping %f in direction %d (at %f of %d)\n",
+	LOG_DEBUG_GESTURES("trigger_swipe_button: swiping %f in direction %d (at %f of %d)\n",
 		dist, dir, gs->move_dist, cfg_swipe->dist);
-#endif
-
 	return 1;
 }
 
@@ -1092,10 +1064,8 @@ static void trigger_rotate(struct Gestures* gs,
 			else if (dir == TR_DIR_RT)
 				trigger_button_click(gs, cfg->rotate_rt_btn - 1, &tv_tmp);
 		}
-#ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_rotate: rotating %f in direction %d (at %f of %d)\n",
+		LOG_DEBUG_GESTURES("trigger_rotate: rotating %f in direction %d (at %f of %d)\n",
 			dist, dir, gs->move_dist, cfg->rotate_dist);
-#endif
 	}
 }
 
@@ -1200,9 +1170,7 @@ static void moving_update(struct Gestures* gs,
 static void dragging_update(struct Gestures* gs)
 {
 	if (gs->move_drag == GS_DRAG_READY && timercmp(&gs->time, &gs->move_drag_expire, >)) {
-#ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "dragging_update: drag expired\n");
-#endif
+		LOG_DEBUG_GESTURES("dragging_update: drag expired\n");
 		trigger_drag_stop(gs, 1);
 	}
 }
@@ -1218,16 +1186,14 @@ static void delayed_update(struct Gestures* gs)
 		return;
 
 	if (!is_timer_infinite(gs) && timercmp(&gs->time, &gs->button_delayed_time, >=)) {
-#ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "delayed_update: %d delay expired, triggering up\n", gs->button_delayed);
-#endif
+		LOG_DEBUG_GESTURES("delayed_update: %d delay expired, triggering up\n", gs->button_delayed);
 		trigger_delayed_button_uncond(gs);
 	}
 	else {
 #ifdef DEBUG_GESTURES
 		struct timeval delta;
 		timersub(&gs->button_delayed_time, &gs->time, &delta);
-		xf86Msg(X_INFO, "delayed_update: %d still waiting, new delta %lld ms\n", gs->button_delayed, timertoms(&delta));
+		LOG_DEBUG_GESTURES("delayed_update: %d still waiting, new delta %lld ms\n", gs->button_delayed, timertoms(&delta));
 #endif
 	}
 }
