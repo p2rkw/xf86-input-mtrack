@@ -219,7 +219,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->scroll_smooth = CLAMPVAL(xf86SetIntOption(opts, "ScrollSmooth", DEFAULT_SCROLL_HIGH_PREC), 0, 1);
 	cfg->scroll.dist = MAXVAL(xf86SetIntOption(opts, "ScrollDistance", DEFAULT_SCROLL_DIST), 1);
 	cfg->scroll.hold = MAXVAL(xf86SetIntOption(opts, "ScrollClickTime", DEFAULT_SCROLL_HOLD), 0);
-	cfg->scroll.drag_sens = MAXVAL(xf86SetIntOption(opts, "ScrollSensitivity", DEFAULT_SWIPE_SENS), 0);
+	cfg->scroll.drag_sens = MAXVAL(xf86SetIntOption(opts, "ScrollSensitivity", DEFAULT_SCROLL_SENS), 0);
 	cfg->scroll.up_btn = CLAMPVAL(xf86SetIntOption(opts, "ScrollUpButton", DEFAULT_SCROLL_UP_BTN), 0, 32);
 	cfg->scroll.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "ScrollDownButton", DEFAULT_SCROLL_DN_BTN), 0, 32);
 	cfg->scroll.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "ScrollLeftButton", DEFAULT_SCROLL_LT_BTN), 0, 32);
@@ -236,7 +236,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->swipe3.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "SwipeRightButton", DEFAULT_SWIPE_RT_BTN), 0, 32);
 	cfg->swipe4.dist = MAXVAL(xf86SetIntOption(opts, "Swipe4Distance", DEFAULT_SWIPE4_DIST), 1);
 	cfg->swipe4.hold = MAXVAL(xf86SetIntOption(opts, "Swipe4ClickTime", DEFAULT_SWIPE_HOLD), 0);
-	cfg->swipe4.drag_sens = MAXVAL(xf86SetIntOption(opts, "Swipe4Sensitivity", DEFAULT_SWIPE_SENS), 0);
+	cfg->swipe4.drag_sens = MAXVAL(xf86SetIntOption(opts, "Swipe4Sensitivity", DEFAULT_SWIPE4_SENS), 0);
 	cfg->swipe4.up_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4UpButton", DEFAULT_SWIPE4_UP_BTN), 0, 32);
 	cfg->swipe4.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4DownButton", DEFAULT_SWIPE4_DN_BTN), 0, 32);
 	cfg->swipe4.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4LeftButton", DEFAULT_SWIPE4_LT_BTN), 0, 32);
