@@ -653,7 +653,7 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		gs->move_dist = 0;
 	}
 	gs->move_type = move_type_to_trigger;
-	gs->move_dist += (int)ABSVAL(dist);
+	gs->move_dist += ABSVAL(dist);
 	gs->move_dir = dir;
 	timeraddms(&gs->time, cfg->gesture_wait + 5 /*bonus from me*/, &gs->move_wait);
 
@@ -697,7 +697,7 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		trigger_button_click(gs, button - 1, &tv_tmp);
 	}
 #ifdef DEBUG_GESTURES
-	xf86Msg(X_INFO, "trigger_swipe_button: swiping %f in direction %d (at %d of %d)\n",
+	xf86Msg(X_INFO, "trigger_swipe_button: swiping %f in direction %d (at %f of %d)\n",
 		dist, dir, gs->move_dist, cfg_swipe->dist);
 #endif
 
@@ -1029,7 +1029,7 @@ static int trigger_scale(struct Gestures* gs, const struct MConfig* cfg,
 		gs->move_dist = 0;
 	gs->move_dx = gs->move_dy = 0.0;
 	gs->move_type = GS_SCALE;
-	gs->move_dist += (int)ABSVAL(dist);
+	gs->move_dist += ABSVAL(dist);
 	gs->move_dir = dir;
 	timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 	if (gs->move_dist >= cfg->scale_dist) {
@@ -1059,7 +1059,7 @@ static void trigger_rotate(struct Gestures* gs,
 		gs->move_dx = 0.0;
 		gs->move_dy = 0.0;
 		gs->move_type = GS_ROTATE;
-		gs->move_dist += (int)ABSVAL(dist);
+		gs->move_dist += ABSVAL(dist);
 		gs->move_dir = dir;
 		timeraddms(&gs->time, cfg->gesture_wait, &gs->move_wait);
 		if (gs->move_dist >= cfg->rotate_dist) {
@@ -1071,7 +1071,7 @@ static void trigger_rotate(struct Gestures* gs,
 				trigger_button_click(gs, cfg->rotate_rt_btn - 1, &tv_tmp);
 		}
 #ifdef DEBUG_GESTURES
-		xf86Msg(X_INFO, "trigger_rotate: rotating %f in direction %d (at %d of %d)\n",
+		xf86Msg(X_INFO, "trigger_rotate: rotating %f in direction %d (at %f of %d)\n",
 			dist, dir, gs->move_dist, cfg->rotate_dist);
 #endif
 	}
