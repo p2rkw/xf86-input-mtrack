@@ -80,7 +80,7 @@ struct Gestures {
 	struct timeval tap_timeout;
 
 	int move_type;
-	int move_dist;
+	double move_dist;
 	int move_dir;
 	int move_drag;
 	int move_drag_dx;
