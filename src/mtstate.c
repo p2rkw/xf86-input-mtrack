@@ -25,12 +25,12 @@
 
 static int inline percentage(int dividend, int divisor)
 {
-	return (double)dividend / (double)divisor * 100;
+	return (int)((double)dividend / (double)divisor * 100);
 }
 
 static int inline touch_range_ratio(const struct MConfig* cfg, int value)
 {
-	return (double)(value - cfg->touch_min) / (double)(cfg->touch_max - cfg->touch_min) * 100;
+	return (int)((double)(value - cfg->touch_min) / (double)(cfg->touch_max - cfg->touch_min) * 100);
 }
 
 static int inline pressure_range_ratio(const struct MConfig* cfg, int value)
@@ -309,8 +309,8 @@ static void touches_update(struct MTState* ms,
 				CLEARBIT(ms->touch[n].flags, MT_EDGE);
 
 			MODBIT(ms->touch[n].flags, MT_INVALID,
-				GETBIT(ms->touch[n].flags, MT_THUMB) && cfg->ignore_thumb ||
-				GETBIT(ms->touch[n].flags, MT_PALM) && cfg->ignore_palm ||
+				(GETBIT(ms->touch[n].flags, MT_THUMB) && cfg->ignore_thumb) ||
+				(GETBIT(ms->touch[n].flags, MT_PALM) && cfg->ignore_palm) ||
 				GETBIT(ms->touch[n].flags, MT_EDGE));
 
 			disable |= cfg->disable_on_thumb && GETBIT(ms->touch[n].flags, MT_THUMB);
@@ -339,7 +339,7 @@ static void mtstate_output(const struct MTState* ms,
 			const struct HWState* hs)
 {
 	int i, n;
-	char* type;
+	//char* type;
 	struct timeval tv;
 	n = bitcount(ms->touch_used);
 	if (bitcount(ms->touch_used) > 0) {

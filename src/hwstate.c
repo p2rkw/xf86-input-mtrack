@@ -34,7 +34,7 @@ void hwstate_init(struct HWState *s, const struct Capabilities *caps)
 static void finish_packet(struct HWState *s, const struct Capabilities *caps,
 			  const struct input_event *syn)
 {
-	static const mstime_t ms = 1000;
+	//static const mstime_t ms = 1000;
 	int i;
 	foreach_bit(i, s->used) {
 		if (!caps->has_abs[MTDEV_TOUCH_MINOR])

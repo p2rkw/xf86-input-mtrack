@@ -62,7 +62,7 @@
 #define DEFAULT_SCROLL_RT_BTN 7
 #define DEFAULT_SCROLL_HOLD 20
 #define DEFAULT_SCROLL_COAST_MIN_SPEED 0.1f
-#define DEFAULT_SCROLL_COAST_DURATION 200
+#define DEFAULT_SCROLL_COAST_DURATION 200.0f
 #define DEFAULT_SCROLL_COAST_TICK_MS 30 /* Schould be configurable? */
 #define DEFAULT_SCROLL_SENS 0
 #define DEFAULT_SWIPE_DIST 700
@@ -187,7 +187,7 @@ struct MConfig {
 	struct MConfigSwipeCoasting{
 		float min_speed;		// What speed to start scroll coasting at. >= 0
 		int tick_ms;		// How fast events will be generated during coasting >= 1
-		int duration;		// How long coasting ticks will last >= 0, 0 disables coasting
+		float duration;		// How long coasting ticks will last >= 0, 0 disables coasting
 	} scroll_coast;
 	struct MConfigSwipe edge_scroll;
 	int scale_dist;			// Distance needed to trigger a button. >= 0, 0 disables

@@ -224,9 +224,9 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->scroll.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "ScrollDownButton", DEFAULT_SCROLL_DN_BTN), 0, 32);
 	cfg->scroll.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "ScrollLeftButton", DEFAULT_SCROLL_LT_BTN), 0, 32);
 	cfg->scroll.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "ScrollRightButton", DEFAULT_SCROLL_RT_BTN), 0, 32);
-	cfg->scroll_coast.min_speed = MAXVAL(xf86SetRealOption(opts, "ScrollCoastEnableSpeed", DEFAULT_SCROLL_COAST_MIN_SPEED), 0.0);
+	cfg->scroll_coast.min_speed = MAXVAL((float)xf86SetRealOption(opts, "ScrollCoastEnableSpeed", DEFAULT_SCROLL_COAST_MIN_SPEED), 0.0f);
 	cfg->scroll_coast.tick_ms = MAXVAL(DEFAULT_SCROLL_COAST_TICK_MS, 1);
-	cfg->scroll_coast.duration = MAXVAL(xf86SetRealOption(opts, "ScrollCoastDuration", DEFAULT_SCROLL_COAST_DURATION), 0);
+	cfg->scroll_coast.duration = MAXVAL((float)xf86SetRealOption(opts, "ScrollCoastDuration", DEFAULT_SCROLL_COAST_DURATION), 0.0f);
 	cfg->swipe3.dist = MAXVAL(xf86SetIntOption(opts, "SwipeDistance", DEFAULT_SWIPE_DIST), 1);
 	cfg->swipe3.hold = MAXVAL(xf86SetIntOption(opts, "SwipeClickTime", DEFAULT_SWIPE_HOLD), 0);
 	cfg->swipe3.drag_sens = MAXVAL(xf86SetIntOption(opts, "SwipeSensitivity", DEFAULT_SWIPE_SENS), 0);

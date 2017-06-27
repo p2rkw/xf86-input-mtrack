@@ -97,7 +97,7 @@ struct Gestures {
 	int scroll_speed_valid;
 
 	/* Duration left */
-	int coasting_duration_left;
+	float coasting_duration_left;
 };
 
 
