@@ -73,12 +73,7 @@
 #define DEFAULT_SWIPE4_LT_BTN 0
 #define DEFAULT_SWIPE4_RT_BTN 0
 #define DEFAULT_SWIPE_SENS 0
-#define DEFAULT_EDGE_VERTICAL_DIST 0
-#define DEFAULT_EDGE_VERTICAL_UP_BTN 4
-#define DEFAULT_EDGE_VERTICAL_DN_BTN 5
-#define DEFAULT_EDGE_HORIZONTAL_DIST 0
-#define DEFAULT_EDGE_HORIZONTAL_LT_BTN 6
-#define DEFAULT_EDGE_HORIZONTAL_RT_BTN 7
+#define DEFAULT_EDGE_SCROLL_DIST 10
 #define DEFAULT_SCALE_DIST 150
 #define DEFAULT_SCALE_UP_BTN 12
 #define DEFAULT_SCALE_DN_BTN 13
@@ -188,11 +183,7 @@ struct MConfig {
 		int tick_ms;		// How fast events will be generated during coasting >= 1
 		int duration;		// How long coasting ticks will last >= 0, 0 disables coasting
 	} scroll_coast;
-	struct MConfigEdgeScroll{
-		int dist;
-		int up_btn;
-		int dn_btn;
-	} edge_vertical, edge_horizontal;
+	struct MConfigSwipe edge_scroll;
 	int scale_dist;			// Distance needed to trigger a button. >= 0, 0 disables
 	int scale_up_btn;		// Button to use for scale up. >= 0, 0 is none
 	int scale_dn_btn;		// Button to use for scale down. >= 0, 0 is none

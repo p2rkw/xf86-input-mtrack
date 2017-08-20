@@ -69,6 +69,18 @@ Atom atom_init_integer(DeviceIntPtr dev, char* name, int nvalues, int* values, i
 	return atom;
 }
 
+static
+Atom atom_init_integers32(DeviceIntPtr dev, char* name, int nvalues, int* values) {
+	int size = 32;
+	Atom atom;
+
+	atom = MakeAtom(name, strlen(name), TRUE);
+	XIChangeDeviceProperty(dev, atom, XA_INTEGER, size, PropModeReplace, nvalues, values, FALSE);
+	XISetDevicePropertyDeletable(dev, atom, FALSE);
+	return atom;
+}
+
+
 Atom atom_init_float(DeviceIntPtr dev, char* name, int nvalues, float* values, Atom float_type) {
 	Atom atom = MakeAtom(name, strlen(name), TRUE);
 	XIChangeDeviceProperty(dev, atom, float_type, 32, PropModeReplace, nvalues, values, FALSE);
@@ -93,12 +105,19 @@ static void init_swipe_props(DeviceIntPtr dev, struct MPropsSwipe* props_swipe,
 }
 
 static void init_edge_props(DeviceIntPtr dev, Atom* props_edge,
-                             struct MConfigEdgeScroll* cfg_edge, char const* settings_prop_name){
-	int ivals[MAX_INT_VALUES];
+                             struct MConfigSwipe* cfg_edge, char const* settings_prop_name){
+	static const int nvalues = 7;
+	int ivals[nvalues];
+
 	ivals[0] = cfg_edge->dist;
-	ivals[1] = cfg_edge->up_btn;
-	ivals[2] = cfg_edge->dn_btn;
-	*props_edge = atom_init_integer(dev, (char*)settings_prop_name, 3, ivals, 32);
+	ivals[1] = cfg_edge->hold;
+	ivals[2] = cfg_edge->drag_sens;
+	ivals[3] = cfg_edge->up_btn;
+	ivals[4] = cfg_edge->dn_btn;
+	ivals[5] = cfg_edge->lt_btn;
+	ivals[6] = cfg_edge->rt_btn;
+
+	*props_edge = atom_init_integers32(dev, (char*)settings_prop_name, nvalues, ivals);
 }
 
 void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
@@ -181,9 +200,7 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	fvals[1] = cfg->scroll_coast.duration; /* = duration in miliseconds */
 	mprops.scroll_coast = atom_init_float(local->dev, MTRACK_PROP_SCROLL_COAST, 2, fvals, mprops.float_type);
 
-	init_edge_props(local->dev, &mprops.edge_vertical, &cfg->edge_vertical, MTRACK_PROP_EDGE_VERTICAL_SETTINGS);
-
-	init_edge_props(local->dev, &mprops.edge_horizontal, &cfg->edge_horizontal, MTRACK_PROP_EDGE_HORIZONTAL_SETTINGS);
+	init_edge_props(local->dev, &mprops.edge_scroll, &cfg->edge_scroll, MTRACK_PROP_EDGE_SCROLL_SETTINGS);
 
 	ivals[0] = cfg->scale_dist;
 	mprops.scale_dist = atom_init_integer(local->dev, MTRACK_PROP_SCALE_DIST, 1, ivals, 32);
@@ -576,15 +593,19 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 #endif
 		}
 	}
-	else if (property == mprops.edge_vertical) {
-		if (prop->size != 3 || prop->format != 32 || prop->type != XA_INTEGER)
+	else if (property == mprops.edge_scroll) {
+		if (prop->size != 7 || prop->format != 32 || prop->type != XA_INTEGER)
 			return BadMatch;
 		ivals32 = (uint32_t*)prop->data;
 
 		if (!checkonly) {
-			cfg->edge_vertical.dist = ivals32[0];
-			cfg->edge_vertical.up_btn = ivals32[1];
-			cfg->edge_vertical.dn_btn = ivals32[2];
+			cfg->edge_scroll.dist = ivals32[0];
+			cfg->edge_scroll.hold = ivals32[1];
+			cfg->edge_scroll.drag_sens = ivals32[2];
+			cfg->edge_scroll.up_btn = ivals32[3];
+			cfg->edge_scroll.dn_btn = ivals32[4];
+			cfg->edge_scroll.lt_btn = ivals32[5];
+			cfg->edge_scroll.rt_btn = ivals32[6];
 		}
 
 	}

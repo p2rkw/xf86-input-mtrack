@@ -761,37 +761,18 @@ static int trigger_swipe(struct Gestures* gs,
 static int trigger_edge(struct Gestures* gs, const struct MConfig* cfg,
 												const struct Touch* touch)
 {
-	const struct MConfigEdgeScroll* cfg_edge;
+	const struct MConfigSwipe* cfg_edge;
 	int dir = TR_NONE;
 
 	if (GETBIT(touch->flags, MT_EDGE) == 0)
 		return 0;
 
 	dir = trig_generalize(touch->direction);
-	switch (dir){
-		case TR_DIR_UP:
-		case TR_DIR_DN:
-			cfg_edge = &cfg->edge_vertical;
-			break;
-		case TR_DIR_LT:
-		case TR_DIR_RT:
-			cfg_edge = &cfg->edge_horizontal;
-			break;
-		default:
-			return 0;
-	}
-	if (cfg_edge->dist <= 0)
+	if (dir == TR_NONE)
 		return 0;
-	struct MConfigSwipe swipeCfg = {
-		cfg_edge->dist, /* dist */
-		20, /* hold */
-		0, /* sens */
-		cfg->edge_vertical.up_btn, /* up button */
-		cfg->edge_vertical.dn_btn, /* down button */
-		cfg->edge_horizontal.up_btn, /* left button */
-		cfg->edge_horizontal.dn_btn, /* right button */
-	};
-	return trigger_swipe_unsafe(gs, cfg, &swipeCfg, &touch, 1, GS_SCROLL);
+	cfg_edge = &cfg->edge_scroll;
+
+	return trigger_swipe_unsafe(gs, cfg, cfg_edge, &touch, 1, GS_SCROLL);
 }
 
 /* Compute hypot from x, y and compare it with given value
