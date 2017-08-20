@@ -194,7 +194,6 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 
 	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
-	TimerInit();
 	mt->timer = NULL; /* allocated later */
 	mt->timer_kind = 0;
 	mt->absolute_mode = FALSE;
