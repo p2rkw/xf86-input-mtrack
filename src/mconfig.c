@@ -77,6 +77,12 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->swipe4.dn_btn = DEFAULT_SWIPE4_DN_BTN;
 	cfg->swipe4.lt_btn = DEFAULT_SWIPE4_LT_BTN;
 	cfg->swipe4.rt_btn = DEFAULT_SWIPE4_RT_BTN;
+	cfg->edge_vertical.dist = DEFAULT_EDGE_VERTICAL_DIST;
+	cfg->edge_vertical.up_btn = DEFAULT_EDGE_VERTICAL_UP_BTN;
+	cfg->edge_vertical.dn_btn = DEFAULT_EDGE_VERTICAL_DN_BTN;
+	cfg->edge_horizontal.dist = DEFAULT_EDGE_HORIZONTAL_DIST;
+	cfg->edge_horizontal.up_btn = DEFAULT_EDGE_HORIZONTAL_LT_BTN;
+	cfg->edge_horizontal.dn_btn = DEFAULT_EDGE_HORIZONTAL_RT_BTN;
 	cfg->scale_dist = DEFAULT_SCALE_DIST;
 	cfg->scale_up_btn = DEFAULT_SCALE_UP_BTN;
 	cfg->scale_dn_btn = DEFAULT_SCALE_DN_BTN;
@@ -234,6 +240,12 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->swipe4.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4DownButton", DEFAULT_SWIPE4_DN_BTN), 0, 32);
 	cfg->swipe4.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4LeftButton", DEFAULT_SWIPE4_LT_BTN), 0, 32);
 	cfg->swipe4.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4RightButton", DEFAULT_SWIPE4_RT_BTN), 0, 32);
+	cfg->edge_vertical.dist = MAXVAL(xf86SetIntOption(opts, "EdgeVerticalDist", DEFAULT_EDGE_VERTICAL_DIST), 0);
+	cfg->edge_vertical.up_btn = MAXVAL(xf86SetIntOption(opts, "EdgeVerticalUpButton", DEFAULT_EDGE_VERTICAL_UP_BTN), 4);
+	cfg->edge_vertical.dn_btn = MAXVAL(xf86SetIntOption(opts, "EdgeVerticalDownButton", DEFAULT_EDGE_VERTICAL_DN_BTN), 5);
+	cfg->edge_horizontal.dist = MAXVAL(xf86SetIntOption(opts, "EdgeHorizontalDist", DEFAULT_EDGE_HORIZONTAL_DIST), 0);
+	cfg->edge_horizontal.up_btn = MAXVAL(xf86SetIntOption(opts, "EdgeHorizontalLeftButton", DEFAULT_EDGE_HORIZONTAL_LT_BTN), 6);
+	cfg->edge_horizontal.dn_btn = MAXVAL(xf86SetIntOption(opts, "EdgeHorizontalRightButton", DEFAULT_EDGE_HORIZONTAL_RT_BTN), 7);
 	cfg->scale_dist = MAXVAL(xf86SetIntOption(opts, "ScaleDistance", DEFAULT_SCALE_DIST), 1);
 	cfg->scale_up_btn = CLAMPVAL(xf86SetIntOption(opts, "ScaleUpButton", DEFAULT_SCALE_UP_BTN), 0, 32);
 	cfg->scale_dn_btn = CLAMPVAL(xf86SetIntOption(opts, "ScaleDownButton", DEFAULT_SCALE_DN_BTN), 0, 32);
@@ -281,4 +293,3 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->axis_y_invert = xf86SetBoolOption(opts, "AxisYInvert", DEFAULT_AXIS_Y_INVERT);
 	cfg->sensitivity = MAXVAL(xf86SetRealOption(opts, "Sensitivity", DEFAULT_SENSITIVITY), 0);
 }
-

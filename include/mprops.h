@@ -87,6 +87,10 @@
 #define MTRACK_PROP_SWIPE4_SETTINGS "Trackpad Swipe4 Settings"
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_SWIPE4_BUTTONS "Trackpad Swipe4 Buttons"
+// int, 3 values - distance before event triggered (0 disable), up button, down button
+#define MTRACK_PROP_EDGE_VERTICAL_SETTINGS "Trackpad Edge Vertical Settings"
+// int, 3 values - distance before event triggered (0 disable), left button, right button
+#define MTRACK_PROP_EDGE_HORIZONTAL_SETTINGS "Trackpad Edge Horizontal Settings"
 // int, 1 value - distance before a scale event is triggered
 #define MTRACK_PROP_SCALE_DIST "Trackpad Scale Distance"
 // int, 2 values - up button, down button
@@ -160,6 +164,8 @@ struct MProps {
 		Atom buttons;
 	} scroll, swipe3, swipe4/*, swipe5*/;
 	Atom scroll_coast;
+	Atom edge_vertical;
+	Atom edge_horizontal;
 	Atom scale_dist;
 	Atom scale_buttons;
 	Atom rotate_dist;
