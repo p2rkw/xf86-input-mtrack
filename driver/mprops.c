@@ -800,21 +800,13 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 }
 
 int mprops_update_scroll_valuators(DeviceIntPtr dev, struct MConfigSwipe* cfg_scroll){
-#define MT_BTN_TO_X(btn) (btn+1)
-
 	/* consider SCROLL_FLAG_DONT_EMULATE */
 
-	if(cfg_scroll->up_btn == MT_BTN_TO_X(MT_BUTTON_WHEEL_UP))
-		SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, cfg_scroll->dist, SCROLL_FLAG_PREFERRED);
-	else if(cfg_scroll->up_btn == MT_BTN_TO_X(MT_BUTTON_WHEEL_DOWN)){
-		SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, -cfg_scroll->dist, SCROLL_FLAG_PREFERRED);
-	}
+	/* Do not flip cfg_scroll->dist anymore.
+	 * Natural scrolling will be handled on gestures.c in trigger swipe unsafe.
+	 * This will let me handle reversed scrolling for edge scrolling also.
+	 */
 
-	if(cfg_scroll->lt_btn == MT_BTN_TO_X(MT_BUTTON_HWHEEL_LEFT))
-		SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, cfg_scroll->dist, SCROLL_FLAG_NONE);
-	else if(cfg_scroll->lt_btn == MT_BTN_TO_X(MT_BUTTON_HWHEEL_RIGHT)){
-		SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, -cfg_scroll->dist, SCROLL_FLAG_NONE);
-	}
-
-#undef MT_BTN_TO_X
+	SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, cfg_scroll->dist, SCROLL_FLAG_PREFERRED);
+	SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, cfg_scroll->dist, SCROLL_FLAG_NONE);
 }

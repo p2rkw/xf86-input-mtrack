@@ -178,7 +178,7 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 	init_axle(dev, 3, &axes_labels[3], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
 
 	mprops_init(&mt->cfg, local);
-	mprops_update_scroll_valuators(dev, &mt->cfg.scroll);
+	mprops_update_scroll_valuators(dev, &mt->cfg.scroll); // set valuators to defaults
 
 	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
