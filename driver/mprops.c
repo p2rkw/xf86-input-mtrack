@@ -299,7 +299,6 @@ static int set_swipe_properties(DeviceIntPtr dev, Atom property, XIPropertyValue
 			xf86Msg(X_INFO, "mtrack: set swipe settings: dist: %d hold: %d\n",
 				cfg_swipe->dist, cfg_swipe->hold);
 #endif
-			mprops_update_scroll_valuators(dev, cfg_swipe);
 		}
 	}
 	else if (property == props_swipe->buttons) {
@@ -309,8 +308,6 @@ static int set_swipe_properties(DeviceIntPtr dev, Atom property, XIPropertyValue
 				cfg_swipe->dn_btn = ivals8[1];
 				cfg_swipe->lt_btn = ivals8[2];
 				cfg_swipe->rt_btn = ivals8[3];
-
-				mprops_update_scroll_valuators(dev, cfg_swipe);
 			}
 		}
 		else
@@ -797,16 +794,4 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	}
 
 	return Success;
-}
-
-int mprops_update_scroll_valuators(DeviceIntPtr dev, struct MConfigSwipe* cfg_scroll){
-	/* consider SCROLL_FLAG_DONT_EMULATE */
-
-	/* Do not flip cfg_scroll->dist anymore.
-	 * Natural scrolling will be handled on gestures.c in trigger swipe unsafe.
-	 * This will let me handle reversed scrolling for edge scrolling also.
-	 */
-
-	SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, cfg_scroll->dist, SCROLL_FLAG_PREFERRED);
-	SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, cfg_scroll->dist, SCROLL_FLAG_NONE);
 }

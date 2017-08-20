@@ -674,6 +674,9 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 			case 6: gs->scroll_speed_x = -ABSVAL(avg_move_x / (double)timertoms(&gs->dt)); break;  /* scroll left */
 			case 7: gs->scroll_speed_x = ABSVAL(avg_move_x / (double)timertoms(&gs->dt)); break;   /* scroll right */
 		}
+		/* Valuator increment=1.0 so I can scale manually here. */
+		gs->scroll_speed_x /= (double)cfg_swipe->dist;
+		gs->scroll_speed_y /= (double)cfg_swipe->dist;
 
 		gs->scroll_speed_valid = 1;
 		LOG_DEBUG_GESTURES("smooth scrolling: speed: x: %lf, y: %lf\n", gs->scroll_speed_x, gs->scroll_speed_y);

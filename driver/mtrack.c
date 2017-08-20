@@ -184,8 +184,13 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 	init_axle_relative(dev, 2, &axes_labels[2]);
 	init_axle_relative(dev, 3, &axes_labels[3]);
 
+	/* Always set valuator distance to 1.0 because it reported values will be
+	 * adjusted accordingly by smooth scroll trigger.
+	 */
+	SetScrollValuator(dev, 2, SCROLL_TYPE_VERTICAL, 1.0, SCROLL_FLAG_PREFERRED);
+	SetScrollValuator(dev, 3, SCROLL_TYPE_HORIZONTAL, 1.0, SCROLL_FLAG_NONE);
+
 	mprops_init(&mt->cfg, local);
-	mprops_update_scroll_valuators(dev, &mt->cfg.scroll); // set valuators to defaults
 
 	XIRegisterPropertyHandler(dev, mprops_set_property, NULL, NULL);
 
@@ -581,12 +586,6 @@ static int preinit(InputDriverPtr drv, InputInfoPtr pInfo, int flags)
 	xf86ProcessCommonOptions(pInfo, pInfo->options);
 	mconfig_configure(&mt->cfg, pInfo->options); // set the defaults
 	mt->valuator_mask = valuator_mask_new(4);
-	if(pInfo->dev != NULL){
-		// Try to set valuators as early as possible,
-		// however this might not be executed due to null ptr 'dev' from pInfo.
-		// In this case valuators will be set by: device_control::device_init::mprops_update_scroll_valuators
-		mprops_update_scroll_valuators(pInfo->dev, &mt->cfg.scroll);
-	}
 
 	return Success;
 }
