@@ -110,6 +110,7 @@ static void init_button_labels(Atom map[DIM_BUTTON])
  */
 static void init_axle(DeviceIntPtr dev, int axnum, Atom* label, int min, int max, int resolution)
 {
+	/* Inform server about reported range of axis values. */
 	xf86InitValuatorAxisStruct(dev, axnum,
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
 		*label,
@@ -122,6 +123,12 @@ static void init_axle(DeviceIntPtr dev, int axnum, Atom* label, int min, int max
 		, Absolute
 #endif
 	);
+	xf86InitValuatorDefaults(dev, axnum);
+}
+
+static void init_axle_relative(DeviceIntPtr dev, int axnum, Atom* label)
+{
+	xf86InitValuatorAxisStruct(dev, axnum, *label, NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0, 0, 0, Relative);
 	xf86InitValuatorDefaults(dev, axnum);
 }
 
@@ -174,8 +181,8 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 	init_axle(dev, 0, &axes_labels[0], mt->caps.abs[MTDEV_POSITION_X].minimum, mt->caps.abs[MTDEV_POSITION_X].maximum, mt->caps.abs[MTDEV_POSITION_X].resolution);
 	init_axle(dev, 1, &axes_labels[1], mt->caps.abs[MTDEV_POSITION_Y].minimum, mt->caps.abs[MTDEV_POSITION_Y].maximum, mt->caps.abs[MTDEV_POSITION_Y].resolution);
 
-	init_axle(dev, 2, &axes_labels[2], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
-	init_axle(dev, 3, &axes_labels[3], NO_AXIS_LIMITS, NO_AXIS_LIMITS, 0);
+	init_axle_relative(dev, 2, &axes_labels[2]);
+	init_axle_relative(dev, 3, &axes_labels[3]);
 
 	mprops_init(&mt->cfg, local);
 	mprops_update_scroll_valuators(dev, &mt->cfg.scroll); // set valuators to defaults
