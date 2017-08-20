@@ -73,6 +73,11 @@ typedef unsigned int bitmask_t;
 		xf86Msg(X_INFO, __VA_ARGS__); \
 	}while(0)
 
+#define LOG_INFO_ENABLED(...) LOG_INFO(__VA_ARGS__)
+#define LOG_INFO_DISABLED(...)
+
+#define LOG_INFO2(is_enabled, ...) LOG_INFO_##is_enabled(__VA_ARGS__)
+
 #if defined(DEBUG_DRIVER) && (DEBUG_DRIVER != 0)
 # define LOG_DEBUG LOG_INFO
 #else

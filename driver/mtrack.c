@@ -146,11 +146,11 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 
 	local->fd = xf86OpenSerial(local->options);
 	if (local->fd < 0) {
-		xf86Msg(X_ERROR, "mtrack: cannot open device\n");
+		xf86Msg(X_ERROR, "mtrack: cannot open device %s\n", local->name);
 		return !Success;
 	}
 	if (mtouch_configure(mt, local->fd)) {
-		xf86Msg(X_ERROR, "mtrack: cannot configure device\n");
+		xf86Msg(X_ERROR, "mtrack: cannot configure device %s\n", local->name);
 		return !Success;
 	}
 	xf86CloseSerial(local->fd);
@@ -212,6 +212,10 @@ static int device_on(LocalDevicePtr local)
 		xf86Msg(X_ERROR, "mtrack: cannot grab device\n");
 		return !Success;
 	}
+	/*
+	 *  xf86AddEnabledDevice() will add our device's fd to the list of SIGIO handlers.
+	 *  When a SIGIO occurs, our read_input will get called.
+	 */
 	xf86AddEnabledDevice(local);
 	if(mt->timer != NULL)
 		TimerFree(mt->timer);	// release any existing timer
@@ -507,6 +511,9 @@ static void post_button(struct MTouch* mt, int button, int new_state)
  *
  * More on input event processing:
  * http://www.x.org/wiki/Development/Documentation/InputEventProcessing/
+ *
+ * HowTo:
+ * https://www.x.org/wiki/Development/Documentation/XorgInputHOWTO/
  */
 static void read_input(LocalDevicePtr local)
 {
