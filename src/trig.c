@@ -51,11 +51,11 @@ int trig_generalize(double dir)
 {
 	if (dir == TR_NONE)
 		return TR_NONE;
-	else if (dir > 1 && dir <= 3)
+	else if (dir > 1.0 && dir <= 3.0)
 		return TR_DIR_RT;
-	else if (dir > 3 && dir <= 5)
+	else if (dir > 3.0 && dir <= 5.0)
 		return TR_DIR_DN;
-	else if (dir > 5 && dir <= 7)
+	else if (dir > 5.0 && dir <= 7.0)
 		return TR_DIR_LT;
 	else
 		return TR_DIR_UP;
