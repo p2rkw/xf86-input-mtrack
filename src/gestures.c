@@ -669,17 +669,18 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		 * down buttons. Sign of speed vactor have to match selected button.
 		 */
 		switch(button){
-			case 4: gs->scroll_speed_y = -ABSVAL(avg_move_y / (double)timertoms(&gs->dt)); break;  /* scroll up - always negative */
-			case 5: gs->scroll_speed_y = ABSVAL(avg_move_y / (double)timertoms(&gs->dt)); break;   /* scroll down - always positve */
-			case 6: gs->scroll_speed_x = -ABSVAL(avg_move_x / (double)timertoms(&gs->dt)); break;  /* scroll left */
-			case 7: gs->scroll_speed_x = ABSVAL(avg_move_x / (double)timertoms(&gs->dt)); break;   /* scroll right */
+			case 4: gs->scroll_speed_y = -ABSVAL(avg_move_y); break;  /* scroll up - always negative */
+			case 5: gs->scroll_speed_y = ABSVAL(avg_move_y); break;   /* scroll down - always positve */
+			case 6: gs->scroll_speed_x = -ABSVAL(avg_move_x); break;  /* scroll left */
+			case 7: gs->scroll_speed_x = ABSVAL(avg_move_x); break;   /* scroll right */
 		}
-		/* Valuator increment=1.0 so I can scale manually here. */
-		gs->scroll_speed_x /= (double)cfg_swipe->dist;
-		gs->scroll_speed_y /= (double)cfg_swipe->dist;
+		/* Valuator increment=1.0 so I can scale by dist manually here. */
+		/* Delta component will be kept in scroll_speed. */
+		gs->scroll_speed_x = gs->scroll_speed_x / (double)(cfg_swipe->dist /* * timertoms(&gs->dt) */);
+		gs->scroll_speed_y = gs->scroll_speed_y / (double)(cfg_swipe->dist /* * timertoms(&gs->dt) */);
 
 		gs->scroll_speed_valid = 1;
-		LOG_DEBUG_GESTURES("smooth scrolling: speed: x: %lf, y: %lf\n", gs->scroll_speed_x, gs->scroll_speed_y);
+		LOG_INFO2(DISABLED, "smooth scrolling: speed: x: %lf, y: %lf\n", gs->scroll_speed_x, gs->scroll_speed_y);
 
 		/* Reset coasting duration 'to go' ticks. */
 		gs->coasting_duration_left = cfg->scroll_coast.duration - 1;

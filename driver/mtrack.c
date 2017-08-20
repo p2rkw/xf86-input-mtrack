@@ -424,8 +424,8 @@ static bitmask_t buttons_posted = 0U;
 static void post_gestures(struct MTouch *mt)
 {
 	struct Gestures* gs = &mt->gs;
-
 	int i;
+	const double delta = timertoms(&gs->dt);
 
 	if(mt->absolute_mode == FALSE){
 		if (mt->cfg.scroll_smooth){
@@ -448,15 +448,19 @@ static void post_gestures(struct MTouch *mt)
 			if(gs->move_type == GS_SWIPE2 || gs->move_type == GS_SWIPE3 || gs->move_type == GS_SWIPE4){
 				if(gs->scroll_speed_valid)
 				{
-					const double delta = timertoms(&gs->dt);
-					valuator_mask_set_double(mask, 2, gs->scroll_speed_y * delta);
-					valuator_mask_set_double(mask, 3, gs->scroll_speed_x * delta);
+					/* Delta encoded in scroll_speed. */
+					valuator_mask_set_double(mask, 2, gs->scroll_speed_y);
+					valuator_mask_set_double(mask, 3, gs->scroll_speed_x);
 				}
 				gs->scroll_speed_valid = 0;
 
 				/* Start coasting here if needed. */
-				if(can_start_coasting(mt))
+				if(delta != 0.0 && can_start_coasting(mt)){
+					/* Remove delta component from scroll_speed. */
+					gs->scroll_speed_x /= delta;
+					gs->scroll_speed_y /= delta;
 					mt_timer_start(mt, MT_TIMER_COASTING);
+				}
 			}
 
 			xf86PostMotionEventM(mt->local_dev, Relative, mask);
