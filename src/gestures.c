@@ -474,6 +474,7 @@ static void tapping_update(struct Gestures* gs,
 			else{ /* gs->tap_touching is < 0 */
 				/* That means finges(s) were down, while tap wasn't active and finger was released */
 				gs->tap_touching = 0;
+				trigger_drag_stop(gs, 1);
 				return; /* Pretty common situation; do nothing */
 			}
 			LOG_TAP("tapping_update: touch released; gs->tap_touching=%d, gs->tap_released=%d\n", gs->tap_touching, gs->tap_released);

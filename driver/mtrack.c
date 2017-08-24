@@ -434,7 +434,15 @@ static void post_gestures(struct MTouch *mt)
 			CLEARBIT(gs->buttons, MT_BUTTON_WHEEL_DOWN);
 			CLEARBIT(gs->buttons, MT_BUTTON_HWHEEL_LEFT);
 			CLEARBIT(gs->buttons, MT_BUTTON_HWHEEL_RIGHT);
+		}
+	}
 
+	for (i = 0; i < 32; i++) {
+		post_button(mt, i, GETBIT(gs->buttons, i));
+	}
+
+	if(mt->absolute_mode == FALSE){
+		if (mt->cfg.scroll_smooth){
 			ValuatorMask* mask;	mask = mt->valuator_mask;
 			valuator_mask_zero(mask);
 
@@ -478,10 +486,6 @@ static void post_gestures(struct MTouch *mt)
 		xf86PostMotionEvent(mt->local_dev, 1, 0, 2,
 			mt->state.touch[0].x + get_cap_xmid(&mt->caps),
 			mt->state.touch[0].y + get_cap_ymid(&mt->caps));
-	}
-
-	for (i = 0; i < 32; i++) {
-		post_button(mt, i, GETBIT(gs->buttons, i));
 	}
 }
 

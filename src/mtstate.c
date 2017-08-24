@@ -131,13 +131,11 @@ static int is_palm(const struct MConfig* cfg,
 
 static int is_edge(const struct MConfig* cfg, const struct FingerState* hw)
 {
-	int edge_width = (cfg->edge_size * cfg->pad_width) / 100;
-	int edge_height = (cfg->edge_size * cfg->pad_height) / 100;
 	return
-		hw->position_x < cfg->x_min + edge_width ||
-		hw->position_x > cfg->x_min - edge_width + cfg->pad_width ||
-		hw->position_y < cfg->y_min + edge_height ||
-		hw->position_y > cfg->y_min - edge_height + cfg->pad_height;
+		hw->position_x < cfg->x_min + (cfg->edge_left_size * cfg->pad_width) / 100 ||
+		hw->position_x > cfg->x_min - (cfg->edge_right_size * cfg->pad_width) / 100 + cfg->pad_width ||
+		hw->position_y < cfg->y_min + (cfg->edge_top_size * cfg->pad_width) / 100 ||
+		hw->position_y > cfg->y_min - (cfg->edge_bottom_size * cfg->pad_width) / 100 + cfg->pad_height;
 }
 
 /* Find a touch by its tracking ID.  Return -1 if not found.
@@ -209,7 +207,9 @@ static void touch_update(struct MTState* ms,
 	ms->touch[touch].total_dy += ms->touch[touch].dy;
 	ms->touch[touch].x = x;
 	ms->touch[touch].y = y;
-	ms->touch[touch].direction = trig_direction(ms->touch[touch].dx, ms->touch[touch].dy);
+	if (ms->touch[touch].dx != 0 || ms->touch[touch].dy != 0) {
+		ms->touch[touch].direction = trig_direction(ms->touch[touch].dx, ms->touch[touch].dy);
+	}
 	CLEARBIT(ms->touch[touch].flags, MT_NEW);
 }
 
