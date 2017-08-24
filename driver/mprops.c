@@ -202,6 +202,12 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 
 	init_edge_props(local->dev, &mprops.edge_scroll, &cfg->edge_scroll, MTRACK_PROP_EDGE_SCROLL_SETTINGS);
 
+	ivals[0] = cfg->edge_top_size;
+	ivals[1] = cfg->edge_bottom_size;
+	ivals[2] = cfg->edge_left_size;
+	ivals[3] = cfg->edge_right_size;
+	mprops.edge_sizes = atom_init_integer(local->dev, MTRACK_PROP_EDGE_SIZES, 4, ivals, 8);
+
 	ivals[0] = cfg->scale_dist;
 	mprops.scale_dist = atom_init_integer(local->dev, MTRACK_PROP_SCALE_DIST, 1, ivals, 32);
 
@@ -246,12 +252,6 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[0] = cfg->axis_x_invert;
 	ivals[1] = cfg->axis_y_invert;
 	mprops.axis_invert = atom_init_integer(local->dev, MTRACK_PROP_AXIS_INVERT, 2, ivals, 8);
-
-	ivals[0] = cfg->edge_left_size;
-	ivals[1] = cfg->edge_right_size;
-	ivals[2] = cfg->edge_top_size;
-	ivals[3] = cfg->edge_bottom_size;
-	mprops.edge_sizes = atom_init_integer(local->dev, MTRACK_PROP_EDGE_SIZES, 4, ivals, 8);
 }
 
 int check_buttons_property(XIPropertyValuePtr prop, uint8_t** buttons_ret_arr, int buttons_count)
@@ -788,10 +788,10 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			return BadMatch;
 
 		if (!checkonly) {
-			cfg->edge_left_size = ivals8[0];
-			cfg->edge_right_size = ivals8[1];
-			cfg->edge_top_size = ivals8[2];
-			cfg->edge_bottom_size = ivals8[3];
+			cfg->edge_top_size = ivals8[0];
+			cfg->edge_bottom_size = ivals8[1];
+			cfg->edge_left_size = ivals8[2];
+			cfg->edge_right_size = ivals8[3];
 #ifdef DEBUG_PROPS
 			xf86Msg(X_INFO, "mtrack: set edge sizes to %d %d %d %d\n",
 				cfg->edge_left_size, cfg->edge_right_size, cfg->edge_top_size, cfg->edge_bottom_size);

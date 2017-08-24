@@ -33,10 +33,10 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->thumb_ratio = DEFAULT_THUMB_RATIO;
 	cfg->thumb_size = DEFAULT_THUMB_SIZE;
 	cfg->palm_size = DEFAULT_PALM_SIZE;
-	cfg->edge_left_size = DEFAULT_EDGE_LEFT_SIZE;
-	cfg->edge_right_size = DEFAULT_EDGE_RIGHT_SIZE;
 	cfg->edge_top_size = DEFAULT_EDGE_TOP_SIZE;
 	cfg->edge_bottom_size = DEFAULT_EDGE_BOTTOM_SIZE;
+	cfg->edge_left_size = DEFAULT_EDGE_LEFT_SIZE;
+	cfg->edge_right_size = DEFAULT_EDGE_RIGHT_SIZE;
 
 	// Configure Gestures
 	cfg->trackpad_disable = DEFAULT_TRACKPAD_DISABLE;
@@ -198,10 +198,6 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->thumb_ratio = CLAMPVAL(xf86SetIntOption(opts, "ThumbRatio", DEFAULT_THUMB_RATIO), 0, 100);
 	cfg->thumb_size = CLAMPVAL(xf86SetIntOption(opts, "ThumbSize", DEFAULT_THUMB_SIZE), 0, 100);
 	cfg->palm_size = CLAMPVAL(xf86SetIntOption(opts, "PalmSize", DEFAULT_PALM_SIZE), 0, 100);
-	cfg->edge_left_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeLeftSize", DEFAULT_EDGE_LEFT_SIZE), 0, 100);
-	cfg->edge_right_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeRightSize", DEFAULT_EDGE_RIGHT_SIZE), 0, 100);
-	cfg->edge_top_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeTopSize", DEFAULT_EDGE_TOP_SIZE), 0, 100);
-	cfg->edge_bottom_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeBottomSize", DEFAULT_EDGE_BOTTOM_SIZE), 0, 100);
 
 	// Configure Gestures
 	cfg->trackpad_disable = CLAMPVAL(xf86SetIntOption(opts, "TrackpadDisable", DEFAULT_TRACKPAD_DISABLE), 0, 3);
@@ -247,13 +243,26 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->swipe4.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4DownButton", DEFAULT_SWIPE4_DN_BTN), 0, 32);
 	cfg->swipe4.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4LeftButton", DEFAULT_SWIPE4_LT_BTN), 0, 32);
 	cfg->swipe4.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4RightButton", DEFAULT_SWIPE4_RT_BTN), 0, 32);
-	cfg->edge_scroll.dist = MAXVAL(xf86SetIntOption(opts, "EdgeVerticalDist", DEFAULT_EDGE_SCROLL_DIST), 0);
+	cfg->edge_scroll.dist = MAXVAL(xf86SetIntOption(opts, "EdgeScrollDist", DEFAULT_EDGE_SCROLL_DIST), 0);
 	cfg->edge_scroll.hold = MAXVAL(xf86SetIntOption(opts, "EdgeScrollClickTime", DEFAULT_SCROLL_HOLD), 0);
 	cfg->edge_scroll.drag_sens = MAXVAL(xf86SetIntOption(opts, "EdgeScrollSensitivity", DEFAULT_SWIPE_SENS), 0);
 	cfg->edge_scroll.up_btn = CLAMPVAL(xf86SetIntOption(opts, "EdgeScrollUpButton", DEFAULT_SCROLL_UP_BTN), 0, 32);
 	cfg->edge_scroll.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "EdgeScrollDownButton", DEFAULT_SCROLL_DN_BTN), 0, 32);
 	cfg->edge_scroll.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "EdgeScrollLeftButton", DEFAULT_SCROLL_LT_BTN), 0, 32);
 	cfg->edge_scroll.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "EdgeScrollRightButton", DEFAULT_SCROLL_RT_BTN), 0, 32);
+	int edge_size =	CLAMPVAL(xf86SetIntOption(opts, "EdgeSize", 101), 0, 101);
+	if(edge_size < 0 || edge_size > 100){
+		cfg->edge_top_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeTopSize", DEFAULT_EDGE_TOP_SIZE), 0, 100);
+		cfg->edge_bottom_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeBottomSize", DEFAULT_EDGE_BOTTOM_SIZE), 0, 100);
+		cfg->edge_left_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeLeftSize", DEFAULT_EDGE_LEFT_SIZE), 0, 100);
+		cfg->edge_right_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeRightSize", DEFAULT_EDGE_RIGHT_SIZE), 0, 100);
+	}else{
+		xf86Msg(X_WARNING, "mtrack %s:%i: %s", __FILE__, __LINE__, "You' re using DEPRECATED 'EdgeSize' option, it will be removed, plese switch to Edge{Right,Left,Top,Bottom}Size options.\n");
+		cfg->edge_top_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeTopSize", edge_size), 0, 100);
+		cfg->edge_bottom_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeBottomSize", edge_size), 0, 100);
+		cfg->edge_left_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeLeftSize", edge_size), 0, 100);
+		cfg->edge_right_size = CLAMPVAL(xf86SetIntOption(opts, "EdgeRightSize", edge_size), 0, 100);
+	}
 
 	cfg->scale_dist = MAXVAL(xf86SetIntOption(opts, "ScaleDistance", DEFAULT_SCALE_DIST), 1);
 	cfg->scale_up_btn = CLAMPVAL(xf86SetIntOption(opts, "ScaleUpButton", DEFAULT_SCALE_UP_BTN), 0, 32);

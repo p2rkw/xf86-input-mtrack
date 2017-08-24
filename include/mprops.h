@@ -93,6 +93,8 @@
 //    third: sensitivity of the pointer during gesture
 //    rest: {up,down,left,right} buttons
 #define MTRACK_PROP_EDGE_SCROLL_SETTINGS "Trackpad Edge Scroll Settings"
+// int, 4 value - size of edge regions that are ignored: {up,down,left,right}
+#define MTRACK_PROP_EDGE_SIZES "Trackpad Edge Sizes"
 // int, 1 value - distance before a scale event is triggered
 #define MTRACK_PROP_SCALE_DIST "Trackpad Scale Distance"
 // int, 2 values - up button, down button
@@ -138,8 +140,6 @@
 #define MTRACK_PROP_DRAG_SETTINGS "Trackpad Drag Settings"
 // int, 2 values - invert x axis, invert y axis
 #define MTRACK_PROP_AXIS_INVERT "Trackpad Axis Inversion"
-// int, 4 value - size of edge regions that are ignored: left, right, top, bottom
-#define MTRACK_PROP_EDGE_SIZES "Trackpad Edge Sizes"
 
 struct MProps {
 	// Properties Config
