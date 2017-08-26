@@ -151,13 +151,13 @@ int get_cap_ymid(const struct Capabilities *cap)
 	return (y->maximum + y->minimum) >> 1;
 }
 
-int get_cap_x(const struct Capabilities *cap, int x)
+int translate_cap_x(const struct Capabilities *cap, int x)
 {
 	int mid = get_cap_xmid(cap);
 	return x - mid;
 }
 
-int get_cap_y(const struct Capabilities *cap, int y)
+int translate_cap_y(const struct Capabilities *cap, int y)
 {
 	int mid = get_cap_ymid(cap);
 	return y - mid;
