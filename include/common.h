@@ -76,7 +76,7 @@ typedef unsigned int bitmask_t;
 #define LOG_INFO_ENABLED(...) LOG_INFO(__VA_ARGS__)
 #define LOG_INFO_DISABLED(...)
 
-#define LOG_INFO2(is_enabled, ...) LOG_INFO_##is_enabled(__VA_ARGS__)
+#define LOG_INFO2(ENABLED_or_DISABLED, ...) LOG_INFO_##ENABLED_or_DISABLED(__VA_ARGS__)
 
 #if defined(DEBUG_DRIVER) && (DEBUG_DRIVER != 0)
 # define LOG_DEBUG LOG_INFO

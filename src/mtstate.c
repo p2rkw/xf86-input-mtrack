@@ -129,13 +129,42 @@ static int is_palm(const struct MConfig* cfg,
 	}
 }
 
-static int is_edge(const struct MConfig* cfg, const struct FingerState* hw)
+/*
+ * |1|   2   |3|
+ * |-|-------|-|
+ * |4|   5   |6|
+ * |-|-------|-|
+ * |7|   8   |9|
+ */
+int which_edge(const struct MConfig* cfg, const struct Touch* t)
 {
-	return
-		hw->position_x < cfg->x_min + (cfg->edge_left_size * cfg->pad_width) / 100 ||
-		hw->position_x > cfg->x_min - (cfg->edge_right_size * cfg->pad_width) / 100 + cfg->pad_width ||
-		hw->position_y < cfg->y_min + (cfg->edge_top_size * cfg->pad_width) / 100 ||
-		hw->position_y > cfg->y_min - (cfg->edge_bottom_size * cfg->pad_width) / 100 + cfg->pad_height;
+	typeof(cfg->pad_width) w = cfg->pad_width;
+	typeof(cfg->pad_height) h = cfg->pad_height;
+
+	/* Translate back origin from center of the device to top left. */
+	typeof(t->x) x = t->x + w/2;
+	typeof(t->y) y = t->y + h/2;
+
+	int out = 5; // see visualization above
+
+	// y < (cfg->edge_top_size * cfg->pad_height)/100):
+	if(y * 100 < cfg->edge_top_size * h) out = 2;
+
+	// y > h - (cfg->edge_bottom_size * h)/100) :
+	if((y - h) * 100 > -cfg->edge_bottom_size * h) out = 8;
+
+	if(x * 100 < cfg->edge_left_size * w) out -= 1; // 1,4,7
+
+	// x > w - (cfg->edge_right_size * w)/100
+	if((x - w) * 100 > -cfg->edge_right_size * w) out += 1; // 3,6,9
+
+	LOG_INFO2(ENABLED, "x=%i y=%i out=%i w=%i h=%i\n", x,y,out,w,h);
+	return out;
+}
+
+static int is_edge(const struct MConfig* cfg, const struct Touch* t)
+{
+	return which_edge(cfg, t) != 5;
 }
 
 /* Find a touch by its tracking ID.  Return -1 if not found.
@@ -272,7 +301,7 @@ static void touches_update(struct MTState* ms,
 			else
 				CLEARBIT(ms->touch[n].flags, MT_PALM);
 
-			if (is_edge(cfg, &hs->data[i])) {
+			if (is_edge(cfg, &ms->touch[n])) {
 				if (GETBIT(ms->touch[n].flags, MT_NEW))
 					SETBIT(ms->touch[n].flags, MT_EDGE);
 			}

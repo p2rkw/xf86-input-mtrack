@@ -51,6 +51,15 @@ struct MTState {
 	struct Touch touch[DIM_TOUCHES];
 };
 
+/*
+ * |1|   2   |3|
+ * |-|-------|-|
+ * |4|   5   |6|
+ * |-|-------|-|
+ * |7|   8   |9|
+ */
+int which_edge(const struct MConfig* cfg, const struct Touch* t);
+
 /* Initialize an MTState struct.
  */
 void mtstate_init(struct MTState* ms);
