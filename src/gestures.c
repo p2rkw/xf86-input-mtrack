@@ -768,8 +768,14 @@ static int trigger_swipe(struct Gestures* gs,
 static int trigger_edge(struct Gestures* gs, const struct MConfig* cfg,
 												const struct Touch* touch)
 {
-	const struct MConfigSwipe* cfg_edge;
 	int dir = TR_NONE;
+	int edge = touch_which_edge(cfg, touch);
+
+	switch (edge){
+		case 5:
+		case 7: case 8: case 9: /* Always disable scrolling for bottom edge. */
+			return 0;
+	}
 
 	if (GETBIT(touch->flags, MT_EDGE) == 0)
 		return 0;
@@ -777,9 +783,7 @@ static int trigger_edge(struct Gestures* gs, const struct MConfig* cfg,
 	dir = trig_generalize(touch->direction);
 	if (dir == TR_NONE)
 		return 0;
-	cfg_edge = &cfg->edge_scroll;
-
-	return trigger_swipe_unsafe(gs, cfg, cfg_edge, &touch, 1, GS_SCROLL);
+	return trigger_swipe_unsafe(gs, cfg, &cfg->edge_scroll, &touch, 1, GS_SCROLL);
 }
 
 /* Compute hypot from x, y and compare it with given value

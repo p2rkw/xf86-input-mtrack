@@ -136,7 +136,7 @@ static int is_palm(const struct MConfig* cfg,
  * |-|-------|-|
  * |7|   8   |9|
  */
-int which_edge(const struct MConfig* cfg, const struct Touch* t)
+int touch_which_edge(const struct MConfig* cfg, const struct Touch* t)
 {
 	typeof(cfg->pad_width) w = cfg->pad_width;
 	typeof(cfg->pad_height) h = cfg->pad_height;
@@ -164,7 +164,7 @@ int which_edge(const struct MConfig* cfg, const struct Touch* t)
 
 static int is_edge(const struct MConfig* cfg, const struct Touch* t)
 {
-	return which_edge(cfg, t) != 5;
+	return touch_which_edge(cfg, t) != 5;
 }
 
 /* Find a touch by its tracking ID.  Return -1 if not found.

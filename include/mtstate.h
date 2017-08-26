@@ -58,7 +58,7 @@ struct MTState {
  * |-|-------|-|
  * |7|   8   |9|
  */
-int which_edge(const struct MConfig* cfg, const struct Touch* t);
+int touch_which_edge(const struct MConfig* cfg, const struct Touch* t);
 
 /* Initialize an MTState struct.
  */
