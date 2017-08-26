@@ -1,6 +1,6 @@
 xf86-input-mtrack
 =================
-######v0.4.1
+###### v0.4.1
 
 An Xorg driver for multitouch trackpads. Supports any trackpad whose kernel
 driver uses the slotted multitouch protocol. For more information on the
@@ -119,15 +119,13 @@ The minimum size of what's considered a palm. Palms are expected to be very
 large on the trackpad. This is represented as a percentage of the maximum touch
 value and is dependent on the trackpad hardware. Integer value. Defaults to 40.
 
-**EdgeLeftSize** -
-The size of an area at the left of the trackpad where new touches are ignored
-(fingers travelling into this area from the right will still be tracked). This
-is represented as a percentage of the total trackpad width. Defaults to 0.
-
-**EdgeRightSize** -
-The size of an area at the right of the trackpad where new touches are ignored
-(fingers travelling into this area from the left will still be tracked). This
-is represented as a percentage of the total trackpad width. Defaults to 0.
+**EdgeSize** -
+DEPRECATED.
+The size of an area around the trackpad where new touches are ignored (fingers
+traveling into this area from above will still be tracked). This is represented
+as a percentage of the total trackpad height. Defaults to 0.
+Value set here is overwriten by EdgeLeftSize, EdgeRightSize, EdgeTopSize and
+EdgeBottomSize
 
 **EdgeTopSize** -
 The size of an area at the top of the trackpad where new touches are ignored
@@ -138,6 +136,16 @@ is represented as a percentage of the total trackpad height. Defaults to 0.
 The size of an area at the bottom of the trackpad where new touches are ignored
 (fingers travelling into this area from the top will still be tracked). This
 is represented as a percentage of the total trackpad height. Defaults to 10.
+
+**EdgeLeftSize** -
+The size of an area at the left of the trackpad where new touches are ignored
+(fingers travelling into this area from the right will still be tracked). This
+is represented as a percentage of the total trackpad width. Defaults to 0.
+
+**EdgeRightSize** -
+The size of an area at the right of the trackpad where new touches are ignored
+(fingers travelling into this area from the left will still be tracked). This
+is represented as a percentage of the total trackpad width. Defaults to 0.
 
 **ButtonEnable** - 
 Whether or not to enable the physical buttons on or near the trackpad. Boolean
@@ -226,6 +234,7 @@ click is triggered. Integer value. Defaults to 150.
 **ScrollClickTime** -
 For two finger scrolling. How long button triggered by scrolling 
 will be hold down. A value of 0 will hold button down till end of gesture.
+0 - emit button click only once pre "instance" of gesture.
 Integer value representing milliseconds. Defaults to 20.
 
 **ScrollSensitivity** -
@@ -325,6 +334,38 @@ value. A value of 0 disables swiping left. Defaults to 10.
 **Swipe4RightButton** - 
 For four finger swiping. The button that is triggered by swiping right. Integer
 value. A value of 0 disables swiping right. Defaults to 11.
+
+**EdgeScrollDist** -
+For one finger edge scrolling. How far you must move your finger on edge before
+a button click is triggered. Integer value. Defaults to ... .
+
+**EdgeScrollClickTime** -
+For one finger edge scrolling. How long button triggered by edge scrolling
+will be hold down. A value of 0 will hold button down till end of gesture.
+0 - emit button click only once pre "instance" of gesture.
+Integer value representing milliseconds. Defaults to 20.
+
+**EdgeScrollSensitivity** -
+For one finger edge scrolling. Sensitivity (movement speed) of pointer during one
+finger scrolling. A value of 0 disables pointer movement during gesture.
+Integer value expressed as parts per thousand of normal sensivity.
+A value of 1000 results with normal movement speed. Defaults to 0.
+
+**EdgeScrollUpButton** -
+For one finger edge scrolling. The button that is triggered by edge scrolling up.
+Integer value. A value of 0 disables scrolling up. Defaults to 4.
+
+**EdgeScrollDownButton** -
+For one finger edge scrolling. The button that is triggered by edge scrolling down.
+Integer value. A value of 0 disables scrolling down. Defaults to 5.
+
+**EdgeScrollLeftButton** -
+For one finger edge scrolling. The button that is triggered by edge scrolling left.
+Integer value. A value of 0 disables scrolling left. Defaults to 6.
+
+**EdgeScrollRightButton** -
+For one finger edge scrolling. The button that is triggered by edge scrolling right.
+Integer value. A value of 0 disables scrolling right. Defaults to 7.
 
 **ScaleDistance** - 
 For pinch scaling. How far you must move your fingers before a button click is
