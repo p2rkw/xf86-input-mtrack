@@ -138,8 +138,6 @@ void mconfig_init(struct MConfig* cfg,
 	cfg->touch_minor = caps->has_abs[MTDEV_TOUCH_MINOR];
 	cfg->pad_width = get_cap_xsize(caps);
 	cfg->pad_height = get_cap_ysize(caps);
-	cfg->x_min = get_cap_xmin(caps);
-	cfg->y_min = get_cap_ymin(caps);
 
 	if (caps->has_abs[MTDEV_TOUCH_MAJOR] && caps->has_abs[MTDEV_WIDTH_MAJOR]) {
 		cfg->touch_type = MCFG_SCALE;
