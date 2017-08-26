@@ -1124,7 +1124,7 @@ static void moving_update(struct Gestures* gs,
 	foreach_bit(i, ms->touch_used) {
 		if (GETBIT(ms->touch[i].flags, MT_INVALID)){
 			if (GETBIT(ms->touch[i].flags, MT_EDGE))
-				edge_touch = &ms->touch[i];
+				edge_touch = &ms->touch[i]; // only valid when count == 1, so could be overwritten here
 			continue;
 		}
 		else if (GETBIT(ms->touch[i].flags, MT_BUTTON)) {
@@ -1143,10 +1143,10 @@ static void moving_update(struct Gestures* gs,
 		/* nothing to do */
 	}
 	else if (count == 0) {
-		if (edge_touch != NULL) // one touch down, but count == 0 because it was not counted there
-			trigger_edge(gs, cfg, edge_touch);
-		else if (btn_count >= 1 && cfg->trackpad_disable < 2)
+		if (btn_count >= 1 && cfg->trackpad_disable < 2)
 			trigger_move(gs, cfg, dx, dy);
+		// one touch down, but count == 0 because it was not counted there
+		else if(edge_touch != NULL && trigger_edge(gs, cfg, edge_touch) != 0){ }
 		else if (btn_count < 1)
 			trigger_reset(gs);
 	}
