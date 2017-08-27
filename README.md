@@ -72,32 +72,23 @@ Available options and their defaults are as follows.
 
 [Sensitivity](#Sensitivity)
 
-[FingerHigh](#FingerHigh)
-
+[FingerHigh](#FingerHigh) &nbsp;&nbsp;&nbsp;
 [FingerLow](#FingerLow)
 
-[IgnoreThumb](#IgnoreThumb)
-
+[IgnoreThumb](#IgnoreThumb) &nbsp;&nbsp;&nbsp;
 [IgnorePalm](#IgnorePalm)
 
-[DisableOnThumb](#DisableOnThumb)
-
+[DisableOnThumb](#DisableOnThumb) &nbsp;&nbsp;&nbsp;
 [DisableOnPalm](#DisableOnPalm)
+
+[ThumbSize](#ThumbSize) &nbsp;&nbsp;&nbsp; [PalmSize](#PalmSize)
 
 [ThumbRatio](#ThumbRatio)
 
-[ThumbSize](#ThumbSize)
-
-[PalmSize](#PalmSize)
-
-[EdgeSize](#EdgeSize)
-
-[EdgeTopSize](#EdgeTopSize)
-
-[EdgeBottomSize](#EdgeBottomSize)
-
-[EdgeLeftSize](#EdgeLeftSize)
-
+[EdgeSize](#EdgeSize) &nbsp;&nbsp;&nbsp;
+[EdgeTopSize](#EdgeTopSize) &nbsp;&nbsp;&nbsp;
+[EdgeBottomSize](#EdgeBottomSize) &nbsp;&nbsp;&nbsp;
+[EdgeLeftSize](#EdgeLeftSize) &nbsp;&nbsp;&nbsp;
 [EdgeRightSize](#EdgeRightSize)
 
 [ButtonEnable](#ButtonEnable)
@@ -110,18 +101,13 @@ Available options and their defaults are as follows.
 
 [ButtonTouchExpire](#ButtonTouchExpire)
 
-[ClickFinger1](#ClickFinger1)
+[ClickFinger1](#ClickFinger1) &nbsp;&nbsp;&nbsp;
+[ClickFinger2](#ClickFinger2) &nbsp;&nbsp;&nbsp;
+[ClickFinger3](#ClickFinger3) &nbsp;&nbsp;&nbsp;
 
-[ClickFinger2](#ClickFinger2)
-
-[ClickFinger3](#ClickFinger3)
-
-[TapButton1](#TapButton1)
-
-[TapButton2](#TapButton2)
-
-[TapButton3](#TapButton3)
-
+[TapButton1](#TapButton1) &nbsp;&nbsp;&nbsp;
+[TapButton2](#TapButton2) &nbsp;&nbsp;&nbsp;
+[TapButton3](#TapButton3) &nbsp;&nbsp;&nbsp;
 [TapButton4](#TapButton4)
 
 [ClickTime](#ClickTime)
@@ -134,95 +120,66 @@ Available options and their defaults are as follows.
 
 [GestureWaitTime](#GestureWaitTime)
 
-[ScrollDistance](#ScrollDistance)
+[ScrollDistance](#ScrollDistance) &nbsp;&nbsp;&nbsp;
+[ScrollClickTime](#ScrollClickTime) &nbsp;&nbsp;&nbsp;
+[ScrollSensitivity](#ScrollSensitivity) &nbsp;&nbsp;&nbsp;
 
-[ScrollClickTime](#ScrollClickTime)
+[ScrollUpButton](#ScrollUpButton) &nbsp;&nbsp;&nbsp;
+[ScrollDownButton](#ScrollDownButton) &nbsp;&nbsp;&nbsp;
+[ScrollLeftButton](#ScrollLeftButton) &nbsp;&nbsp;&nbsp;
+[ScrollRightButton](#ScrollRightButton) &nbsp;&nbsp;&nbsp;
 
-[ScrollSensitivity](#ScrollSensitivity)
-
-[ScrollUpButton](#ScrollUpButton)
-
-[ScrollDownButton](#ScrollDownButton)
-
-[ScrollLeftButton](#ScrollLeftButton)
-
-[ScrollRightButton](#ScrollRightButton)
-
-[ScrollSmooth](#ScrollSmooth)
-
-[ScrollCoastDuration](#ScrollCoastDuration)
-
+[ScrollSmooth](#ScrollSmooth) &nbsp;&nbsp;&nbsp;
+[ScrollCoastDuration](#ScrollCoastDuration) &nbsp;&nbsp;&nbsp;
 [ScrollCoastEnableSpeed](#ScrollCoastEnableSpeed)
 
-[SwipeDistance](#SwipeDistance)
+[SwipeDistance](#SwipeDistance) &nbsp;&nbsp;&nbsp;
+[SwipeClickTime](#SwipeClickTime) &nbsp;&nbsp;&nbsp;
+[SwipeSensitivity](#SwipeSensitivity) &nbsp;&nbsp;&nbsp;
 
-[SwipeClickTime](#SwipeClickTime)
+[SwipeUpButton](#SwipeUpButton) &nbsp;&nbsp;&nbsp;
+[SwipeDownButton](#SwipeDownButton) &nbsp;&nbsp;&nbsp;
+[SwipeLeftButton](#SwipeLeftButton) &nbsp;&nbsp;&nbsp;
+[SwipeRightButton](#SwipeRightButton) &nbsp;&nbsp;&nbsp;
 
-[SwipeSensitivity](#SwipeSensitivity)
+[Swipe4Distance](#Swipe4Distance) &nbsp;&nbsp;&nbsp;
+[Swipe4ClickTime](#Swipe4ClickTime) &nbsp;&nbsp;&nbsp;
+[Swipe4Sensitivity](#Swipe4Sensitivity) &nbsp;&nbsp;&nbsp;
 
-[SwipeUpButton](#SwipeUpButton)
+[Swipe4UpButton](#Swipe4UpButton) &nbsp;&nbsp;&nbsp;
+[Swipe4DownButton](#Swipe4DownButton) &nbsp;&nbsp;&nbsp;
+[Swipe4LeftButton](#Swipe4LeftButton) &nbsp;&nbsp;&nbsp;
+[Swipe4RightButton](#Swipe4RightButton) &nbsp;&nbsp;&nbsp;
 
-[SwipeDownButton](#SwipeDownButton)
+[EdgeScrollDist](#EdgeScrollDist) &nbsp;&nbsp;&nbsp;
+[EdgeScrollClickTime](#EdgeScrollClickTime) &nbsp;&nbsp;&nbsp;
+[EdgeScrollSensitivity](#EdgeScrollSensitivity) &nbsp;&nbsp;&nbsp;
 
-[SwipeLeftButton](#SwipeLeftButton)
+[EdgeScrollUpButton](#EdgeScrollUpButton) &nbsp;&nbsp;&nbsp;
+[EdgeScrollDownButton](#EdgeScrollDownButton) &nbsp;&nbsp;&nbsp;
+[EdgeScrollLeftButton](#EdgeScrollLeftButton) &nbsp;&nbsp;&nbsp;
+[EdgeScrollRightButton](#EdgeScrollRightButton) &nbsp;&nbsp;&nbsp;
 
-[SwipeRightButton](#SwipeRightButton)
+[ScaleDistance](#ScaleDistance) &nbsp;&nbsp;&nbsp;
 
-[Swipe4Distance](#Swipe4Distance)
+[ScaleUpButton](#ScaleUpButton) &nbsp;&nbsp;&nbsp;
+[ScaleDownButton](#ScaleDownButton) &nbsp;&nbsp;&nbsp;
 
-[Swipe4ClickTime](#Swipe4ClickTime)
+[RotateDistance](#RotateDistance) &nbsp;&nbsp;&nbsp;
 
-[Swipe4Sensitivity](#Swipe4Sensitivity)
+[RotateLeftButton](#RotateLeftButton) &nbsp;&nbsp;&nbsp;
+[RotateRightButton](#RotateRightButton) &nbsp;&nbsp;&nbsp;
 
-[Swipe4UpButton](#Swipe4UpButton)
+[Hold1Move1StationaryButton](#Hold1Move1StationaryButton) &nbsp;&nbsp;&nbsp;
+[Hold1Move1StationaryMaxMove](#Hold1Move1StationaryMaxMove) &nbsp;&nbsp;&nbsp;
 
-[Swipe4DownButton](#Swipe4DownButton)
+[TapDragEnable](#TapDragEnable) &nbsp;&nbsp;&nbsp;
+[TapDragTime](#TapDragTime) &nbsp;&nbsp;&nbsp;
+[TapDragWait](#TapDragWait) &nbsp;&nbsp;&nbsp;
+[TapDragDist](#TapDragDist) &nbsp;&nbsp;&nbsp;
 
-[Swipe4LeftButton](#Swipe4LeftButton)
-
-[Swipe4RightButton](#Swipe4RightButton)
-
-[EdgeScrollDist](#EdgeScrollDist)
-
-[EdgeScrollClickTime](#EdgeScrollClickTime)
-
-[EdgeScrollSensitivity](#EdgeScrollSensitivity)
-
-[EdgeScrollUpButton](#EdgeScrollUpButton)
-
-[EdgeScrollDownButton](#EdgeScrollDownButton)
-
-[EdgeScrollLeftButton](#EdgeScrollLeftButton)
-
-[EdgeScrollRightButton](#EdgeScrollRightButton)
-
-[ScaleDistance](#ScaleDistance)
-
-[ScaleUpButton](#ScaleUpButton)
-
-[ScaleDownButton](#ScaleDownButton)
-
-[RotateDistance](#RotateDistance)
-
-[RotateLeftButton](#RotateLeftButton)
-
-[RotateRightButton](#RotateRightButton)
-
-[Hold1Move1StationaryButton](#Hold1Move1StationaryButton)
-
-[Hold1Move1StationaryMaxMove](#Hold1Move1StationaryMaxMove)
-
-[TapDragEnable](#TapDragEnable)
-
-[TapDragTime](#TapDragTime)
-
-[TapDragWait](#TapDragWait)
-
-[TapDragDist](#TapDragDist)
-
-[AxisXInvert](#AxisXInvert)
-
-[AxisYInvert](#AxisYInvert)
+[AxisXInvert](#AxisXInvert) &nbsp;&nbsp;&nbsp;
+[AxisYInvert](#AxisYInvert) &nbsp;&nbsp;&nbsp;
 
 
 <a name="TrackpadDisable"></a>
@@ -268,12 +225,6 @@ value. Defaults to false.
 Whether or not to disable the entire trackpad when a palm is touching. Boolean
 value. Defaults to false.
 
-<a name="ThumbRatio"></a>
-**ThumbRatio** - 
-The width/length ratio of what's considered a thumb. It is expected that a
-thumb is longer than it is wide. This tells the driver how much longer.
-Percentage represented by an integer. Defaults to 70.
-
 <a name="ThumbSize"></a>
 **ThumbSize** - 
 The minimum size of what's considered a thumb. It is expected that a thumb
@@ -286,6 +237,12 @@ Defaults to 25.
 The minimum size of what's considered a palm. Palms are expected to be very
 large on the trackpad. This is represented as a percentage of the maximum touch
 value and is dependent on the trackpad hardware. Integer value. Defaults to 40.
+
+<a name="ThumbRatio"></a>
+**ThumbRatio** -
+The width/length ratio of what's considered a thumb. It is expected that a
+thumb is longer than it is wide. This tells the driver how much longer.
+Percentage represented by an integer. Defaults to 70.
 
 <a name="EdgeSize"></a>
 **EdgeSize** -
