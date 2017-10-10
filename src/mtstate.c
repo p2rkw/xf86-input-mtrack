@@ -158,7 +158,7 @@ int touch_which_edge(const struct MConfig* cfg, const struct Touch* t)
 	// x > w - (cfg->edge_right_size * w)/100
 	if((x - w) * 100 > -cfg->edge_right_size * w) out += 1; // 3,6,9
 
-	LOG_INFO2(ENABLED, "x=%i y=%i out=%i w=%i h=%i\n", x,y,out,w,h);
+	LOG_INFO2(DISABLED, "x=%i y=%i out=%i w=%i h=%i\n", x,y,out,w,h);
 	return out;
 }
 
