@@ -766,7 +766,7 @@ static int trigger_swipe(struct Gestures* gs,
  *  other value - it was swipe, but couldn't be executed
  */
 static int trigger_edge(struct Gestures* gs, const struct MConfig* cfg,
-												const struct Touch* touch)
+                        const struct Touch* touch)
 {
 	int dir = TR_NONE;
 	int edge = touch_which_edge(cfg, touch);
