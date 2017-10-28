@@ -108,19 +108,19 @@ static void init_button_labels(Atom map[DIM_BUTTON])
  * @param max
  * @param resolution
  */
-static void init_axle(DeviceIntPtr dev, int axnum, Atom* label, int min, int max, int resolution)
+static void init_axle_absolute(DeviceIntPtr dev, int axnum, Atom* label)
 {
 	/* Inform server about reported range of axis values. */
 	xf86InitValuatorAxisStruct(dev, axnum,
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
 		*label,
 #endif
-		min, max,
-		/*resolution*/ resolution,
+		/* minval, maxval */ NO_AXIS_LIMITS, NO_AXIS_LIMITS,
+		/*resolution*/ 1,
 		/*min res*/ 0,
-		/*max res*/ resolution
+		/*max res*/ 1
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
-		, Absolute
+		/* mode */, Absolute
 #endif
 	);
 	xf86InitValuatorDefaults(dev, axnum);
@@ -178,8 +178,8 @@ static int device_init(DeviceIntPtr dev, LocalDevicePtr local)
 #error "Unsupported ABI_XINPUT_VERSION"
 #endif
 
-	init_axle(dev, 0, &axes_labels[0], mt->caps.abs[MTDEV_POSITION_X].minimum, mt->caps.abs[MTDEV_POSITION_X].maximum, mt->caps.abs[MTDEV_POSITION_X].resolution);
-	init_axle(dev, 1, &axes_labels[1], mt->caps.abs[MTDEV_POSITION_Y].minimum, mt->caps.abs[MTDEV_POSITION_Y].maximum, mt->caps.abs[MTDEV_POSITION_Y].resolution);
+	init_axle_absolute(dev, 0, &axes_labels[0]);
+	init_axle_absolute(dev, 1, &axes_labels[1]);
 
 	init_axle_relative(dev, 2, &axes_labels[2]);
 	init_axle_relative(dev, 3, &axes_labels[3]);
