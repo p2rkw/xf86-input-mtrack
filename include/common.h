@@ -179,7 +179,7 @@ static inline int bitcount(unsigned v)
 /* Boost-style foreach bit.
  */
 #define foreach_bit(i, m)						\
-	for (i = firstbit(m); i >= 0; i = firstbit((m) & (~0U << i + 1)))
+	for (i = firstbit(m); i >= 0; i = firstbit((m) & (~0U << (i + 1))))
 
 /* Robust system ioctl calls.
  */
@@ -205,7 +205,7 @@ struct Gestures;
  * @param value
  * @return -1 when lhs is less than rhs, 0 when equal, 1 when greater
  */
-int hypot_cmpf(float x, float y, float value);
+int hypot_cmpf(double x, double y, double value);
 
 /**
  *  It's called 'uncond' because caller have to check that all conditions required to

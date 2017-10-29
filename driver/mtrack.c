@@ -283,7 +283,7 @@ void mt_timer_start(struct MTouch *mt, int kind)
 		return;
 	}
 
-	LOG_DEBUG_DRIVER("Start timer, ID: %i with timeout: %u\n", kind, timeout);
+	LOG_DEBUG_DRIVER("Start timer, ID: %i with timeout: %llu\n", kind, timeout);
 	mt->timer = TimerSet(mt->timer, 0, timeout, mt_timer_callback, mt);
 	mt->timer_kind = kind;
 }
@@ -389,7 +389,7 @@ void mt_timer_stop_if(struct MTouch *mt, int kind)
 
 void mt_timer_continue(struct MTouch *mt, mstime_t timeout)
 {
-	LOG_DEBUG_DRIVER("Continue timer, ID: %i with timeout: %u\n", mt->timer_kind, timeout);
+	LOG_DEBUG_DRIVER("Continue timer, ID: %i with timeout: %llu\n", mt->timer_kind, timeout);
 	mt->timer = TimerSet(mt->timer, 0, timeout, mt_timer_callback, mt);
 }
 

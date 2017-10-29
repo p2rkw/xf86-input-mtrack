@@ -431,7 +431,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->button_2touch = ivals8[1];
 			cfg->button_3touch = ivals8[2];
 #ifdef DEBUG_PROPS
-			xf86Msg(X_INFO, "mtrack: set button emulation to %d %d %s\n",
+			xf86Msg(X_INFO, "mtrack: set button emulation to %d %d %d\n",
 				cfg->button_1touch, cfg->button_2touch, cfg->button_3touch);
 #endif
 		}
