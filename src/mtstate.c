@@ -309,8 +309,8 @@ static void touches_update(struct MTState* ms,
 				CLEARBIT(ms->touch[n].flags, MT_EDGE);
 
 			MODBIT(ms->touch[n].flags, MT_INVALID,
-				GETBIT(ms->touch[n].flags, MT_THUMB) && cfg->ignore_thumb ||
-				GETBIT(ms->touch[n].flags, MT_PALM) && cfg->ignore_palm ||
+				(GETBIT(ms->touch[n].flags, MT_THUMB) && cfg->ignore_thumb) ||
+				(GETBIT(ms->touch[n].flags, MT_PALM) && cfg->ignore_palm) ||
 				GETBIT(ms->touch[n].flags, MT_EDGE));
 
 			disable |= cfg->disable_on_thumb && GETBIT(ms->touch[n].flags, MT_THUMB);
@@ -339,8 +339,8 @@ static void mtstate_output(const struct MTState* ms,
 			const struct HWState* hs)
 {
 	int i, n;
-	char* type;
 	struct timeval tv;
+
 	n = bitcount(ms->touch_used);
 	if (bitcount(ms->touch_used) > 0) {
 		microtime(&tv);
