@@ -241,7 +241,7 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->swipe4.dn_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4DownButton", DEFAULT_SWIPE4_DN_BTN), 0, 32);
 	cfg->swipe4.lt_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4LeftButton", DEFAULT_SWIPE4_LT_BTN), 0, 32);
 	cfg->swipe4.rt_btn = CLAMPVAL(xf86SetIntOption(opts, "Swipe4RightButton", DEFAULT_SWIPE4_RT_BTN), 0, 32);
-	cfg->edge_scroll.dist = MAXVAL(xf86SetIntOption(opts, "EdgeScrollDist", DEFAULT_EDGE_SCROLL_DIST), 0);
+	cfg->edge_scroll.dist = MAXVAL(xf86SetIntOption(opts, "EdgeScrollDist", DEFAULT_EDGE_SCROLL_DIST), 1);
 	cfg->edge_scroll.hold = MAXVAL(xf86SetIntOption(opts, "EdgeScrollClickTime", DEFAULT_SCROLL_HOLD), 0);
 	cfg->edge_scroll.drag_sens = MAXVAL(xf86SetIntOption(opts, "EdgeScrollSensitivity", DEFAULT_SWIPE_SENS), 0);
 	cfg->edge_scroll.up_btn = CLAMPVAL(xf86SetIntOption(opts, "EdgeScrollUpButton", DEFAULT_SCROLL_UP_BTN), 0, 32);
