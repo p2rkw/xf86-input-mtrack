@@ -148,7 +148,7 @@ static void trigger_button_click(struct Gestures* gs,
 static void trigger_drag_ready(struct Gestures* gs,
 			const struct MConfig* cfg)
 {
-	gs->move_drag = GS_DRAG_READY;
+	gs->drag_state = GS_DRAG_READY;
 	timeraddms(&gs->time, cfg->drag_timeout, &gs->move_drag_expire);
 	LOG_DEBUG_GESTURES("trigger_drag_ready: drag is ready\n");
 	/* Break coasting */
@@ -159,46 +159,46 @@ static int trigger_drag_start(struct Gestures* gs,
 			const struct MConfig* cfg,
 			int dx, int dy)
 {
-	if (gs->move_drag == GS_DRAG_READY) {
+	if (gs->drag_state == GS_DRAG_READY) {
 		timerclear(&gs->move_drag_expire);
 		if (cfg->drag_wait == 0) {
- 			gs->move_drag = GS_DRAG_ACTIVE;
+ 			gs->drag_state = GS_DRAG_ACTIVE;
 			trigger_button_down(gs, 0);
 			LOG_DEBUG_GESTURES("trigger_drag_start: drag is active\n");
 		}
 		else {
-			gs->move_drag = GS_DRAG_WAIT;
+			gs->drag_state = GS_DRAG_WAIT;
 			gs->move_drag_dx = dx;
 			gs->move_drag_dy = dy;
 			timeraddms(&gs->time, cfg->drag_wait, &gs->move_drag_wait);
 			LOG_DEBUG_GESTURES("trigger_drag_start: drag in wait\n");
 		}
 	}
-	else if (gs->move_drag == GS_DRAG_WAIT) {
+	else if (gs->drag_state == GS_DRAG_WAIT) {
 		gs->move_drag_dx += dx;
 		gs->move_drag_dy += dy;
 		if (!timercmp(&gs->time, &gs->move_drag_wait, <)) {
-			gs->move_drag = GS_DRAG_ACTIVE;
+			gs->drag_state = GS_DRAG_ACTIVE;
 			trigger_button_down(gs, 0);
 			LOG_DEBUG_GESTURES("trigger_drag_start: drag is active\n");
 		}
 		else if (dist2(gs->move_drag_dx, gs->move_drag_dy) > SQRVAL(cfg->drag_dist)) {
-			gs->move_drag = GS_NONE;
+			gs->drag_state = GS_NONE;
 			LOG_DEBUG_GESTURES("trigger_drag_start: drag canceled, moved too far\n");
 		}
 	}
-	return gs->move_drag != GS_DRAG_WAIT;
+	return gs->drag_state != GS_DRAG_WAIT;
 }
 
 static void trigger_drag_stop(struct Gestures* gs, int force)
 {
-	if (gs->move_drag == GS_DRAG_READY && force) {
-		gs->move_drag = GS_NONE;
+	if (gs->drag_state == GS_DRAG_READY && force) {
+		gs->drag_state = GS_NONE;
 		timerclear(&gs->move_drag_expire);
 		LOG_DEBUG_GESTURES("trigger_drag_stop: drag canceled\n");
 	}
-	else if (gs->move_drag == GS_DRAG_ACTIVE) {
-		gs->move_drag = GS_NONE;
+	else if (gs->drag_state == GS_DRAG_ACTIVE) {
+		gs->drag_state = GS_NONE;
 		timerclear(&gs->move_drag_expire);
 		trigger_button_up(gs, 0);
 		LOG_DEBUG_GESTURES("trigger_drag_stop: drag stopped\n");
@@ -1147,7 +1147,7 @@ static void moving_update(struct Gestures* gs,
 
 static void dragging_update(struct Gestures* gs)
 {
-	if (gs->move_drag == GS_DRAG_READY && timercmp(&gs->time, &gs->move_drag_expire, >)) {
+	if (gs->drag_state == GS_DRAG_READY && timercmp(&gs->time, &gs->move_drag_expire, >)) {
 		LOG_DEBUG_GESTURES("dragging_update: drag expired\n");
 		trigger_drag_stop(gs, 1);
 	}
