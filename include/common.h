@@ -72,16 +72,20 @@ typedef unsigned int bitmask_t;
 		xf86Msg(X_ERROR, "mtrack[%i] %s:%i: ", get_next_log_number(), __FILE__, __LINE__); \
 		xf86Msg(X_ERROR, __VA_ARGS__); \
 	}while(0)
+
 #define LOG_WARNING(...) \
 	do{ \
 		xf86Msg(X_WARNING, "mtrack[%i] %s:%i: ", get_next_log_number(), __FILE__, __LINE__); \
 		xf86Msg(X_WARNING, __VA_ARGS__); \
 	}while(0)
+
 #define LOG_INFO(...) \
 	do{ \
 		xf86Msg(X_INFO, "mtrack[%i] %s:%i: ", get_next_log_number(), __FILE__, __LINE__); \
 		xf86Msg(X_INFO, __VA_ARGS__); \
 	}while(0)
+#define LOG_INFO_CONT(...) xf86Msg(X_INFO, "mtrack[...]: " __VA_ARGS__)
+
 #define LOG_DISABLED(...) do { } while(0)
 
 #define LOG_INFO_ENABLED(...) LOG_INFO(__VA_ARGS__)
@@ -95,7 +99,7 @@ typedef unsigned int bitmask_t;
 # define LOG_DEBUG LOG_DISABLED
 #endif
 
-static int get_next_log_number(){
+static inline int get_next_log_number(){
 	static int last = 0;
 	return ++last;
 }
