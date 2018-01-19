@@ -179,16 +179,12 @@ void output_capabilities(const struct Capabilities *cap)
 {
 	char line[1024];
 	int i;
-	memset(line, 0, sizeof(line));
-	ADDCAP(line, cap, left);
-	ADDCAP(line, cap, middle);
-	ADDCAP(line, cap, right);
-	ADDCAP(line, cap, mtdata);
-	ADDCAP(line, cap, ibt);
-	LOG_INFO("devname: %s\n", cap->devname);
-	LOG_INFO("devid: %x %x %x\n",
-		cap->devid.vendor, cap->devid.product, cap->devid.version);
-	char cap_names[][24] = {
+
+	LOG_INFO("Capabilities: \n");
+	LOG_INFO_CONT("devname: %s\n", cap->devname);
+	LOG_INFO_CONT("devid: %x %x %x\n", cap->devid.vendor, cap->devid.product, cap->devid.version);
+
+	char cap_names[MT_ABS_SIZE][24] = {
 		"ABS_MT_TOUCH_MAJOR", "ABS_MT_TOUCH_MINOR",
 		"ABS_MT_WIDTH_MAJOR",	"ABS_MT_WIDTH_MINOR",
 		"ABS_MT_ORIENTATION",
@@ -198,12 +194,22 @@ void output_capabilities(const struct Capabilities *cap)
 		"ABS_MT_TRACKING_ID",
 		"ABS_MT_PRESSURE"
 	};
-	LOG_INFO("caps:%s\n", line);
 	for (i = 0; i < MT_ABS_SIZE; i++) {
 		if (cap->has_abs[i])
-			LOG_INFO("%s: min: %d max: %d\n",
+			LOG_INFO_CONT("%s: min: %d max: %d\n",
 				cap_names[i],
 				cap->abs[i].minimum,
 				cap->abs[i].maximum);
 	}
+	if(cap->has_slot)
+		LOG_INFO_CONT("ABS_MT_SLOT: min: %d max: %d\n", cap->slot.minimum, cap->slot.maximum);
+
+	memset(line, 0, sizeof(line));
+	ADDCAP(line, cap, left);
+	ADDCAP(line, cap, middle);
+	ADDCAP(line, cap, right);
+	ADDCAP(line, cap, mtdata);
+	ADDCAP(line, cap, ibt);
+	ADDCAP(line, cap, slot);
+	LOG_INFO_CONT("enabled caps:%s\n", line);
 }

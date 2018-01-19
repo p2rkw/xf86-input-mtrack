@@ -44,6 +44,16 @@ static void finish_packet(struct HWState *s, const struct Capabilities *caps,
 	timercp(&s->evtime, &syn->time);
 }
 
+/*
+ * This function will return:
+ *  1 - when SYN_REPORT received
+ *  0 - otherwise
+ *
+ * More on kernel input events:
+ * https://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt
+ * https://www.kernel.org/doc/Documentation/input/event-codes.txt
+ * http://linuxwacom.sourceforge.net/wiki/index.php/Kernel_Input_Event_Overview#Touchpad_Overview
+ */
 static int read_event(struct HWState *s, const struct Capabilities *caps,
                       const struct input_event *ev)
 {
