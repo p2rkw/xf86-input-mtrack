@@ -36,8 +36,8 @@
 #include <stdint.h>
 #include <sys/time.h>
 
-#define DIM_FINGER 32
-#define DIM_TOUCHES 32
+#define DIM_FINGER 16
+#define DIM_TOUCHES 16
 
 /* year-proof millisecond event time */
 typedef __u64 mstime_t;
