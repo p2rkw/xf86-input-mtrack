@@ -209,6 +209,10 @@ struct MConfig {
 	int drag_timeout;		// How long to wait for a move after tapping? > 0
 	int drag_wait;			// How long to wait before triggering button down? >= 0
 	int drag_dist;			// How far is the finger allowed to move during wait time? >= 0
+	int drag_lock_timeout;  // How long to wait in 'drag ready' state after
+	                        // dragging finger was released?
+	                        // < 0 - wait of tap to break drag; 0 - disable; > 0 - time in ms
+
 	double sensitivity;		// Mouse movement multiplier. >= 0
 	int scroll_smooth;		// Enable high precision (smooth) scrolling. 0 or 1.
 };

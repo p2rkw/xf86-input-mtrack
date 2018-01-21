@@ -145,6 +145,15 @@ static void trigger_button_click(struct Gestures* gs,
 #endif
 }
 
+static void reset_drag(struct Gestures* gs){
+	if (gs->drag_state == GS_DRAG_ACTIVE) {
+		gs->drag_state = GS_NONE;
+		timerclear(&gs->move_drag_expire);
+		trigger_button_up(gs, 0);
+		LOG_DEBUG_GESTURES("reset_drag: drag stopped\n");
+	}
+}
+
 static void trigger_drag_ready(struct Gestures* gs,
 			const struct MConfig* cfg)
 {
@@ -190,12 +199,15 @@ static int trigger_drag_start(struct Gestures* gs,
 	return gs->drag_state != GS_DRAG_WAIT;
 }
 
-static void trigger_drag_stop(struct Gestures* gs, int force)
+static void trigger_drag_stop(struct Gestures* gs, const struct MConfig* cfg)
 {
-	if (gs->drag_state == GS_DRAG_READY && force) {
-		/* Epoch time will require another tap to break the drag: */
-		if (!isepochtime(&gs->move_drag_expire)
-				&& timercmp(&gs->time, &gs->move_drag_expire, >=)) {
+	int lock_timeout;
+
+	lock_timeout = cfg->drag_lock_timeout;
+
+	if (gs->drag_state == GS_DRAG_READY) {
+		/* if timeout < 0 then tap-dragging will require another tap to break the drag */
+		if (lock_timeout >= 0 && timercmp(&gs->time, &gs->move_drag_expire, >=)) {
 			LOG_DEBUG_GESTURES("trigger_drag_stop: locked drag expored\n");
 			trigger_button_up(gs, 0);
 		}
@@ -204,13 +216,17 @@ static void trigger_drag_stop(struct Gestures* gs, int force)
 		LOG_DEBUG_GESTURES("trigger_drag_stop: drag canceled\n");
 	}
 	else if (gs->drag_state == GS_DRAG_ACTIVE) {
-		//gs->drag_state = GS_NONE;
-		//timerclear(&gs->move_drag_expire);
-		//trigger_button_up(gs, 0);
-		//LOG_DEBUG_GESTURES("trigger_drag_stop: drag stopped\n");
-		gs->drag_state = GS_DRAG_READY;
-		timeraddms(&gs->time, 500, &gs->move_drag_expire);
-		LOG_DEBUG_GESTURES("trigger_drag_stop: drag in wait lock\n");
+		if(lock_timeout == 0){
+			reset_drag(gs);
+		}
+		else{
+			/* Tap to drag lock timeout implementaion:
+			 * Instead of breaking dragging completely, just take one step back
+			 * to ready state and start timer wainting for future dragging */
+			gs->drag_state = GS_DRAG_READY;
+			timeraddms(&gs->time, lock_timeout, &gs->move_drag_expire);
+			LOG_DEBUG_GESTURES("trigger_drag_stop: drag in wait lock\n");
+		}
    }
 }
 
@@ -460,7 +476,7 @@ static void tapping_update(struct Gestures* gs,
 			else{ /* gs->tap_touching is < 0 */
 				/* That means finges(s) were down, while tap wasn't active and finger was released */
 				gs->tap_touching = 0;
-				trigger_drag_stop(gs, 1);
+				trigger_drag_stop(gs, cfg);
 				return; /* Pretty common situation; do nothing */
 			}
 			LOG_TAP("tapping_update: touch released; gs->tap_touching=%d, gs->tap_released=%d\n", gs->tap_touching, gs->tap_released);
@@ -619,7 +635,7 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		return 0;
 	}
 
-	trigger_drag_stop(gs, 1);
+	trigger_drag_stop(gs, cfg);
 	get_swipe_avg_xy(touches, touches_count, &avg_move_x, &avg_move_y);
 	// hypot(1/n * (x0 + ... + xn); 1/n * (y0 + ... + yn)) <=> 1/n * hypot(x0 + ... + xn; y0 + ... + yn)
 	dist = hypot(avg_move_x, avg_move_y);
@@ -1005,7 +1021,7 @@ static int trigger_scale(struct Gestures* gs, const struct MConfig* cfg,
 	dir = calc_scale_dir(t0, t1);
 
 	struct timeval tv_tmp;
-	trigger_drag_stop(gs, 1);
+	trigger_drag_stop(gs, cfg);
 	if (gs->move_type != GS_SCALE || gs->move_dir != dir)
 		gs->move_dist = 0;
 	gs->move_dx = gs->move_dy = 0.0;
@@ -1034,7 +1050,7 @@ static void trigger_rotate(struct Gestures* gs,
 {
 	if (gs->move_type == GS_ROTATE || !timercmp(&gs->time, &gs->move_wait, <)) {
 		struct timeval tv_tmp;
-		trigger_drag_stop(gs, 1);
+		trigger_drag_stop(gs, cfg);
 		if (gs->move_type != GS_ROTATE || gs->move_dir != dir)
 			gs->move_dist = 0;
 		gs->move_dx = 0.0;
@@ -1058,7 +1074,7 @@ static void trigger_rotate(struct Gestures* gs,
 
 static void trigger_reset(struct Gestures* gs)
 {
-	trigger_drag_stop(gs, 0);
+	reset_drag(gs);
 	gs->move_dx = gs->move_dy = 0.0;
 	/* Don't	reset scroll speed cuz it may break things. */
 	gs->move_type = GS_NONE;
@@ -1154,11 +1170,11 @@ static void moving_update(struct Gestures* gs,
 	}
 }
 
-static void dragging_update(struct Gestures* gs)
+static void dragging_update(struct Gestures* gs, const struct MConfig* cfg)
 {
 	if (gs->drag_state == GS_DRAG_READY && timercmp(&gs->time, &gs->move_drag_expire, >)) {
 		LOG_DEBUG_GESTURES("dragging_update: drag expired\n");
-		trigger_drag_stop(gs, 1);
+		trigger_drag_stop(gs, cfg);
 	}
 }
 
@@ -1196,7 +1212,7 @@ void gestures_extract(struct MTouch* mt)
 	timersub(&mt->hs.evtime, &mt->gs.time, &mt->gs.dt);
 	timercp(&mt->gs.time, &mt->hs.evtime);
 
-	dragging_update(&mt->gs);
+	dragging_update(&mt->gs, &mt->cfg);
 	buttons_update(&mt->gs, &mt->cfg, &mt->hs, &mt->state);
 	tapping_update(&mt->gs, &mt->cfg, &mt->state);
 	moving_update(&mt->gs, &mt->cfg, &mt->state);
