@@ -193,15 +193,24 @@ static int trigger_drag_start(struct Gestures* gs,
 static void trigger_drag_stop(struct Gestures* gs, int force)
 {
 	if (gs->drag_state == GS_DRAG_READY && force) {
+		/* Epoch time will require another tap to break the drag: */
+		if (!isepochtime(&gs->move_drag_expire)
+				&& timercmp(&gs->time, &gs->move_drag_expire, >=)) {
+			LOG_DEBUG_GESTURES("trigger_drag_stop: locked drag expored\n");
+			trigger_button_up(gs, 0);
+		}
 		gs->drag_state = GS_NONE;
 		timerclear(&gs->move_drag_expire);
 		LOG_DEBUG_GESTURES("trigger_drag_stop: drag canceled\n");
 	}
 	else if (gs->drag_state == GS_DRAG_ACTIVE) {
-		gs->drag_state = GS_NONE;
-		timerclear(&gs->move_drag_expire);
-		trigger_button_up(gs, 0);
-		LOG_DEBUG_GESTURES("trigger_drag_stop: drag stopped\n");
+		//gs->drag_state = GS_NONE;
+		//timerclear(&gs->move_drag_expire);
+		//trigger_button_up(gs, 0);
+		//LOG_DEBUG_GESTURES("trigger_drag_stop: drag stopped\n");
+		gs->drag_state = GS_DRAG_READY;
+		timeraddms(&gs->time, 500, &gs->move_drag_expire);
+		LOG_DEBUG_GESTURES("trigger_drag_stop: drag in wait lock\n");
    }
 }
 
