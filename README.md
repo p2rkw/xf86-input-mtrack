@@ -177,6 +177,7 @@ Available options and their defaults are as follows.
 [TapDragTime](#TapDragTime) &nbsp;&nbsp;&nbsp;
 [TapDragWait](#TapDragWait) &nbsp;&nbsp;&nbsp;
 [TapDragDist](#TapDragDist) &nbsp;&nbsp;&nbsp;
+[TapDragLockTimeout](#TapDragLockTimeout) &nbsp;&nbsp;&nbsp;
 
 [AxisXInvert](#AxisXInvert) &nbsp;&nbsp;&nbsp;
 [AxisYInvert](#AxisYInvert) &nbsp;&nbsp;&nbsp;
@@ -610,6 +611,16 @@ Defaults to 40.
 How far the finger is allowed to move during drag wait time. If the finger
 moves farther than this distance during the wait time then dragging will be
 canceled and pointer movement will resume. Integer value. Defaults to 200.
+
+<a name="TapDragLockTimeout"></a>
+**TapDragLockTimeout** -
+This is how long the driver will wait after initial drag in 'drag ready' state
+in which it will be able to resume previous drag without additional `up`, `down`
+sequence.
+Value of 0 disables this functionality.
+Values less than zero will make mtrack requre additional tap to finish drag
+by sending `button up`.
+Integer value representing milliseconds. Defaults to 500.
 
 <a name="AxisXInvert"></a>
 **AxisXInvert** - 
