@@ -136,7 +136,7 @@
 // int, 4 values - up button, down button, left button, right button
 #define MTRACK_PROP_HOLD1_MOVE3_BUTTONS "Trackpad Hold1Move3 Buttons"
 
-// int, 4 values - enable, timeout, wait, dist
+// int, 5 values - enable, timeout, wait, dist, lock timeout
 #define MTRACK_PROP_DRAG_SETTINGS "Trackpad Drag Settings"
 // int, 2 values - invert x axis, invert y axis
 #define MTRACK_PROP_AXIS_INVERT "Trackpad Axis Inversion"

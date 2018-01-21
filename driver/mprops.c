@@ -29,7 +29,7 @@
 # define LOG_DEBUG_PROPS LOG_DISABLED
 #endif
 
-#define MAX_INT_VALUES 4
+#define MAX_INT_VALUES 5
 #define MAX_FLOAT_VALUES 4
 #define MAX_BUTTON_VALUES 6
 
@@ -253,7 +253,8 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[1] = cfg->drag_timeout;
 	ivals[2] = cfg->drag_wait;
 	ivals[3] = cfg->drag_dist;
-	mprops.drag_settings = atom_init_integer(local->dev, MTRACK_PROP_DRAG_SETTINGS, 4, ivals, 32);
+	ivals[4] = cfg->drag_lock_timeout;
+	mprops.drag_settings = atom_init_integer(local->dev, MTRACK_PROP_DRAG_SETTINGS, 5, ivals, 32);
 
 	ivals[0] = cfg->axis_x_invert;
 	ivals[1] = cfg->axis_y_invert;
@@ -704,7 +705,7 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 	}
 #endif
 	else if (property == mprops.drag_settings) {
-		if (prop->size != 4 || prop->format != 32 || prop->type != XA_INTEGER)
+		if (prop->size != 5 || prop->format != 32 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals32 = (uint32_t*)prop->data;
@@ -716,8 +717,10 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 			cfg->drag_timeout = ivals32[1];
 			cfg->drag_wait = ivals32[2];
 			cfg->drag_dist = ivals32[3];
-			LOG_DEBUG_PROPS("set drag settings to %d %d %d %d\n",
-				cfg->drag_enable, cfg->drag_timeout, cfg->drag_wait, cfg->drag_dist);
+			cfg->drag_lock_timeout = ivals32[4];
+
+			LOG_DEBUG_PROPS("set drag settings to %d %d %d %d %d\n",
+				cfg->drag_enable, cfg->drag_timeout, cfg->drag_wait, cfg->drag_dist, cfg->drag_lock_timeout);
 		}
 	}
 	else if (property == mprops.axis_invert) {
