@@ -658,6 +658,16 @@ Increase TapMaxDist to give stationary finger more freedom.
 Set Hold1Move1Button to 0 to disable, set to other value to send button other 
 than "1".
 
+##### Persistent dragging
+If you're using lot of tools that require dragging you can make it a little bit
+easier by enabling persistent tap-to-drag:
+```
+    Option "TapDragLockTimeout" "-1"
+```
+With that change you will have to perform additional tap when dragging with
+tap-to-drag. Other positive values will let you continue yor drag within
+specified time.
+
 [1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt     "Kernel Multitouch Protocol"
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"
 [3]: http://bitmath.org/code/multitouch/                                        "xf86-input-multitouch website"
