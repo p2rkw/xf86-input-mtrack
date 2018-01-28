@@ -1,3 +1,19 @@
+## v0.5.0
+* Add tap-to-drag lock timeout
+* Make edge size configurable for each edge individually
+* Add edge scrolling
+* Fix movement truncation
+* Fix crash during suspend/wake up
+* Make movement speed resolution independent
+* Lock smooth scroll to one axis at time
+* Post button events before move events
+* New emulated buttons implementation
+* Reduce max recognized fingers/touch points from 32 to 16
+* New fancy readme with anchors
+* Fix warnings, improve logging
+* New examples
+* Helper script to parse output of xinput --list-props
+
 ## v0.4.1
 * Smooth scroll: detect and handle flipped up&down, left&right buttons
 * Add examples with my current configuration as first example.

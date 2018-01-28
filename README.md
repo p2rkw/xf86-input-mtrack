@@ -1,6 +1,6 @@
 xf86-input-mtrack
 =================
-###### v0.4.1
+###### v0.5.0
 
 An Xorg driver for multitouch trackpads. Supports any trackpad whose kernel
 driver uses the slotted multitouch protocol. For more information on the
@@ -13,7 +13,7 @@ the [mtdev][4] library to operate.
 License
 -------
 
-* Copyright (C) 2017 Paweł Turkowski <p2rkw0@gmail.com>
+* Copyright (C) 2015-2018 Paweł Turkowski <p2rkw0@gmail.com>
 * Copyright (C) 2011 Ryan Bourgeois <bluedragonx@gmail.com>
 * Copyright (C) 2008 Henrik Rydberg <rydberg@euromail.se>
 
