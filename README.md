@@ -313,7 +313,7 @@ value of 0 will not expire touches. Integer value. Defaults to 100.
 <a name="ClickFinger1"></a>
 **ClickFinger1** - 
 Which button to emulate when one finger is touching the trackpad during a
-click. Integer value. A value of 0 disables one-touch emulation. Defaults to 3.
+click. Integer value. A value of 0 disables one-touch emulation. Defaults to 1.
 
 <a name="ClickFinger2"></a>
 **ClickFinger2** - 
@@ -323,7 +323,7 @@ click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 2.
 <a name="ClickFinger3"></a>
 **ClickFinger3** - 
 Which button to emulate when three fingers are touching the trackpad during a
-click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 0.
+click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 3.
 
 <a name="TapButton1"></a>
 **TapButton1** - 
