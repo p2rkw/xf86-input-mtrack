@@ -61,6 +61,8 @@ The following is a minimal working InputClass section for xorg.conf:
         MatchIsTouchpad "on"
         Identifier      "Touchpads"
         Driver          "mtrack"
+#       In case of problems enable/disable this line:
+        MatchDevicePath "/dev/input/event*"
     EndSection
 
 Configuration options may be defined inside the InputClass section to configure
