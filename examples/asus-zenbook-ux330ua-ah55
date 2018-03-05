@@ -1,0 +1,125 @@
+# mtrack config made for asus-zenbook-ux330ua-ah55 
+
+###--------------------------------------------------------------------------###
+# Properties in comments are "xinput set-prop" command to enable setting live (without restarting X)
+# Refer to source code to read more about those: xf86-input-mtrack/include/mprops.h
+###--------------------------------------------------------------------------###
+
+
+Section "InputClass"
+        MatchIsTouchpad "on"
+        Identifier "Touchpads"
+        Driver "mtrack"
+        Option "DeviceEnabled" "1"
+
+###--------------------------------------------------------------------------###
+###   http://www.x.org/wiki/Development/Documentation/PointerAcceleration/
+###   Base velocity setting
+###   Options for polynomial("2") profile
+###--------------------------------------------------------------------------###
+        Option "AccelerationProfile" "4"
+        Option "Sensitivity" "0.75" # Adjusts the sensitivity (movement speed) of the touchpad. This is a real number greater than or equal to zero. Default is 1. A value of 0 will disable pointer movement.
+        Option "AdaptiveDeceleration" "2.0"
+        Option "ConstantDeceleration" "1.02"
+        Option "VelocityScale" "1.0"
+
+###---------------------------------------------------------------------------###
+###   Ignore certain touch type
+###---------------------------------------------------------------------------###
+        Option "PalmSize" "30" # The minimum size of what's considered a palm. Palms are expected to be very large on the trackpad. This is represented as a percentage of the maximum touch value and is dependent on the trackpad hardware. Integer value. Defaults to 40.
+        Option "IgnorePalm" "true" # Whether or not to ignore touches that are determined to be palms. Boolean value. Defaults to false.
+        Option "DisableOnPalm" "true" # Whether or not to disable the entire trackpad when a palm is touching. Boolean value. Defaults to false.
+
+        Option "IgnoreThumb" "true" # Whether or not to ignore touches that are determined to be thumbs. Boolean value. Defaults to false.
+        Option "ThumbRatio" "70" # The width/length ratio of what's considered a thumb. It is expected that a thumb is longer than it is wide. This tells the driver how much longer. Percentage represented by an integer. Defaults to 70.
+        Option "ThumbSize" "15" # The minimum size of what's considered a thumb. It is expected that a thumb will be larger than other fingers. This is represented as a percentage of the maximum touch value and is dependent on the trackpad hardware. Integer value. Defaults to 25.
+
+###--------------------------------------------------------------------------###
+###   Set click interactions
+###--------------------------------------------------------------------------###
+        Option "ButtonEnable" "true" # Whether or not to enable the physical buttons on or near the trackpad. Boolean value. Defaults to true.
+        Option "ButtonMoveEmulate" "true" # Whether or not to count the moving finger when emulating button clicks. Useful to disable if you use two hands on trackpad. Boolean value. Defaults to true.
+        Option "ButtonIntegrated" "true" # Whether or not the physical buttons are integrated with the trackpad. If you have a one-piece trackpad like on newer MacBooks, this should be set to true. Button emulation depends on this value being correct. Boolean value. Defaults to true.
+        Option "ButtonZonesEnable" "false" # Whether or not to enable button zones. If button zones are enabled then the trackpad will be split into one, two, or three vertical zones. Clicking the integrated button in one of these zones will send the button event for ClickFinger1, ClickFinger2, or ClickFinger3. The driver will only add zones for those ClickFinger values that are enabled. So setting ClickFinger1 to 0 and enabling the other two will create two zones, one for ClickFinger2 and one for ClickFinger3. Boolean value. Defaults to false.
+
+        Option "ClickFinger0" "1" # Which button to emulate when no valid finger placement is touching the trackpad during a click. Integer value. A value of 0 disables one-touch emulation. Defaults to 1.
+        Option "ClickFinger1" "1" # Which button to emulate when one finger is touching the trackpad during a click. Integer value. A value of 0 disables one-touch emulation. Defaults to 1.
+        Option "ClickFinger2" "1" # Which button to emulate when two fingers are touching the trackpad during a click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 2.
+        Option "ClickFinger3" "2" # Which button to emulate when three fingers are touching the trackpad during a click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 3.
+
+###---------------------- Gesture Settings ----------------------------------###
+### property: "Trackpad Gesture Settings"
+        Option "GestureClickTime" "20"
+        Option "GestureWaitTime" "3"
+###--------------------------------------------------------------------------###
+
+        Option "ButtonTouchExpire" "120"
+        
+        Option "FingerLow" "0" # Defines the pressure at which a finger is detected as a release. This is a percentage represented as an integer. Default is 5.
+        Option "FingerHigh" "0" # Defines the pressure at which a finger is detected as a touch. This is a percentage represented as an integer. Default is 5.
+
+###---------------------- Tap Settings --------------------------------------###
+### property "Trackpad Tap Settings"
+        Option "ClickTime" "15" # When tapping, how much time to hold down the emulated button. Integer value representing milliseconds. Integer value representing miliseconds. Defaults to 50.
+        Option "MaxTapTime" "165"
+        Option "MaxTapMove" "155"
+###--------------------------------------------------------------------------###
+
+        Option "TapButton1" "1"
+        Option "TapButton2" "3"
+        Option "TapButton3" "2"
+
+###------------------------ Swipe2 as mouse wheel ---------------------------###
+        Option "ScrollSensitivity" "0" # disable pointer mouvement during scroll 
+        Option "ScrollDistance" "22"
+        Option "ScrollClickTime" "12"
+        Option "ScrollSensitivity" "0"
+        Option "ScrollUpButton" "5"
+        Option "ScrollDownButton" "4"
+        Option "ScrollLeftButton" "6"
+        Option "ScrollRightButton" "7"
+
+###--------------------------------------------------------------------------###
+        Option "SwipeDistance" "22"
+        Option "SwipeClickTime" "12"
+        
+### property: "Trackpad Swipe Buttons"
+        Option "SwipeUpButton" "4"
+        Option "SwipeDownButton" "5"
+        Option "SwipeLeftButton" "6"
+        Option "SwipeRightButton" "7"
+###--------------------------------------------------------------------------###
+
+###---------------------- Swipe4 to drag buttons 9 10 11 12 -----------------###
+        Option "Swipe4Distance" "280"
+        Option "Swipe4ClickTime" "50"
+        Option "Swipe4Sensitivity" "0"
+## property: "Trackpad Swipe4 Buttons"
+        Option "Swipe4UpButton" "9"
+        Option "Swipe4DownButton" "10"
+        Option "Swipe4LeftButton" "11"
+        Option "Swipe4RightButton" "12"
+###--------------------------------------------------------------------------###
+
+        Option "ScaleDistance" "70"
+        Option "ScaleUpButton" "12"
+        Option "ScaleDownButton" "13"
+
+        Option "RotateDistance" "350"
+        Option "RotateLeftButton" "14"
+        Option "RotateRightButton" "15"
+
+###--------------------------------------------------------------------------###
+### xinput set-prop 11 "Trackpad Drag Settings" 1 350 60 200
+        Option "TapDragEnable" "true"
+        Option "TapDragTime" "350"
+        Option "TapDragWait" "40"
+        Option "TapDragDist" "150"
+        Option "TapDragLockTimeout" "0" # This is how long the driver will wait after initial drag in 'drag ready' state in which it will be able to resume previous drag without additional up, down sequence. Value of 0 disables this functionality. Values less than zero will make mtrack requre additional tap to finish drag by sending button up. Integer value representing milliseconds. Defaults to 500.
+###--------------------------------------------------------------------------###
+
+        Option "EdgeBottomSize"        "17"  # dont count touches from bottom 17% of area
+
+        Option "Hold1Move1StationaryMaxMove" "120"
+        Option "Hold1Move1StationaryButton" "1" # For two finger hold-and-move functionality. The button that is triggered by holding one finger and moving another one. Integer value. A value of 0 disables hold-and-move. Value of 0 disables this functionality. Defaults to 1.
+EndSection

@@ -316,7 +316,7 @@ value of 0 will not expire touches. Integer value. Defaults to 100.
 <a name="ClickFinger0"></a>
 **ClickFinger0** - 
 Which button to emulate when no valid finger placement is touching the trackpad during a
-click. Integer value. A value of 0 disables one-touch emulation. Defaults to 0.
+click, as on "EdgeBottom". Integer value. A value of 0 disables one-touch emulation. Defaults to 0.
 
 <a name="ClickFinger1"></a>
 **ClickFinger1** - 
