@@ -353,8 +353,7 @@ static void buttons_update(struct Gestures* gs,
 			}
 			else if (cfg->button_0touch > 0) {
 				/* The integrated physical button have been pressed but no finger are valid
-				*  This code path can be reached by enabling the ClickFinger0 in the config file. 
-				*/
+				 * This code path can be reached by enabling the ClickFinger0 in the config file. */
 				LOG_EMULATED("buttons_update: integrated pressed without touch detection%d\n", touching);
 				trigger_button_emulation(gs, cfg->button_0touch - 1);
 			}
