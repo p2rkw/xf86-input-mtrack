@@ -158,10 +158,11 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[2] = cfg->button_expire;
 	mprops.button_emulate_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_SETTINGS, 3, ivals, 16);
 
-	ivals[0] = cfg->button_1touch;
-	ivals[1] = cfg->button_2touch;
-	ivals[2] = cfg->button_3touch;
-	mprops.button_emulate_values = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_VALUES, 3, ivals, 8);
+	ivals[0] = cfg->button_0touch;
+	ivals[1] = cfg->button_1touch;
+	ivals[2] = cfg->button_2touch;
+	ivals[3] = cfg->button_3touch;
+	mprops.button_emulate_values = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_VALUES, 4, ivals, 8);
 
 	ivals[0] = cfg->tap_hold;
 	ivals[1] = cfg->tap_timeout;
@@ -414,19 +415,20 @@ int mprops_set_property(DeviceIntPtr dev, Atom property, XIPropertyValuePtr prop
 		}
 	}
 	else if (property == mprops.button_emulate_values) {
-		if (prop->size != 3 || prop->format != 8 || prop->type != XA_INTEGER)
+		if (prop->size != 4 || prop->format != 8 || prop->type != XA_INTEGER)
 			return BadMatch;
 
 		ivals8 = (uint8_t*)prop->data;
-		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]))
+		if (!VALID_BUTTON(ivals8[0]) || !VALID_BUTTON(ivals8[1]) || !VALID_BUTTON(ivals8[2]) || !VALID_BUTTON(ivals8[3]))
 			return BadMatch;
 
 		if (!checkonly) {
-			cfg->button_1touch = ivals8[0];
-			cfg->button_2touch = ivals8[1];
-			cfg->button_3touch = ivals8[2];
-			LOG_DEBUG_PROPS("set button emulation to %d %d %d\n",
-				cfg->button_1touch, cfg->button_2touch, cfg->button_3touch);
+			cfg->button_0touch = ivals8[0];
+			cfg->button_1touch = ivals8[1];
+			cfg->button_2touch = ivals8[2];
+			cfg->button_3touch = ivals8[3];
+			LOG_DEBUG_PROPS("set button emulation to %d %d %d %d\n",
+				cfg->button_0touch, cfg->button_1touch, cfg->button_2touch, cfg->button_3touch);
 		}
 	}
 	else if (property == mprops.tap_settings) {

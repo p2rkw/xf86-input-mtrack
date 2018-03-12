@@ -103,6 +103,7 @@ Available options and their defaults are as follows.
 
 [ButtonTouchExpire](#ButtonTouchExpire)
 
+[ClickFinger0](#ClickFinger0) &nbsp;&nbsp;&nbsp;
 [ClickFinger1](#ClickFinger1) &nbsp;&nbsp;&nbsp;
 [ClickFinger2](#ClickFinger2) &nbsp;&nbsp;&nbsp;
 [ClickFinger3](#ClickFinger3) &nbsp;&nbsp;&nbsp;
@@ -311,6 +312,11 @@ ClickFinger3. Boolean value. Defaults to false.
 **ButtonTouchExpire** - 
 How long (in ms) to consider a touching finger as part of button emulation. A
 value of 0 will not expire touches. Integer value. Defaults to 100.
+
+<a name="ClickFinger0"></a>
+**ClickFinger0** - 
+Which button to emulate when no valid finger placement is touching the trackpad during a
+click, as on "EdgeBottom". Integer value. A value of 0 disables one-touch emulation. Defaults to 0.
 
 <a name="ClickFinger1"></a>
 **ClickFinger1** - 
@@ -669,6 +675,13 @@ easier by enabling persistent tap-to-drag:
 With that change you will have to perform additional tap when dragging with
 tap-to-drag. Other positive values will let you continue yor drag within
 specified time.
+
+##### Enabling soft button
+If you enable edge restriction an you still want the integrated button to click inside that edge, you must enable ClickFinger0.
+```
+    Option "ClickFinger0" "1"
+```
+You can also set another button instead of "1".
 
 [1]: http://www.kernel.org/doc/Documentation/input/multi-touch-protocol.txt     "Kernel Multitouch Protocol"
 [2]: http://www.gnu.org/licenses/gpl-2.0.html                                   "GNU General Public License, version 2"

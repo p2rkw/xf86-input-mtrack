@@ -2,6 +2,7 @@
 *.lo
 *.la
 *.swp
+*.dirstamp
 .deps/
 .libs/
 Makefile
@@ -20,5 +21,10 @@ ltmain.sh
 /stamp-h1
 /depcomp
 /compile
+
+debian/files
+debian/xserver-xorg-input-mtrack.debhelper.log
+debian/xserver-xorg-input-mtrack.substvars
+debian/xserver-xorg-input-mtrack/
 
 mtrack-test

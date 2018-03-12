@@ -41,6 +41,7 @@
 #define DEFAULT_BUTTON_ENABLE 1
 #define DEFAULT_BUTTON_INTEGRATED 1
 #define DEFAULT_BUTTON_ZONES 0
+#define DEFAULT_BUTTON_0TOUCH 0 /* When finger placement is "invalid", do not emulate any button */
 #define DEFAULT_BUTTON_1TOUCH 1
 #define DEFAULT_BUTTON_2TOUCH 2
 #define DEFAULT_BUTTON_3TOUCH 3
@@ -156,6 +157,8 @@ struct MConfig {
 	int button_integrated;	// Is the button under the touchpad? 0 or 1
 	int button_expire;		// How long to consider a touch for button emulation. >= 0
 	int button_zones;		// Use button zones for emulation?
+	int button_0touch;		// What button to emulate when no finger is on the
+							// pad and a click is registered? 0 to 32
 	int button_1touch;		// What button to emulate when one finger is on the
 							// pad or the first zone is clicked? 0 to 32
 	int button_2touch;		// What button to emulate when two fingers are on the

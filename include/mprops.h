@@ -46,7 +46,7 @@
 #define MTRACK_PROP_BUTTON_SETTINGS "Trackpad Button Settings"
 // int, 3 values - enable button zones, button move emulation, emulation touch expiration
 #define MTRACK_PROP_BUTTON_EMULATE_SETTINGS "Trackpad Button Emulation Settings"
-// int, 3 values - button to emulate with 1 touch, 2 touches, 3 touches
+// int, 4 values - button to emulate with 0 touch, 1 touch, 2 touches, 3 touches
 #define MTRACK_PROP_BUTTON_EMULATE_VALUES "Trackpad Button Emulation Values"
 // int, 3 values - click time, touch timeout, invalidate distance
 #define MTRACK_PROP_TAP_SETTINGS "Trackpad Tap Settings"
