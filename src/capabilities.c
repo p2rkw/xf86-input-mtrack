@@ -118,6 +118,19 @@ int read_capabilities(struct Capabilities *cap, int fd)
 	default_fuzz(cap, ABS_MT_WIDTH_MINOR, SN_WIDTH);
 	default_fuzz(cap, ABS_MT_ORIENTATION, SN_ORIENT);
 
+//#define MIMIC_CUSTOM_CAPS
+#ifdef MIMIC_CUSTOM_CAPS
+	cap->has_abs[MTDEV_POSITION_X] = 1;
+	cap->has_abs[MTDEV_POSITION_Y] = 1;
+	cap->has_abs[MTDEV_TRACKING_ID] = 1;
+
+	cap->has_abs[MTDEV_TOUCH_MAJOR] = 0;
+	cap->has_abs[MTDEV_TOUCH_MINOR] = 0;
+	cap->has_abs[MTDEV_WIDTH_MAJOR] = 0;
+	cap->has_abs[MTDEV_WIDTH_MINOR] = 0;
+	cap->has_abs[MTDEV_ORIENTATION] = 0;
+	cap->has_abs[MTDEV_PRESSURE] = 0;
+#endif
 	return 0;
 }
 
