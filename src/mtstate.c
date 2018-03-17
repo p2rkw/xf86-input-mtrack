@@ -55,7 +55,8 @@ static int finger_touch_ratio(const struct MConfig* cfg, const struct FingerStat
 	case MCFG_PRESSURE_SIZE:
 	case MCFG_PRESSURE:
 		return pressure_range_ratio(cfg, hw->pressure);
-	default: return 101; /* sholuld it be additional argument? or maybe it should return -1? */
+	default:
+		return 101; /* sholuld it be additional argument? or maybe it should return -1? */
 	}
 }
 
@@ -114,7 +115,8 @@ static int is_palm(const struct MConfig* cfg,
 	case MCFG_PRESSURE:
 		ratio =  pressure_range_ratio(cfg, hw->pressure);
 		break;
-	default: return 0;
+	default:
+		return 0;
 	}
 
 	if (ratio > cfg->palm_size) {
