@@ -21,8 +21,8 @@
 
 #include "capabilities.h"
 
-#define SETABS(c, x, map, key, fd)					\
-	(c->has_##x = getbit(map, key) && getabs(&c->x, key, fd))
+#define READABS(c, x, map, key, fd)					\
+	(c->has_##x = getbit(map, key) && readabs(&c->x, key, fd))
 
 #define ADDCAP(s, c, x) strcat(s, c->has_##x ? " " #x : "")
 
@@ -42,10 +42,17 @@ static inline int getbit(const unsigned long *map, int key)
 	return (map[key / bits_per_long] >> (key % bits_per_long)) & 0x01;
 }
 
-static int getabs(struct input_absinfo *abs, int key, int fd)
+static int readabs(struct input_absinfo *abs, int key, int fd)
 {
 	int rc;
 	SYSCALL(rc = ioctl(fd, EVIOCGABS(key), abs));
+	return rc >= 0;
+}
+
+static int writeabs(struct input_absinfo *abs, int key, int fd)
+{
+	int rc;
+	SYSCALL(rc = ioctl(fd, EVIOCSABS(key), abs));
 	return rc >= 0;
 }
 
@@ -69,7 +76,7 @@ static int has_integrated_button(const struct Capabilities *cap)
 static void default_fuzz(struct Capabilities *cap, unsigned int code, int sn)
 {
 	int bit = mtdev_abs2mt(code);
-	if (cap->has_abs[bit] && cap->abs[bit].fuzz == 0)
+	if (cap->has_abs[bit] /* && cap->abs[bit].fuzz == 0 */)
 		cap->abs[bit].fuzz =
 			(cap->abs[bit].maximum - cap->abs[bit].minimum) / sn;
 }
@@ -103,9 +110,9 @@ int read_capabilities(struct Capabilities *cap, int fd)
 	cap->has_middle = getbit(keybits, BTN_MIDDLE);
 	cap->has_right = getbit(keybits, BTN_RIGHT);
 
-	SETABS(cap, slot, absbits, ABS_MT_SLOT, fd);
+	READABS(cap, slot, absbits, ABS_MT_SLOT, fd);
 	for (i = 0; i < MT_ABS_SIZE; i++)
-		SETABS(cap, abs[i], absbits, mtdev_mt2abs(i), fd);
+		READABS(cap, abs[i], absbits, mtdev_mt2abs(i), fd);
 
 	cap->has_mtdata = has_mt_data(cap);
 	cap->has_ibt = has_integrated_button(cap);
@@ -117,6 +124,13 @@ int read_capabilities(struct Capabilities *cap, int fd)
 	default_fuzz(cap, ABS_MT_WIDTH_MAJOR, SN_WIDTH);
 	default_fuzz(cap, ABS_MT_WIDTH_MINOR, SN_WIDTH);
 	default_fuzz(cap, ABS_MT_ORIENTATION, SN_ORIENT);
+
+	for (i = 0; i < MT_ABS_SIZE; i++){
+		if (cap->has_abs[i] && !writeabs(&cap->abs[i], mtdev_mt2abs(i), fd)){
+			LOG_WARNING("ioctl EVIOCSABS(%d) failed\n", i);
+		}
+	}
+
 
 //#define MIMIC_CUSTOM_CAPS
 #ifdef MIMIC_CUSTOM_CAPS
@@ -209,10 +223,10 @@ void output_capabilities(const struct Capabilities *cap)
 	};
 	for (i = 0; i < MT_ABS_SIZE; i++) {
 		if (cap->has_abs[i])
-			LOG_INFO_CONT("%s: min: %d max: %d\n",
-				cap_names[i],
-				cap->abs[i].minimum,
-				cap->abs[i].maximum);
+			LOG_INFO_CONT("%s: min: %d max: %d fuzz: %d resolution: %d\n",
+				cap_names[i], cap->abs[i].minimum, cap->abs[i].maximum,
+				cap->abs[i].fuzz, cap->abs[i].resolution
+			);
 	}
 	if(cap->has_slot)
 		LOG_INFO_CONT("ABS_MT_SLOT: min: %d max: %d\n", cap->slot.minimum, cap->slot.maximum);
