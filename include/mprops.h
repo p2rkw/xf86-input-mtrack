@@ -44,13 +44,13 @@
 #define MTRACK_PROP_PRESSURE "Trackpad Touch Pressure"
 // int, 2 values - enable buttons, has integrated button
 #define MTRACK_PROP_BUTTON_SETTINGS "Trackpad Button Settings"
-// int, 3 values - enable button zones, button move emulation, emulation touch expiration
+// int, 4 values - enable button zones, button move emulation, emulation touch expiration, button zone in edge bottom
 #define MTRACK_PROP_BUTTON_EMULATE_SETTINGS "Trackpad Button Emulation Settings"
-// int, 4 values - button to emulate with 0 touch, 1 touch, 2 touches, 3 touches
+// int, 7 values - button to emulate with 0 touch, 1 touch, 2 touches, 3 touches AND zone 1, zone 2, zone 3
 #define MTRACK_PROP_BUTTON_EMULATE_VALUES "Trackpad Button Emulation Values"
 // int, 3 values - click time, touch timeout, invalidate distance
 #define MTRACK_PROP_TAP_SETTINGS "Trackpad Tap Settings"
-// int, 3 values - 1 touch button, 2 touch button, 3 touch button, 4 touch button
+// int, 4 values - 1 touch button, 2 touch button, 3 touch button, 4 touch button
 #define MTRACK_PROP_TAP_EMULATE "Trackpad Tap Button Emulation"
 // int, 2 values - ignore thumb touches, disable trackpad on thumb touches
 #define MTRACK_PROP_THUMB_DETECT "Trackpad Thumb Detection"

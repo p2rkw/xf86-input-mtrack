@@ -107,5 +107,17 @@ void gestures_init(struct MTouch* mt);
 void gestures_extract(struct MTouch* mt);
 int gestures_delayed(struct MTouch* mt);
 
+static int buttons_zone_update(
+	struct Gestures* gs,
+	const struct MConfig* cfg,
+	const struct MTState* ms,
+	int lowest);
+static void touch_detect_udpate(
+	struct Gestures* gs,
+	const struct MConfig* cfg,
+	const struct MTState* ms,
+	int latest);
+
+
 #endif
 

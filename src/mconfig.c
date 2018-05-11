@@ -44,6 +44,10 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->button_integrated = DEFAULT_BUTTON_INTEGRATED;
 	cfg->button_expire = DEFAULT_BUTTON_EXPIRE;
 	cfg->button_zones = DEFAULT_BUTTON_ZONES;
+	cfg->button_zones_in_edge_bottom = DEFAULT_BUTTON_ZONES_IN_EDGE_BOTTOM;
+	cfg->zones_button_1 = DEFAULT_ZONES_BUTTON_1;
+	cfg->zones_button_2 = DEFAULT_ZONES_BUTTON_2;
+	cfg->zones_button_3 = DEFAULT_ZONES_BUTTON_3;
 	cfg->button_0touch = DEFAULT_BUTTON_0TOUCH;
 	cfg->button_1touch = DEFAULT_BUTTON_1TOUCH;
 	cfg->button_2touch = DEFAULT_BUTTON_2TOUCH;
@@ -204,6 +208,10 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->button_integrated = xf86SetBoolOption(opts, "ButtonIntegrated", DEFAULT_BUTTON_INTEGRATED);
 	cfg->button_expire = MAXVAL(xf86SetIntOption(opts, "ButtonTouchExpire", DEFAULT_BUTTON_EXPIRE), 0);
 	cfg->button_zones = xf86SetBoolOption(opts, "ButtonZonesEnable", DEFAULT_BUTTON_ZONES);
+	cfg->button_zones_in_edge_bottom = xf86SetBoolOption(opts, "ButtonZonesInEdgeBottom", DEFAULT_BUTTON_ZONES_IN_EDGE_BOTTOM);
+	cfg->zones_button_1 = CLAMPVAL(xf86SetIntOption(opts, "ZoneButton1", DEFAULT_ZONES_BUTTON_1), 0, 32);
+	cfg->zones_button_2 = CLAMPVAL(xf86SetIntOption(opts, "ZoneButton2", DEFAULT_ZONES_BUTTON_2), 0, 32);
+	cfg->zones_button_3 = CLAMPVAL(xf86SetIntOption(opts, "ZoneButton3", DEFAULT_ZONES_BUTTON_3), 0, 32);
 	cfg->button_0touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger0", DEFAULT_BUTTON_0TOUCH), 0, 32);
 	cfg->button_1touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger1", DEFAULT_BUTTON_1TOUCH), 0, 32);
 	cfg->button_2touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger2", DEFAULT_BUTTON_2TOUCH), 0, 32);

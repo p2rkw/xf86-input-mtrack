@@ -40,8 +40,12 @@
 #define DEFAULT_EDGE_BOTTOM_SIZE 10
 #define DEFAULT_BUTTON_ENABLE 1
 #define DEFAULT_BUTTON_INTEGRATED 1
-#define DEFAULT_BUTTON_ZONES 0
-#define DEFAULT_BUTTON_0TOUCH 0 /* When finger placement is "invalid", do not emulate any button */
+#define DEFAULT_BUTTON_ZONES 0 /* Button zones are disabled */
+#define DEFAULT_BUTTON_ZONES_IN_EDGE_BOTTOM 0 /* Button zones are emulated on the whole pad */
+#define DEFAULT_ZONES_BUTTON_1 1
+#define DEFAULT_ZONES_BUTTON_2 3
+#define DEFAULT_ZONES_BUTTON_3 0
+#define DEFAULT_BUTTON_0TOUCH 0 /* "invalid" finger placement do not emulate any button */
 #define DEFAULT_BUTTON_1TOUCH 1
 #define DEFAULT_BUTTON_2TOUCH 2
 #define DEFAULT_BUTTON_3TOUCH 3
@@ -157,6 +161,10 @@ struct MConfig {
 	int button_integrated;	// Is the button under the touchpad? 0 or 1
 	int button_expire;		// How long to consider a touch for button emulation. >= 0
 	int button_zones;		// Use button zones for emulation?
+	int button_zones_in_edge_bottom;	// Height of the button zones
+	int zones_button_1;		// Button to execute when clicking in the leftmost part of the zone (button_zones > 0 and zones_height > 0)
+	int zones_button_2;		// Button to execute when clicking right of zone_button1 part of the zone (button_zones > 0 and zones_height > 0)
+	int zones_button_3;		// Button to execute when clicking the rightmost part of the zone (button_zones > 0 and zones_height > 0)
 	int button_0touch;		// What button to emulate when no finger is on the
 							// pad and a click is registered? 0 to 32
 	int button_1touch;		// What button to emulate when one finger is on the
