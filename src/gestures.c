@@ -224,7 +224,7 @@ static void trigger_drag_stop(struct Gestures* gs, const struct MConfig* cfg)
 		else{
 			/* Tap to drag lock timeout implementaion:
 			 * Instead of breaking dragging completely, just take one step back
-			 * to ready state and start timer wainting for future dragging */
+			 * to ready state and start timer waiting for future dragging */
 			gs->drag_state = GS_DRAG_READY;
 			timeraddms(&gs->time, lock_timeout, &gs->move_drag_expire);
 			LOG_DEBUG_GESTURES("trigger_drag_stop: drag in wait lock\n");
@@ -252,7 +252,6 @@ static void buttons_update(struct Gestures* gs,
 	static bitmask_t button_prev = 0U;
 	int i, integrated_down, integrated_up;
 	int integrated_just_clicked, integrated_just_released;
-	int touching;
 
 	integrated_down = 0;
 	integrated_up = 0;
@@ -292,73 +291,15 @@ static void buttons_update(struct Gestures* gs,
 		}
 
 		if (integrated_just_clicked) {
+			int is_emulation_triggered = 0;
 			if (cfg->button_zones && lowest >= 0) {
-				int zones, left, right, pos;
-				double width;
-
-				zones = 0;
-				if (cfg->button_1touch > 0)
-					zones++;
-				if (cfg->button_2touch > 0)
-					zones++;
-				if (cfg->button_3touch > 0)
-					zones++;
-
-				if (zones > 0) {
-					width = ((double)cfg->pad_width)/((double)zones);
-					pos = cfg->pad_width / 2 + ms->touch[lowest].x; /* Why not mean x of all touches? */
-					LOG_EMULATED("buttons_update: pad width %d, zones %d, zone width %f, x %d\n",
-						cfg->pad_width, zones, width, pos);
-					for (i = 0; i < zones; i++) {
-						left = width*i;
-						right = width*(i+1);
-						if ((i == 0 || pos >= left) && (i == zones - 1 || pos <= right)) {
-							LOG_EMULATED("buttons_update: button %d, left %d, right %d (found)\n", i, left, right);
-							break;
-						}
-						else
-							LOG_EMULATED("buttons_update: button %d, left %d, right %d\n", i, left, right);
-					}
-
-					if (i == 0)
-						trigger_button_emulation(gs, cfg->button_1touch - 1);
-					else if (i == 1)
-						trigger_button_emulation(gs, cfg->button_2touch - 1);
-					else
-						trigger_button_emulation(gs, cfg->button_3touch - 1);
-				}
+				is_emulation_triggered = buttons_zone_update(gs, cfg, ms, lowest);
 			}
-			else if (latest >= 0) {
-				touching = 0;
-				struct timeval expire;
-				foreach_bit(i, ms->touch_used) {
-					microtime(&expire);
-					timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
-					if ((cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) &&
-						!(cfg->ignore_thumb && GETBIT(ms->touch[i].flags, MT_THUMB)) &&
-						!(cfg->ignore_palm && GETBIT(ms->touch[i].flags, MT_PALM)) &&
-						!(GETBIT(ms->touch[i].flags, MT_EDGE))) {
-						touching++;
-						LOG_EMULATED("buttons_update: latest >=0: touching++ =%d\n", touching);
-					}
-				}
-				LOG_EMULATED("buttons_update: latest >=0: touching=%d\n", touching);
-
-				if (touching == 1 && cfg->button_1touch > 0)
-					trigger_button_emulation(gs, cfg->button_1touch - 1);
-				else if (touching == 2 && cfg->button_2touch > 0)
-					trigger_button_emulation(gs, cfg->button_2touch - 1);
-				else if (touching == 3 && cfg->button_3touch > 0)
-					trigger_button_emulation(gs, cfg->button_3touch - 1);
-			}
-			else if (cfg->button_0touch > 0) {
-				/* The integrated physical button have been pressed but no finger are valid
-				 * This code path can be reached by enabling the ClickFinger0 in the config file. */
-				LOG_EMULATED("buttons_update: integrated pressed without touch detection: button %d\n", cfg->button_0touch - 1);
-				trigger_button_emulation(gs, cfg->button_0touch - 1);
+			if (!is_emulation_triggered && latest >= 0) {
+				touch_detect_update(gs, cfg, ms, latest);
 			}
 		}
-	} /* if (down)*/
+	}
 
 	if (integrated_just_released) {
 		foreach_bit(i, ms->touch_used) {
@@ -369,6 +310,110 @@ static void buttons_update(struct Gestures* gs,
 		}
 		trigger_button_emulation_end(gs);
 	}
+}
+
+/*
+ * Handle the physical button click in relation to touch properties.
+ * It count the number of valid finger touching the pad while clicking it to 
+ * emulate the action in the user config. See "ClickFinger#" configuration parameter.
+*/
+static void touch_detect_update(
+	struct Gestures* gs,
+	const struct MConfig* cfg,
+	const struct MTState* ms,
+	int latest)
+{
+	int i = 0, 
+	touching = 0;
+	struct timeval expire;
+	foreach_bit(i, ms->touch_used) {
+		microtime(&expire);
+		timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
+		if ((cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) &&
+			!(cfg->ignore_thumb && GETBIT(ms->touch[i].flags, MT_THUMB)) &&
+			!(cfg->ignore_palm && GETBIT(ms->touch[i].flags, MT_PALM)) &&
+			!(GETBIT(ms->touch[i].flags, MT_EDGE))) {
+			touching++;
+			LOG_EMULATED("touch_detect_udpate: latest >=0: touching++ =%d\n", touching);
+		}
+	}
+	LOG_EMULATED("touch_detect_udpate: latest >=0: touching=%d\n", touching);
+	if (touching == 0 && cfg->button_0touch > 0) {
+		/* The integrated physical button have been pressed but no finger are valid
+		 * This code path can be reached by enabling the ClickFinger0 in the config file. */
+		trigger_button_emulation(gs, cfg->button_0touch - 1);
+	}
+	else if (touching == 1 && cfg->button_1touch > 0)
+		trigger_button_emulation(gs, cfg->button_1touch - 1);
+	else if (touching == 2 && cfg->button_2touch > 0)
+		trigger_button_emulation(gs, cfg->button_2touch - 1);
+	else if (touching == 3 && cfg->button_3touch > 0)
+		trigger_button_emulation(gs, cfg->button_3touch - 1);
+}
+
+/*
+ * Handle the button zone options for triggering button emulation
+ * Up to three zones can be setup, one for each button_touch type.
+ * This function take into account a maximum height for zone action.
+ *
+ * Return: "true" if a button_emulation was triggered, else false
+*/
+static int buttons_zone_update(
+	struct Gestures* gs,
+	const struct MConfig* cfg,
+	const struct MTState* ms,
+	int lowest)
+{
+	int i, zones, left, right, pos_x, pos_y;
+	double width;
+	double limit_height;
+
+	zones = 0;
+	if (cfg->zones_button_1 > 0)
+		zones++;
+	if (cfg->zones_button_2 > 0)
+		zones++;
+	if (cfg->zones_button_3 > 0)
+		zones++;
+
+	if (zones > 0) {
+		limit_height = -1;
+		pos_y = 0;
+
+		/* Check if the zone need to be limited in height */
+		if(cfg->button_zones_in_edge_bottom != 0 && cfg->edge_bottom_size != 0) {
+			limit_height = cfg->pad_height - cfg->pad_height * ((double)cfg->edge_bottom_size / 100);
+			pos_y = cfg->pad_height / 2 + ms->touch[lowest].y;
+			LOG_EMULATED("button_zone_update: limit_height %f, pos_y %d, pad_height %d, edge_bottom_size %d\n",
+				limit_height, pos_y, cfg->pad_height, cfg->edge_bottom_size);
+		}
+		/* If no height limit is set in the config, it will always be true */
+		if(pos_y >= limit_height) {
+			width = ((double)cfg->pad_width) / ((double)zones);
+			pos_x = cfg->pad_width / 2 + ms->touch[lowest].x; /* Why not mean x of all touches? */
+			LOG_EMULATED("button_zone_update: pad width %d, zones %d, zone width %f, zone height %f, x %d\n",
+				cfg->pad_width, zones, width, limit_height, pos_x);
+
+			for (i = 0; i < zones; i++) {
+				left = width*i;
+				right = width*(i+1);
+				if ((i == 0 || pos_x >= left) && (i == zones - 1 || pos_x <= right)) {
+					LOG_EMULATED("button_zone_update: button %d, left %d, right %d (found)\n", i, left, right);
+					break;
+				}
+				else
+					LOG_EMULATED("button_zone_update: button %d, left %d, right %d\n", i, left, right);
+			}
+			if (i == 0)
+				trigger_button_emulation(gs, cfg->button_1touch - 1);
+			else if (i == 1)
+				trigger_button_emulation(gs, cfg->button_2touch - 1);
+			else
+				trigger_button_emulation(gs, cfg->button_3touch - 1);
+			return 1;
+		}
+	}
+	return 0;
 }
 
 /*

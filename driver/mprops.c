@@ -29,7 +29,7 @@
 # define LOG_DEBUG_PROPS LOG_DISABLED
 #endif
 
-#define MAX_INT_VALUES 5
+#define MAX_INT_VALUES 7
 #define MAX_FLOAT_VALUES 4
 #define MAX_BUTTON_VALUES 6
 
@@ -156,13 +156,17 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[0] = cfg->button_zones;
 	ivals[1] = cfg->button_move;
 	ivals[2] = cfg->button_expire;
-	mprops.button_emulate_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_SETTINGS, 3, ivals, 16);
+	ivals[3] = cfg->button_zones_in_edge_bottom;
+	mprops.button_emulate_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_SETTINGS, 4, ivals, 16);
 
 	ivals[0] = cfg->button_0touch;
 	ivals[1] = cfg->button_1touch;
 	ivals[2] = cfg->button_2touch;
 	ivals[3] = cfg->button_3touch;
-	mprops.button_emulate_values = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_VALUES, 4, ivals, 8);
+	ivals[4] = cfg->zones_button_1;
+	ivals[5] = cfg->zones_button_2;
+	ivals[6] = cfg->zones_button_3;
+	mprops.button_emulate_values = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_VALUES, 7, ivals, 8);
 
 	ivals[0] = cfg->tap_hold;
 	ivals[1] = cfg->tap_timeout;
