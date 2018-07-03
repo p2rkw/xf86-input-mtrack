@@ -291,15 +291,15 @@ static void buttons_update(struct Gestures* gs,
 		}
 
 		if (integrated_just_clicked) {
-			int continue_integrated_update = 1;
+			int is_emulation_triggered = 0;
 			if (cfg->button_zones && lowest >= 0) {
-				continue_integrated_update = buttons_zone_update(gs, cfg, ms, lowest);
+				is_emulation_triggered = buttons_zone_update(gs, cfg, ms, lowest);
 			}
-			if (continue_integrated_update && latest >= 0) {
-				touch_detect_udpate(gs, cfg, ms, latest);
+			if (!is_emulation_triggered && latest >= 0) {
+				touch_detect_update(gs, cfg, ms, latest);
 			}
 		}
-	} /* if (down)*/
+	}
 
 	if (integrated_just_released) {
 		foreach_bit(i, ms->touch_used) {
@@ -312,12 +312,12 @@ static void buttons_update(struct Gestures* gs,
 	}
 }
 
-/* 
+/*
  * Handle the physical button click in relation to touch properties.
  * It count the number of valid finger touching the pad while clicking it to 
  * emulate the action in the user config. See "ClickFinger#" configuration parameter.
 */
-static void touch_detect_udpate(
+static void touch_detect_update(
 	struct Gestures* gs,
 	const struct MConfig* cfg,
 	const struct MTState* ms,
@@ -355,6 +355,8 @@ static void touch_detect_udpate(
  * Handle the button zone options for triggering button emulation
  * Up to three zones can be setup, one for each button_touch type.
  * This function take into account a maximum height for zone action.
+ *
+ * Return: "true" if a button_emulation was triggered, else false
 */
 static int buttons_zone_update(
 	struct Gestures* gs,
@@ -377,20 +379,21 @@ static int buttons_zone_update(
 	if (zones > 0) {
 		limit_height = -1;
 		pos_y = 0;
-		
+
 		/* Check if the zone need to be limited in height */
 		if(cfg->button_zones_in_edge_bottom != 0 && cfg->edge_bottom_size != 0) {
 			limit_height = cfg->pad_height - cfg->pad_height * ((double)cfg->edge_bottom_size / 100);
 			pos_y = cfg->pad_height / 2 + ms->touch[lowest].y;
-			LOG_EMULATED("button_zone_update: zone limit %f, pos_y %d, pad_height %d, edge_bottom_size %d\n",
+			LOG_EMULATED("button_zone_update: limit_height %f, pos_y %d, pad_height %d, edge_bottom_size %d\n",
 				limit_height, pos_y, cfg->pad_height, cfg->edge_bottom_size);
 		}
+		/* If no height limit is set in the config, it will always be true */
 		if(pos_y >= limit_height) {
 			width = ((double)cfg->pad_width) / ((double)zones);
 			pos_x = cfg->pad_width / 2 + ms->touch[lowest].x; /* Why not mean x of all touches? */
 			LOG_EMULATED("button_zone_update: pad width %d, zones %d, zone width %f, zone height %f, x %d\n",
 				cfg->pad_width, zones, width, limit_height, pos_x);
-			
+
 			for (i = 0; i < zones; i++) {
 				left = width*i;
 				right = width*(i+1);
@@ -407,10 +410,10 @@ static int buttons_zone_update(
 				trigger_button_emulation(gs, cfg->button_2touch - 1);
 			else
 				trigger_button_emulation(gs, cfg->button_3touch - 1);
-			return 0;
+			return 1;
 		}
 	}
-	return 1;
+	return 0;
 }
 
 /*
