@@ -1,3 +1,10 @@
+## v0.5.1
+* Add button emulation when no finger placement is valid
+* Add dedicated zone button
+* Enable the restriction of the zone inside the bottom edge
+* Readme configuration options are grouped according to their relationship
+* Readme anchor has been moved to the options themselves
+
 ## v0.5.0
 * Add tap-to-drag lock timeout
 * Make edge size configurable for each edge individually

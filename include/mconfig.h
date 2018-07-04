@@ -43,7 +43,7 @@
 #define DEFAULT_BUTTON_ZONES 0 /* Button zones are disabled */
 #define DEFAULT_BUTTON_ZONES_IN_EDGE_BOTTOM 0 /* Button zones are emulated on the whole pad */
 #define DEFAULT_ZONES_BUTTON_1 1
-#define DEFAULT_ZONES_BUTTON_2 3
+#define DEFAULT_ZONES_BUTTON_2 2
 #define DEFAULT_ZONES_BUTTON_3 0
 #define DEFAULT_BUTTON_0TOUCH 0 /* "invalid" finger placement do not emulate any button */
 #define DEFAULT_BUTTON_1TOUCH 1
