@@ -30,7 +30,7 @@
 #include "gestures.h"
 #include "mtouch.h"
 #include "trig.h"
-
+//#define DEBUG_GESTURES 1
 #ifdef DEBUG_GESTURES
 # define LOG_DEBUG_GESTURES LOG_DEBUG
 # define LOG_EMULATED LOG_INFO
@@ -291,11 +291,12 @@ static void buttons_update(struct Gestures* gs,
 		}
 
 		if (integrated_just_clicked) {
+			LOG_EMULATED("buttons_update: integrated_just_clicked=true\n");
 			int is_emulation_triggered = 0;
 			if (cfg->button_zones && lowest >= 0) {
 				is_emulation_triggered = buttons_zone_update(gs, cfg, ms, lowest);
 			}
-			if (!is_emulation_triggered && latest >= 0) {
+			if (!is_emulation_triggered) {
 				touch_detect_update(gs, cfg, ms, latest);
 			}
 		}
@@ -326,18 +327,22 @@ static void touch_detect_update(
 	int i = 0, 
 	touching = 0;
 	struct timeval expire;
-	foreach_bit(i, ms->touch_used) {
-		microtime(&expire);
-		timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
-		if ((cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) &&
-			!(cfg->ignore_thumb && GETBIT(ms->touch[i].flags, MT_THUMB)) &&
-			!(cfg->ignore_palm && GETBIT(ms->touch[i].flags, MT_PALM)) &&
-			!(GETBIT(ms->touch[i].flags, MT_EDGE))) {
-			touching++;
-			LOG_EMULATED("touch_detect_udpate: latest >=0: touching++ =%d\n", touching);
+
+	/*If latest is not set, the finger placement is not valid*/
+	if (latest >= 0) {
+		foreach_bit(i, ms->touch_used) {
+			microtime(&expire);
+			timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
+			if ((cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) &&
+				!(cfg->ignore_thumb && GETBIT(ms->touch[i].flags, MT_THUMB)) &&
+				!(cfg->ignore_palm && GETBIT(ms->touch[i].flags, MT_PALM)) &&
+				!(GETBIT(ms->touch[i].flags, MT_EDGE))) {
+				touching++;
+				LOG_EMULATED("touch_detect_udpate: latest >=0: touching++ =%d\n", touching);
+			}
 		}
 	}
-	LOG_EMULATED("touch_detect_udpate: latest >=0: touching=%d\n", touching);
+	LOG_EMULATED("touch_detect_udpate: latest=%d: touching=%d\n", latest, touching);
 	if (touching == 0 && cfg->button_0touch > 0) {
 		/* The integrated physical button have been pressed but no finger are valid
 		 * This code path can be reached by enabling the ClickFinger0 in the config file. */
@@ -369,11 +374,11 @@ static int buttons_zone_update(
 	double limit_height;
 
 	zones = 0;
-	if (cfg->zones_button_1 > 0)
+	if (cfg->button_first_zone > 0)
 		zones++;
-	if (cfg->zones_button_2 > 0)
+	if (cfg->button_second_zone > 0)
 		zones++;
-	if (cfg->zones_button_3 > 0)
+	if (cfg->button_third_zone > 0)
 		zones++;
 
 	if (zones > 0) {
@@ -381,8 +386,8 @@ static int buttons_zone_update(
 		pos_y = 0;
 
 		/* Check if the zone need to be limited in height */
-		if(cfg->button_zones_in_edge_bottom != 0 && cfg->edge_bottom_size != 0) {
-			limit_height = cfg->pad_height - cfg->pad_height * ((double)cfg->edge_bottom_size / 100);
+		if(cfg->is_button_zones_height_limited != 0 && cfg->edge_bottom_size != 0) {
+			limit_height = cfg->pad_height - cfg->pad_height * ((double)cfg->edge_bottom_size / 100.0);
 			pos_y = cfg->pad_height / 2 + ms->touch[lowest].y;
 			LOG_EMULATED("button_zone_update: limit_height %f, pos_y %d, pad_height %d, edge_bottom_size %d\n",
 				limit_height, pos_y, cfg->pad_height, cfg->edge_bottom_size);
@@ -405,11 +410,11 @@ static int buttons_zone_update(
 					LOG_EMULATED("button_zone_update: button %d, left %d, right %d\n", i, left, right);
 			}
 			if (i == 0)
-				trigger_button_emulation(gs, cfg->button_1touch - 1);
+				trigger_button_emulation(gs, cfg->button_first_zone - 1);
 			else if (i == 1)
-				trigger_button_emulation(gs, cfg->button_2touch - 1);
-			else
-				trigger_button_emulation(gs, cfg->button_3touch - 1);
+				trigger_button_emulation(gs, cfg->button_second_zone - 1);
+			else if (i == 2)
+				trigger_button_emulation(gs, cfg->button_third_zone - 1);
 			return 1;
 		}
 	}

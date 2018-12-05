@@ -40,20 +40,27 @@ Section "InputClass"
         Option "ButtonEnable" "true" # Whether or not to enable the physical buttons on or near the trackpad. Boolean value. Defaults to true.
         Option "ButtonMoveEmulate" "true" # Whether or not to count the moving finger when emulating button clicks. Useful to disable if you use two hands on trackpad. Boolean value. Defaults to true.
         Option "ButtonIntegrated" "true" # Whether or not the physical buttons are integrated with the trackpad. If you have a one-piece trackpad like on newer MacBooks, this should be set to true. Button emulation depends on this value being correct. Boolean value. Defaults to true.
-        Option "ButtonZonesEnable" "false" # Whether or not to enable button zones. If button zones are enabled then the trackpad will be split into one, two, or three vertical zones. Clicking the integrated button in one of these zones will send the button event for ClickFinger1, ClickFinger2, or ClickFinger3. The driver will only add zones for those ClickFinger values that are enabled. So setting ClickFinger1 to 0 and enabling the other two will create two zones, one for ClickFinger2 and one for ClickFinger3. Boolean value. Defaults to false.
+        Option "ButtonZonesEnable" "true" # Whether or not to enable button zones. If button zones are enabled then the trackpad will be split into one, two, or three vertical zones. Clicking the integrated button in one of these zones will send the button event for ClickFinger1, ClickFinger2, or ClickFinger3. The driver will only add zones for those ClickFinger values that are enabled. So setting ClickFinger1 to 0 and enabling the other two will create two zones, one for ClickFinger2 and one for ClickFinger3. Boolean value. Defaults to false.
+        Option "LimitButtonZonesToBottomEdge" "true" # Restrict button zones inside the EdgeBottom area. So instead of enabling zones on the full pad height, the zone is limited to the percentage set for the EdgeBottom. Boolean value. Default to false.
+
+        # Zones stack from left to right inside the 20% height defined above (EdgeBottomSize)
+        Option "FirstZoneButton" "1" # The button to emulate when the zone is pressed. This is the leftmost part of the pad. Integer value. A value of 0 disables this zone split. Defaults to 1.
+        Option "SecondZoneButton" "3" # The button to emulate when the zone is pressed. This will float to the right of the leftmost zone. Integer value. A value of 0 disables this zone split. Defaults to 2.
+        # Next one is not needed and defaut to zero
+        #Option "ThirdZoneButton" "0" # The button to emulate when the zone is pressed. This will float to the right of the leftmost zone. Integer value. A value of 0 disables this zone split. Defaults to 0.
 
         Option "ClickFinger0" "1" # Which button to emulate when no valid finger placement is touching the trackpad during a click. Integer value. A value of 0 disables one-touch emulation. Defaults to 1.
         Option "ClickFinger1" "1" # Which button to emulate when one finger is touching the trackpad during a click. Integer value. A value of 0 disables one-touch emulation. Defaults to 1.
-        Option "ClickFinger2" "1" # Which button to emulate when two fingers are touching the trackpad during a click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 2.
+        Option "ClickFinger2" "3" # Which button to emulate when two fingers are touching the trackpad during a click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 2.
         Option "ClickFinger3" "2" # Which button to emulate when three fingers are touching the trackpad during a click. Integer value. A value of 0 disabled one-touch emulation. Defaults to 3.
 
 ###---------------------- Gesture Settings ----------------------------------###
 ### property: "Trackpad Gesture Settings"
-        Option "GestureClickTime" "20"
-        Option "GestureWaitTime" "3"
-###--------------------------------------------------------------------------###
+        Option "GestureClickTime" "20" # When a gesture triggers a click, how much time to hold down the emulated button. Integer value representing milliseconds. Defaults to 10.
+        Option "GestureWaitTime" "3" # Touches are allowed to transition from one gesture to another. For example, you may go from scrolling to swiping without releasing your fingers from the pad. This value is the amount of time you must be performing the new gesture before it is triggered. This prevents accidental touches from triggering other gestures. Integer value representing milliseconds. Defaults to 100.
 
-        Option "ButtonTouchExpire" "120"
+###--------------------------------------------------------------------------###
+        Option "ButtonTouchExpire" "120" # How long (in ms) to consider a touching finger as part of button emulation. A value of 0 will not expire touches. Integer value. Defaults to 100.
         
         Option "FingerLow" "0" # Defines the pressure at which a finger is detected as a release. This is a percentage represented as an integer. Default is 5.
         Option "FingerHigh" "0" # Defines the pressure at which a finger is detected as a touch. This is a percentage represented as an integer. Default is 5.
@@ -61,25 +68,25 @@ Section "InputClass"
 ###---------------------- Tap Settings --------------------------------------###
 ### property "Trackpad Tap Settings"
         Option "ClickTime" "15" # When tapping, how much time to hold down the emulated button. Integer value representing milliseconds. Integer value representing miliseconds. Defaults to 50.
-        Option "MaxTapTime" "165"
-        Option "MaxTapMove" "155"
-###--------------------------------------------------------------------------###
+        Option "MaxTapTime" "165" # The amount of time to wait for incoming touches after first one before counting it as emulated button click. Integer value representing milliseconds. Defaults to 120.
+        Option "MaxTapMove" "155" # How far a touch is allowed to move before counting it is no longer considered a tap. Integer value. Defaults to 400.
 
-        Option "TapButton1" "1"
-        Option "TapButton2" "3"
-        Option "TapButton3" "2"
+###--------------------------------------------------------------------------###
+        Option "TapButton1" "1" # Which button to emulate for one-finger tapping. Integer value. A value of 0 disables one-finger tapping. Defaults to 1.
+        Option "TapButton2" "3" # Which button to emulate for two-finger tapping. Integer value. A value of 0 disables two-finger tapping. Defaults to 3.
+        Option "TapButton3" "2" # Which button to emulate for three-finger tapping. Integer value. A value of 0 disables three-finger tapping. Defaults to 2.
+        #Option "TapButton4" "0" # Which button to emulate for four-finger tapping. Integer value. A value of 0 disables three-finger tapping. Defaults to 0.
 
 ###------------------------ Swipe2 as mouse wheel ---------------------------###
-        Option "ScrollSensitivity" "0" # disable pointer mouvement during scroll 
-        Option "ScrollDistance" "22"
-        Option "ScrollClickTime" "12"
-        Option "ScrollSensitivity" "0"
-        Option "ScrollUpButton" "5"
-        Option "ScrollDownButton" "4"
-        Option "ScrollLeftButton" "6"
-        Option "ScrollRightButton" "7"
+        Option "ScrollDistance" "22" # For two finger scrolling. How far you must move your fingers before a button click is triggered. Integer value. Defaults to 150.
+        Option "ScrollClickTime" "12" # For two finger scrolling. How long button triggered by scrolling will be hold down. A value of 0 will hold button down till end of gesture. 0 - emit button click only once pre "instance" of gesture. Integer value representing milliseconds. Defaults to 20.
+        Option "ScrollSensitivity" "0" # For two finger scrolling. Sensitivity (movement speed) of pointer during two finger scrolling. A value of 0 disables pointer movement during gesture. Integer value expressed as parts per thousand of normal sensivity. A value of 1000 results with normal movement speed. Defaults to 0.
+        Option "ScrollUpButton" "5" # For two finger scrolling. The button that is triggered by scrolling up. Integer value. A value of 0 disables scrolling up. Defaults to 4.
+        Option "ScrollDownButton" "4" # For two finger scrolling. The button that is triggered by scrolling down. Integer value. A value of 0 disables scrolling down. Defaults to 5.
+        Option "ScrollLeftButton" "6" # For two finger scrolling. The button that is triggered by scrolling left. Integer value. A value of 0 disables scrolling left. Defaults to 6.
+        Option "ScrollRightButton" "7" # For two finger scrolling. The button that is triggered by scrolling right. Integer value. A value of 0 disables scrolling right. Defaults to 7.
 
-###--------------------------------------------------------------------------###
+###------------------------ Swipe3 - act as mouse wheel ---------------------###
         Option "SwipeDistance" "22"
         Option "SwipeClickTime" "12"
         
@@ -118,7 +125,12 @@ Section "InputClass"
         Option "TapDragLockTimeout" "0" # This is how long the driver will wait after initial drag in 'drag ready' state in which it will be able to resume previous drag without additional up, down sequence. Value of 0 disables this functionality. Values less than zero will make mtrack requre additional tap to finish drag by sending button up. Integer value representing milliseconds. Defaults to 500.
 ###--------------------------------------------------------------------------###
 
-        Option "EdgeBottomSize"        "17"  # dont count touches from bottom 17% of area
+        Option "EdgeBottomSize" "17"  # Disable tap and movement detection in the bottom 17% of the pad
+        #Option "EdgeTopSize"   "2"
+        #Option "EdgeLeftSize"  "4"
+        #Option "EdgeRightSize" "6"
+        #Option "EdgeScrollUpButton"    "4"
+        #Option "EdgeScrollDownButton"  "5"
 
         Option "Hold1Move1StationaryMaxMove" "120"
         Option "Hold1Move1StationaryButton" "1" # For two finger hold-and-move functionality. The button that is triggered by holding one finger and moving another one. Integer value. A value of 0 disables hold-and-move. Value of 0 disables this functionality. Defaults to 1.

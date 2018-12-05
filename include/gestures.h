@@ -112,7 +112,7 @@ static int buttons_zone_update(
 	const struct MConfig* cfg,
 	const struct MTState* ms,
 	int lowest);
-static void touch_detect_udpate(
+static void touch_detect_update(
 	struct Gestures* gs,
 	const struct MConfig* cfg,
 	const struct MTState* ms,
