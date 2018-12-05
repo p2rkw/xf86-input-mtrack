@@ -140,16 +140,17 @@ Percentage represented by an integer.
 Integer value. Defaults to 70.
 
 ---
-#### Zones
+#### Zones<a name="Zones"></a>
+Divide the touchpad into "zones". Clicking the integrated button in one of 
+these zones will send the button event configured for ZoneButton1, ZoneButton2,
+or ZoneButton3. The driver will only add zones for the ZoneButton values that
+are enabled. The zone splitting start from the left using the smallest
+ZoneButton# value. So enabling only ZoneButton2 and ZoneButton3 will create two
+zones, the left one for ZoneButton2 and the right one for ZoneButton3.  
+
 **[ButtonZonesEnable](#ButtonZonesEnable)**<a name="ButtonZonesEnable"></a>
 Whether or not to enable button zones. If button zones are enabled then the
-trackpad will be split into one, two, or three vertical zones. Clicking the
-integrated button in one of these zones will send the button event for
-ZoneButton1, ZoneButton2, or ZoneButton3. The driver will only add zones for
-the ZoneButton values that are enabled. The zone splitting start from the 
-left using the smallest ZoneButton value. So setting ZoneButton1 to 0 and
-enabling the other two will create two zones, one for ZoneButton2 and one for
-ZoneButton3.  
+trackpad will be split into one, two, or three vertical zones. 
 Boolean value. Defaults to false.
 
 **[ZoneButton1](#ZoneButton1)**<a name="ZoneButton1"></a>
@@ -167,9 +168,9 @@ The button to emulate when the zone is pressed. This will float to the right of
 the leftmost zone. Integer value. A value of 0 disables this zone split.  
 Integer value. Defaults to 0.
 
-**[ButtonZonesInEdgeBottom](#ButtonZonesInEdgeBottom)**<a name="ButtonZonesInEdgeBottom"></a>
-Restrict button zones inside the EdgeBottom area. So instead of enabling zones
-on the full pad height, the zone is limited to the percentage set for the EdgeBottom.  
+**[LimitButtonZones](#LimitButtonZones)**<a name="LimitButtonZones"></a>
+Restrict button zones inside the [EdgeBottom](#EdgeBottomSize) area. So instead of enabling zones
+on the full pad height, the zone is limited to the percentage set for the [EdgeBottom](#EdgeBottomSize).  
 Boolean value. Default to false.
 
 ---
@@ -227,14 +228,13 @@ disables three-finger tapping.
 Integer value. Defaults to 0.
 
 **[ClickTime](#ClickTime)**<a name="ClickTime"></a>
-When tapping, how much time to hold down the emulated button. Integer value
-representing milliseconds.  
-Integer value. Defaults to 50.
+When tapping, how much time to hold down the emulated button.  
+Integer value representing milliseconds. Defaults to 50.
 
 **[MaxTapTime](#MaxTapTime)**<a name="MaxTapTime"></a>
 The amount of time to wait for incoming touches after first one before counting
-it as emulated button click. Integer value representing milliseconds.  
-Integer value. Defaults to 120.
+it as emulated button click.  
+Integer value representing milliseconds. Defaults to 120.
 
 **[MaxTapMove](#MaxTapMove)**<a name="MaxTapMove"></a>
 How far a touch is allowed to move before counting it is no longer considered a
@@ -247,19 +247,18 @@ Integer value. Defaults to 400.
 ##### Basic
 **[GestureClickTime](#GestureClickTime)**<a name="GestureClickTime"></a>
 When a gesture triggers a click, how much time to hold down the emulated button.
-Integer value representing milliseconds.  
-Integer value. Defaults to 10.
+Integer value representing milliseconds. Defaults to 10.  
 
 **[GestureWaitTime](#GestureWaitTime)**<a name="GestureWaitTime"></a>
 Touches are allowed to transition from one gesture to another. For example, you
 may go from scrolling to swiping without releasing your fingers from the pad.
 This value is the amount of time you must be performing the new gesture before
 it is triggered. This prevents accidental touches from triggering other
-gestures. Integer value representing milliseconds.  
-Integer value. Defaults to 100.
+gestures.   
+Integer value representing milliseconds. Defaults to 100.  
 
 ---
-##### Two fingers Scrolling
+##### Two fingers Scrolling<a name="two-finger-scrolling"></a>
 
 **[ScrollDistance](#ScrollDistance)**<a name="ScrollDistance"></a>
 For two finger scrolling. How far you must move your fingers before a button
@@ -313,7 +312,7 @@ Floating value. Defaults to 0.1.
 Property: "Trackpad Scroll Coasting"
 
 ---
-##### Three fingers swipe
+##### Three fingers swipe<a name="three-finger-swipe"></a>
 **[SwipeDistance](#SwipeDistance)**<a name="SwipeDistance"></a>
 For three finger swiping. How far you must move your fingers before a button
 click is triggered.  
@@ -347,7 +346,7 @@ For three finger swiping. The button that is triggered by swiping right.
 Integer value. A value of 0 disables swiping right. Defaults to 11.
 
 ---
-##### Four fingers swipe
+##### Four fingers swipe<a name="four-finger-swipe"></a>
 **[Swipe4Distance](#Swipe4Distance)**<a name="Swipe4Distance"></a>
 For four finger swiping. How far you must move your fingers before a button
 click is triggered.  
@@ -518,7 +517,7 @@ This is how long the driver will wait after initial drag in 'drag ready' state
 in which it will be able to resume previous drag without additional `up`, `down`
 sequence.  
 Value of 0 disables this functionality.  
-Values less than zero will make mtrack requre additional tap to finish drag
+Values of less than zero will make mtrack require additional tap to finish drag
 by sending `button up`.  
 Integer value representing milliseconds. Defaults to 500.
 
@@ -532,8 +531,8 @@ Boolean value. Defaults to false.
 
 Tips
 -------------
-##### Swipe to drag
-To setup swipe to drag functionality you have to choose which swipe gesture (Scroll, Swipe, Swipe4)
+#### Swipe to drag
+To setup swipe to drag functionality you have to choose which swipe gesture ([Scroll](two-finger-scrolling), [Swipe](#three-finger-swipe), [Swipe4](#four-finger-swipe))
 will be used for dragging.  
 Example configuration for three finger drag:
 ```
@@ -545,22 +544,22 @@ Example configuration for three finger drag:
     Option "SwipeClickTime" "0"
     Option "SwipeSensitivity" "1000"
 ```
-This will enable draging with three fingers. Change sensitivity for faster/slower movements.
+This will enable dragging with three fingers. Change [sensitivity](#SwipeSensitivity) for faster/slower movements.
 Scroll, and Swipe4 are also supported.
 
-##### Hold and move
+#### Hold and move
 Hold down one finger in place to initiate hold-and-move gesture.
 Then move another finger to drag configured button.
 Gesture will last as long as fist finger (a.k.a. stationary finger) will
 be held down in place.
 
-Increase TapMaxDist to give stationary finger more freedom.
-Set Hold1Move1Button to 0 to disable, set to other value to send button other 
+Increase [TapDragDist](#TapDragDist) to give stationary finger more freedom.
+Set [Hold1Move1StationaryButton](#Hold1Move1StationaryButton) to 0 to disable, set to other value to send button other 
 than "1".
 
-##### Persistent dragging
+#### Persistent dragging
 If you're using lot of tools that require dragging you can make it a little bit
-easier by enabling persistent tap-to-drag:
+easier by enabling [persistent tap-to-drag](#TapDragLockTimeout):
 ```
     Option "TapDragLockTimeout" "-1"
 ```
@@ -568,20 +567,27 @@ With that change you will have to perform additional tap when dragging with
 tap-to-drag. Other positive values will let you continue yor drag within
 specified time.
 
-##### Enabling soft button
-If you enable edge restriction ```Option "EdgeBottomSize" "20"``` and you still want the integrated button to
-click inside that edge, you must enable ClickFinger0, like:
+#### Enabling soft button
+##### Basic
+If you like to keep a finger on the bottom of the pad to click and use another one to move the cursor, you should enable edge restriction and [ClickFinger0](#ClickFinger0) parameters.
 ```
-    Option "ClickFinger0" "1"
+    Option "EdgeBottomSize" "20"    # Disable tap and movement detection in the bottom 20% of the pad
+    Option "ClickFinger0" "1"       # Enable clicking action "1" when no finger is detected
 ```
-Another option would be to enable ButtonZones, ButtonZonesInEdgeBottom and up
-to 3 ButtonZones. This enable the use of the bottom zone for clicking left/middle/right click.
+You could also use [ClickFinger0](#ClickFinger0) with [EdgeTop/Right/LeftSize](#EdgeDisabling).
+
+##### Advanced
+If you want more than one button in the bottom edge, you need to use a more  
+advanced configuration. It will enable you use up to [3 buttons](#Zones) inside that [edge](#EdgeBottomSize).  
 ```
-    Option "ButtonZonesEnable" "true"
-    Option "ButtonZone1" "1"
-    Option "ButtonZone2" "3"
-    Option "ButtonZone3" "2"
-    Option "ButtonZonesInEdgeBottom" "true"
+    Option "ButtonZonesEnable" "true"   # Enable "Zones"
+    Option "LimitButtonZones" "true"    # Limit the zones to the bottom edge
+    Option "EdgeBottomSize" "20"        # Disable tap and movement detection in the bottom 20% of the pad
+
+    # Zones stack from left to right inside the 20% height defined above
+    Option "ButtonZone1" "1"            # Left part fire click 1
+    Option "ButtonZone2" "3"            # Middle part fire click 3
+    Option "ButtonZone3" "2"            # Right part fire click 2
 ```
 
 

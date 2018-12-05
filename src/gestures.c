@@ -369,11 +369,11 @@ static int buttons_zone_update(
 	double limit_height;
 
 	zones = 0;
-	if (cfg->zones_button_1 > 0)
+	if (cfg->zone_1_button > 0)
 		zones++;
-	if (cfg->zones_button_2 > 0)
+	if (cfg->zone_2_button > 0)
 		zones++;
-	if (cfg->zones_button_3 > 0)
+	if (cfg->zone_3_button > 0)
 		zones++;
 
 	if (zones > 0) {
@@ -381,8 +381,8 @@ static int buttons_zone_update(
 		pos_y = 0;
 
 		/* Check if the zone need to be limited in height */
-		if(cfg->button_zones_in_edge_bottom != 0 && cfg->edge_bottom_size != 0) {
-			limit_height = cfg->pad_height - cfg->pad_height * ((double)cfg->edge_bottom_size / 100);
+		if(cfg->is_button_zones_limited != 0 && cfg->edge_bottom_size != 0) {
+			limit_height = cfg->pad_height - cfg->pad_height * ((double)cfg->edge_bottom_size / 100.0);
 			pos_y = cfg->pad_height / 2 + ms->touch[lowest].y;
 			LOG_EMULATED("button_zone_update: limit_height %f, pos_y %d, pad_height %d, edge_bottom_size %d\n",
 				limit_height, pos_y, cfg->pad_height, cfg->edge_bottom_size);
@@ -405,11 +405,11 @@ static int buttons_zone_update(
 					LOG_EMULATED("button_zone_update: button %d, left %d, right %d\n", i, left, right);
 			}
 			if (i == 0)
-				trigger_button_emulation(gs, cfg->button_1touch - 1);
+				trigger_button_emulation(gs, cfg->zone_1_button - 1);
 			else if (i == 1)
-				trigger_button_emulation(gs, cfg->button_2touch - 1);
-			else
-				trigger_button_emulation(gs, cfg->button_3touch - 1);
+				trigger_button_emulation(gs, cfg->zone_2_button - 1);
+			else if (i == 2)
+				trigger_button_emulation(gs, cfg->zone_3_button - 1);
 			return 1;
 		}
 	}

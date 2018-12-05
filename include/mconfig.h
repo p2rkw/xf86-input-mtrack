@@ -41,7 +41,7 @@
 #define DEFAULT_BUTTON_ENABLE 1
 #define DEFAULT_BUTTON_INTEGRATED 1
 #define DEFAULT_BUTTON_ZONES 0 /* Button zones are disabled */
-#define DEFAULT_BUTTON_ZONES_IN_EDGE_BOTTOM 0 /* Button zones are emulated on the whole pad */
+#define DEFAULT_IS_BUTTON_ZONES_LIMITED 0 /* Button zones are emulated on the whole pad (Not limited to the bottom edge)*/
 #define DEFAULT_ZONES_BUTTON_1 1
 #define DEFAULT_ZONES_BUTTON_2 2
 #define DEFAULT_ZONES_BUTTON_3 0
@@ -161,7 +161,7 @@ struct MConfig {
 	int button_integrated;	// Is the button under the touchpad? 0 or 1
 	int button_expire;		// How long to consider a touch for button emulation. >= 0
 	int button_zones;		// Use button zones for emulation?
-	int button_zones_in_edge_bottom;	// Height of the button zones
+	int is_button_zones_limited;	// Limit the button zones to the bottom edge?
 	int zones_button_1;		// Button to execute when clicking in the leftmost part of the zone (button_zones > 0 and zones_height > 0)
 	int zones_button_2;		// Button to execute when clicking right of zone_button1 part of the zone (button_zones > 0 and zones_height > 0)
 	int zones_button_3;		// Button to execute when clicking the rightmost part of the zone (button_zones > 0 and zones_height > 0)
