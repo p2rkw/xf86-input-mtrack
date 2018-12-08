@@ -156,16 +156,16 @@ void mprops_init(struct MConfig* cfg, InputInfoPtr local) {
 	ivals[0] = cfg->button_zones;
 	ivals[1] = cfg->button_move;
 	ivals[2] = cfg->button_expire;
-	ivals[3] = cfg->is_button_zones_limited;
+	ivals[3] = cfg->is_button_zones_height_limited;
 	mprops.button_emulate_settings = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_SETTINGS, 4, ivals, 16);
 
 	ivals[0] = cfg->button_0touch;
 	ivals[1] = cfg->button_1touch;
 	ivals[2] = cfg->button_2touch;
 	ivals[3] = cfg->button_3touch;
-	ivals[4] = cfg->zones_button_1;
-	ivals[5] = cfg->zones_button_2;
-	ivals[6] = cfg->zones_button_3;
+	ivals[4] = cfg->button_first_zone;
+	ivals[5] = cfg->button_second_zone;
+	ivals[6] = cfg->button_third_zone;
 	mprops.button_emulate_values = atom_init_integer(local->dev, MTRACK_PROP_BUTTON_EMULATE_VALUES, 7, ivals, 8);
 
 	ivals[0] = cfg->tap_hold;

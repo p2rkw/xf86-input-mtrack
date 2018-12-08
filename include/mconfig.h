@@ -41,10 +41,10 @@
 #define DEFAULT_BUTTON_ENABLE 1
 #define DEFAULT_BUTTON_INTEGRATED 1
 #define DEFAULT_BUTTON_ZONES 0 /* Button zones are disabled */
-#define DEFAULT_IS_BUTTON_ZONES_LIMITED 0 /* Button zones are emulated on the whole pad (Not limited to the bottom edge)*/
-#define DEFAULT_ZONES_BUTTON_1 1
-#define DEFAULT_ZONES_BUTTON_2 2
-#define DEFAULT_ZONES_BUTTON_3 0
+#define DEFAULT_IS_BUTTON_ZONES_HEIGHT_LIMITED 0 /* Button zones are emulated on the whole pad (Not limited to the bottom edge)*/
+#define DEFAULT_BUTTON_FIRST_ZONE 1
+#define DEFAULT_BUTTON_SECOND_ZONE 2
+#define DEFAULT_BUTTON_THIRD_ZONE 0
 #define DEFAULT_BUTTON_0TOUCH 0 /* "invalid" finger placement do not emulate any button */
 #define DEFAULT_BUTTON_1TOUCH 1
 #define DEFAULT_BUTTON_2TOUCH 2
@@ -161,10 +161,10 @@ struct MConfig {
 	int button_integrated;	// Is the button under the touchpad? 0 or 1
 	int button_expire;		// How long to consider a touch for button emulation. >= 0
 	int button_zones;		// Use button zones for emulation?
-	int is_button_zones_limited;	// Limit the button zones to the bottom edge?
-	int zones_button_1;		// Button to execute when clicking in the leftmost part of the zone (button_zones > 0 and zones_height > 0)
-	int zones_button_2;		// Button to execute when clicking right of zone_button1 part of the zone (button_zones > 0 and zones_height > 0)
-	int zones_button_3;		// Button to execute when clicking the rightmost part of the zone (button_zones > 0 and zones_height > 0)
+	int is_button_zones_height_limited;	// Limit the button zones to the height of the bottom edge?
+	int button_first_zone;	// Button to execute when clicking in the leftmost part of the zone (button_#_zones > 0)
+	int button_second_zone;	// Button to execute when clicking right of zone_button1 part of the zone (button_#_zones > 0)
+	int button_third_zone;	// Button to execute when clicking the rightmost part of the zone (button_#_zones > 0)
 	int button_0touch;		// What button to emulate when no finger is on the
 							// pad and a click is registered? 0 to 32
 	int button_1touch;		// What button to emulate when one finger is on the

@@ -168,7 +168,7 @@ The button to emulate when the zone is pressed. This will float to the right of
 the leftmost zone. Integer value. A value of 0 disables this zone split.  
 Integer value. Defaults to 0.
 
-**[LimitButtonZones](#LimitButtonZones)**<a name="LimitButtonZones"></a>
+**[LimitButtonZonesToEdgeBottom](#LimitButtonZonesToEdgeBottom)**<a name="LimitButtonZonesToEdgeBottom"></a>
 Restrict button zones inside the [EdgeBottom](#EdgeBottomSize) area. So instead of enabling zones
 on the full pad height, the zone is limited to the percentage set for the [EdgeBottom](#EdgeBottomSize).  
 Boolean value. Default to false.
