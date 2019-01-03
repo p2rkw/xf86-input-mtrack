@@ -30,7 +30,7 @@
 #include "gestures.h"
 #include "mtouch.h"
 #include "trig.h"
-
+#define DEBUG_GESTURES 1
 #ifdef DEBUG_GESTURES
 # define LOG_DEBUG_GESTURES LOG_DEBUG
 # define LOG_EMULATED LOG_INFO
@@ -291,11 +291,12 @@ static void buttons_update(struct Gestures* gs,
 		}
 
 		if (integrated_just_clicked) {
+			LOG_EMULATED("buttons_update: integrated_just_clicked=true\n");
 			int is_emulation_triggered = 0;
 			if (cfg->button_zones && lowest >= 0) {
 				is_emulation_triggered = buttons_zone_update(gs, cfg, ms, lowest);
 			}
-			if (!is_emulation_triggered && latest >= 0) {
+			if (!is_emulation_triggered) {
 				touch_detect_update(gs, cfg, ms, latest);
 			}
 		}
@@ -326,18 +327,22 @@ static void touch_detect_update(
 	int i = 0, 
 	touching = 0;
 	struct timeval expire;
-	foreach_bit(i, ms->touch_used) {
-		microtime(&expire);
-		timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
-		if ((cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) &&
-			!(cfg->ignore_thumb && GETBIT(ms->touch[i].flags, MT_THUMB)) &&
-			!(cfg->ignore_palm && GETBIT(ms->touch[i].flags, MT_PALM)) &&
-			!(GETBIT(ms->touch[i].flags, MT_EDGE))) {
-			touching++;
-			LOG_EMULATED("touch_detect_udpate: latest >=0: touching++ =%d\n", touching);
+
+	/*If latest is not set, the finger placement is not valid*/
+	if (latest >= 0) {
+		foreach_bit(i, ms->touch_used) {
+			microtime(&expire);
+			timeraddms(&ms->touch[i].down, cfg->button_expire, &expire);
+			if ((cfg->button_move || cfg->button_expire == 0 || timercmp(&ms->touch[latest].down, &expire, <)) &&
+				!(cfg->ignore_thumb && GETBIT(ms->touch[i].flags, MT_THUMB)) &&
+				!(cfg->ignore_palm && GETBIT(ms->touch[i].flags, MT_PALM)) &&
+				!(GETBIT(ms->touch[i].flags, MT_EDGE))) {
+				touching++;
+				LOG_EMULATED("touch_detect_udpate: latest >=0: touching++ =%d\n", touching);
+			}
 		}
 	}
-	LOG_EMULATED("touch_detect_udpate: latest >=0: touching=%d\n", touching);
+	LOG_EMULATED("touch_detect_udpate: latest=%d: touching=%d\n", latest, touching);
 	if (touching == 0 && cfg->button_0touch > 0) {
 		/* The integrated physical button have been pressed but no finger are valid
 		 * This code path can be reached by enabling the ClickFinger0 in the config file. */

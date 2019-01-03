@@ -208,10 +208,10 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->button_integrated = xf86SetBoolOption(opts, "ButtonIntegrated", DEFAULT_BUTTON_INTEGRATED);
 	cfg->button_expire = MAXVAL(xf86SetIntOption(opts, "ButtonTouchExpire", DEFAULT_BUTTON_EXPIRE), 0);
 	cfg->button_zones = xf86SetBoolOption(opts, "ButtonZonesEnable", DEFAULT_BUTTON_ZONES);
-	cfg->is_button_zones_height_limited = xf86SetBoolOption(opts, "LimitButtonZonesToEdgeBottom", DEFAULT_IS_BUTTON_ZONES_HEIGHT_LIMITED);
-	cfg->button_first_zone = CLAMPVAL(xf86SetIntOption(opts, "ZoneButton1", DEFAULT_BUTTON_FIRST_ZONE), 0, 32);
-	cfg->button_second_zone = CLAMPVAL(xf86SetIntOption(opts, "ZoneButton2", DEFAULT_BUTTON_SECOND_ZONE), 0, 32);
-	cfg->button_third_zone = CLAMPVAL(xf86SetIntOption(opts, "ZoneButton3", DEFAULT_BUTTON_THIRD_ZONE), 0, 32);
+	cfg->is_button_zones_height_limited = xf86SetBoolOption(opts, "LimitButtonZonesToBottomEdge", DEFAULT_IS_BUTTON_ZONES_HEIGHT_LIMITED);
+	cfg->button_first_zone = CLAMPVAL(xf86SetIntOption(opts, "FirstZoneButton", DEFAULT_BUTTON_FIRST_ZONE), 0, 32);
+	cfg->button_second_zone = CLAMPVAL(xf86SetIntOption(opts, "SecondZoneButton", DEFAULT_BUTTON_SECOND_ZONE), 0, 32);
+	cfg->button_third_zone = CLAMPVAL(xf86SetIntOption(opts, "ThirdZoneButton", DEFAULT_BUTTON_THIRD_ZONE), 0, 32);
 	cfg->button_0touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger0", DEFAULT_BUTTON_0TOUCH), 0, 32);
 	cfg->button_1touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger1", DEFAULT_BUTTON_1TOUCH), 0, 32);
 	cfg->button_2touch = CLAMPVAL(xf86SetIntOption(opts, "ClickFinger2", DEFAULT_BUTTON_2TOUCH), 0, 32);

@@ -142,33 +142,33 @@ Integer value. Defaults to 70.
 ---
 #### Zones<a name="Zones"></a>
 Divide the touchpad into "zones". Clicking the integrated button in one of 
-these zones will send the button event configured for ZoneButton1, ZoneButton2,
-or ZoneButton3. The driver will only add zones for the ZoneButton values that
-are enabled. The zone splitting start from the left using the smallest
-ZoneButton# value. So enabling only ZoneButton2 and ZoneButton3 will create two
-zones, the left one for ZoneButton2 and the right one for ZoneButton3.  
+these zones will send the button event configured for each {First, Second, Third}ZoneButton. 
+The driver will only add zones for the ZoneButton values that
+are enabled. The zone splitting start from the left to right using the first to third value. 
+So enabling only SecondZoneButton and ThirdZoneButton will create two
+zones, the left-middle part will fire SecondZoneButton and the middle-right part ThirdZoneButton.  
 
 **[ButtonZonesEnable](#ButtonZonesEnable)**<a name="ButtonZonesEnable"></a>
 Whether or not to enable button zones. If button zones are enabled then the
 trackpad will be split into one, two, or three vertical zones. 
 Boolean value. Defaults to false.
 
-**[ZoneButton1](#ZoneButton1)**<a name="ZoneButton1"></a>
+**[FirstZoneButton](#FirstZoneButton)**<a name="FirstZoneButton"></a>
 The button to emulate when the zone is pressed. This is the leftmost part of the pad.
 Integer value. A value of 0 disables this zone split.  
 Integer value. Defaults to 1.
 
-**[ZoneButton2](#ZoneButton2)**<a name="ZoneButton2"></a>
+**[SecondZoneButton](#SecondZoneButton)**<a name="SecondZoneButton"></a>
 The button to emulate when the zone is pressed. This will float to the right of
 the leftmost zone. Integer value. A value of 0 disables this zone split.  
 Integer value. Defaults to 2.
 
-**[ZoneButton3](#ZoneButton3)**<a name="ZoneButton3"></a>
+**[ThirdZoneButton](#ThirdZoneButton)**<a name="ThirdZoneButton"></a>
 The button to emulate when the zone is pressed. This will float to the right of
 the leftmost zone. Integer value. A value of 0 disables this zone split.  
 Integer value. Defaults to 0.
 
-**[LimitButtonZonesToEdgeBottom](#LimitButtonZonesToEdgeBottom)**<a name="LimitButtonZonesToEdgeBottom"></a>
+**[LimitButtonZonesToBottomEdge](#LimitButtonZonesToBottomEdge)**<a name="LimitButtonZonesToBottomEdge"></a>
 Restrict button zones inside the [EdgeBottom](#EdgeBottomSize) area. So instead of enabling zones
 on the full pad height, the zone is limited to the percentage set for the [EdgeBottom](#EdgeBottomSize).  
 Boolean value. Default to false.
@@ -580,14 +580,14 @@ You could also use [ClickFinger0](#ClickFinger0) with [EdgeTop/Right/LeftSize](#
 If you want more than one button in the bottom edge, you need to use a more  
 advanced configuration. It will enable you use up to [3 buttons](#Zones) inside that [edge](#EdgeBottomSize).  
 ```
-    Option "ButtonZonesEnable" "true"   # Enable "Zones"
-    Option "LimitButtonZones" "true"    # Limit the zones to the bottom edge
-    Option "EdgeBottomSize" "20"        # Disable tap and movement detection in the bottom 20% of the pad
+    Option "ButtonZonesEnable" "true"               # Enable "Zones"
+    Option "LimitButtonZonesToBottomEdge" "true"    # Limit the zones to the bottom edge
+    Option "EdgeBottomSize" "20"                    # Disable tap and movement detection in the bottom 20% of the pad
 
     # Zones stack from left to right inside the 20% height defined above
-    Option "ButtonZone1" "1"            # Left part fire click 1
-    Option "ButtonZone2" "3"            # Middle part fire click 3
-    Option "ButtonZone3" "2"            # Right part fire click 2
+    Option "FirstZoneButton" "1"   # Left part fire click 1
+    Option "SecondZoneButton" "3"   # Middle part fire click 3
+    Option "ThirdZoneButton" "2"   # Right part fire click 2
 ```
 
 
