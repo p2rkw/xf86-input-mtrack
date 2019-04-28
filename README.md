@@ -64,6 +64,10 @@ The following is a minimal working InputClass section for xorg.conf:
     EndSection
 ```
 
+---
+To apply changes made in xorg.conf (or related files) X server have to be restarted.
+Changes made with `xinput` are applied immedietly but they are not saved between sessions.
+
 ### Options
 Configuration options may be defined inside the InputClass section to configure
 the driver. See examples/ directory for example configuration files. Feel free to submit
