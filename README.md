@@ -31,6 +31,9 @@ xorg module directory. Otherwise mtrack may be not installed in xserver search
 path.
 See `configure --help` for options.
 
+On Debian systems (including Ubuntu) you may also need to install the `xorg-dev`
+package prior to these commands.
+
 To build deb package and install in system wide you will usually have to change
 installation prefix to /usr like so:
 ```
