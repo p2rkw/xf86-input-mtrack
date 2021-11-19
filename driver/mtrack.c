@@ -32,6 +32,7 @@
 #include <X11/Xatom.h>
 #include <xserver-properties.h>
 #endif
+#include <math.h> /* cos */
 
 #define TAP_HOLD 100
 #define TAP_TIMEOUT 200
@@ -41,6 +42,7 @@
 #define SWIPE_THRESHOLD 0.15
 #define SCALE_THRESHOLD 0.15
 #define ROTATE_THRESHOLD 0.15
+#define PI 3.14159265
 
 #define NUM_AXES 4
 
@@ -349,7 +351,14 @@ CARD32 mt_timer_callback(OsTimerPtr timer, CARD32 time, void *arg)
 
 		valuator_mask_zero(mask);
 		delta_ms = mt->cfg.scroll_coast.tick_ms;
-		coasting_progress = gs->coasting_duration_left / (double)mt->cfg.scroll_coast.duration;
+		if (mt->cfg.scroll_coast.ease) {
+			/* Calculate easing effect */
+			coasting_progress = ((double)mt->cfg.scroll_coast.duration - gs->coasting_duration_left) / (double)mt->cfg.scroll_coast.duration;
+			delta_ms = delta_ms - ((delta_ms * coasting_progress) / 2);
+			coasting_progress = (cos(PI * coasting_progress) + 1) / 2;
+		}
+		else
+			coasting_progress = gs->coasting_duration_left / (double)mt->cfg.scroll_coast.duration;
 
 		valuator_mask_set_double(mask, 2, gs->scroll_speed_y * coasting_progress * delta_ms);
 		valuator_mask_set_double(mask, 3, gs->scroll_speed_x * coasting_progress * delta_ms);

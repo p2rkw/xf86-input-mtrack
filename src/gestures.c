@@ -315,7 +315,7 @@ static void buttons_update(struct Gestures* gs,
 
 /*
  * Handle the physical button click in relation to touch properties.
- * It count the number of valid finger touching the pad while clicking it to 
+ * It count the number of valid finger touching the pad while clicking it to
  * emulate the action in the user config. See "ClickFinger#" configuration parameter.
 */
 static void touch_detect_update(
@@ -324,7 +324,7 @@ static void touch_detect_update(
 	const struct MTState* ms,
 	int latest)
 {
-	int i = 0, 
+	int i = 0,
 	touching = 0;
 	struct timeval expire;
 
@@ -741,8 +741,12 @@ static int trigger_swipe_unsafe(struct Gestures* gs,
 		gs->scroll_speed_valid = 1;
 		LOG_INFO2(DISABLED, "smooth scrolling: speed: x: %lf, y: %lf\n", gs->scroll_speed_x, gs->scroll_speed_y);
 
-		/* Reset coasting duration 'to go' ticks. */
-		gs->coasting_duration_left = cfg->scroll_coast.duration - 1;
+		if (cfg->scroll_coast.no_boost)
+			/* Prevent scroll coasting boost */
+			gs->coasting_duration_left = 0;
+		else
+			/* Reset coasting duration 'to go' ticks. */
+			gs->coasting_duration_left = cfg->scroll_coast.duration - 1;
 
 		/* Don't modulo move_dist */
 	}

@@ -148,16 +148,16 @@ Integer value. Defaults to 70.
 
 ---
 #### Zones<a name="Zones"></a>
-Divide the touchpad into "zones". Clicking the integrated button in one of 
-these zones will send the button event configured for each {First, Second, Third}ZoneButton. 
+Divide the touchpad into "zones". Clicking the integrated button in one of
+these zones will send the button event configured for each {First, Second, Third}ZoneButton.
 The driver will only add zones for the ZoneButton values that
-are enabled. The zone splitting start from the left to right using the first to third value. 
+are enabled. The zone splitting start from the left to right using the first to third value.
 So enabling only SecondZoneButton and ThirdZoneButton will create two
 zones, the left-middle part will fire SecondZoneButton and the middle-right part ThirdZoneButton.  
 
 **[ButtonZonesEnable](#ButtonZonesEnable)**<a name="ButtonZonesEnable"></a>
 Whether or not to enable button zones. If button zones are enabled then the
-trackpad will be split into one, two, or three vertical zones. 
+trackpad will be split into one, two, or three vertical zones.
 Boolean value. Defaults to false.
 
 **[FirstZoneButton](#FirstZoneButton)**<a name="FirstZoneButton"></a>
@@ -275,17 +275,17 @@ click registering scrolling is triggered.
 Integer value. Defaults to 150.
 
 **[ScrollClickTime](#ScrollClickTime)**<a name="ScrollClickTime"></a>
-For two finger scrolling. How long button triggered by scrolling 
+For two finger scrolling. How long button triggered by scrolling
 will be hold down. A value of 0 will hold button down till end of gesture.
 0 - emit button click only once pre "instance" of gesture.
 Integer value representing milliseconds.  
 Integer value. Defaults to 20.
 
 **[ScrollSensitivity](#ScrollSensitivity)**<a name="ScrollSensitivity"></a>
-For two finger scrolling. Sensitivity (movement speed) of pointer during two 
+For two finger scrolling. Sensitivity (movement speed) of pointer during two
 finger scrolling. A value of 0 disables pointer movement during gesture.
 Integer value expressed as parts per thousand of normal sensivity.
-A value of 1000 results with normal movement speed. 
+A value of 1000 results with normal movement speed.
 Integer value. Defaults to 0.
 
 **[ScrollUpButton](#ScrollUpButton)**<a name="ScrollUpButton"></a>
@@ -310,7 +310,7 @@ Boolean value. Defaults to 1.
 Property: "Trackpad High Smooth Scroll"
 
 **[ScrollCoastDuration](#ScrollCoastDuration)**<a name="ScrollCoastDuration"></a>
-How long after finished scrolling movement should be continued. Works only 
+How long after finished scrolling movement should be continued. Works only
 with smooth scrolling enabled.  
 Floating value representing miliseconds. Defaults to 200.0.
 Property: "Trackpad Scroll Coasting"
@@ -318,6 +318,16 @@ Property: "Trackpad Scroll Coasting"
 **[ScrollCoastEnableSpeed](#ScrollCoastEnableSpeed)**<a name="ScrollCoastEnableSpeed"></a>
 How fast scroll should be to enable coasting feature.  
 Floating value. Defaults to 0.1.
+Property: "Trackpad Scroll Coasting"
+
+**[ScrollCoastNoBoost](#ScrollCoastNoBoost)**<a name="ScrollCoastNoBoost"></a>
+Disable boosting on second scroll gesture during coasting
+Boolean value. Defaults to false.
+Property: "Trackpad Scroll Coasting"
+
+**[ScrollCoastEase](#ScrollCoastEase)**<a name="ScrollCoastEase"></a>
+Apply easing effect on coasting
+Boolean value. Defaults to false.
 Property: "Trackpad Scroll Coasting"
 
 ---
@@ -333,7 +343,7 @@ will be hold down.
 Integer value representing milliseconds. Defaults to 300.
 
 **[SwipeSensitivity](#SwipeSensitivity)**<a name="SwipeSensitivity"></a>
-For three finger scrolling. Sensitivity (movement speed) of pointer during three 
+For three finger scrolling. Sensitivity (movement speed) of pointer during three
 finger scrolling. A value of 0 disables pointer movement during gesture.  
 Integer value expressed as parts per thousand of normal sensivity.  
 A value of 1000 results with normal movement speed. Defaults to 0.
@@ -367,7 +377,7 @@ will be hold down.
 Integer value representing milliseconds. Defaults to 300.
 
 **[Swipe4Sensitivity](#Swipe4Sensitivity)**<a name="Swipe4Sensitivity"></a>
-For four finger scrolling. Sensitivity (movement speed) of pointer during four 
+For four finger scrolling. Sensitivity (movement speed) of pointer during four
 finger scrolling. A value of 0 disables pointer movement during gesture.  
 Integer value expressed as parts per thousand of normal sensivity.  
 A value of 1000 results with normal movement speed. Defaults to 0.
@@ -489,7 +499,7 @@ Integer value representing a percentage of the total trackpad width. Defaults to
 ---
 #### Special features
 **[Hold1Move1StationaryButton](#Hold1Move1StationaryButton)**<a name="Hold1Move1StationaryButton"></a>
-For two finger hold-and-move functionality. The button that is triggered by 
+For two finger hold-and-move functionality. The button that is triggered by
 holding one finger and moving another one.  
 Integer value. A value of 0 disables hold-and-move.  
 Value of 0 disables this functionality.  
@@ -563,7 +573,7 @@ Gesture will last as long as fist finger (a.k.a. stationary finger) will
 be held down in place.
 
 Increase [TapDragDist](#TapDragDist) to give stationary finger more freedom.
-Set [Hold1Move1StationaryButton](#Hold1Move1StationaryButton) to 0 to disable, set to other value to send button other 
+Set [Hold1Move1StationaryButton](#Hold1Move1StationaryButton) to 0 to disable, set to other value to send button other
 than "1".
 
 #### Persistent dragging
