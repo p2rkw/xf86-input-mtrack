@@ -71,6 +71,8 @@ void mconfig_defaults(struct MConfig* cfg)
 	cfg->scroll_coast.min_speed = DEFAULT_SCROLL_COAST_MIN_SPEED;
 	cfg->scroll_coast.tick_ms = DEFAULT_SCROLL_COAST_TICK_MS;
 	cfg->scroll_coast.duration = DEFAULT_SCROLL_COAST_DURATION;
+	cfg->scroll_coast.no_boost = DEFAULT_SCROLL_COAST_NO_BOOST;
+	cfg->scroll_coast.ease = DEFAULT_SCROLL_COAST_EASE;
 	cfg->swipe3.dist = DEFAULT_SWIPE_DIST;
 	cfg->swipe3.hold = DEFAULT_SWIPE_HOLD;
 	cfg->swipe3.drag_sens = DEFAULT_SWIPE_SENS;
@@ -237,6 +239,8 @@ void mconfig_configure(struct MConfig* cfg,
 	cfg->scroll_coast.min_speed = MAXVAL(xf86SetRealOption(opts, "ScrollCoastEnableSpeed", DEFAULT_SCROLL_COAST_MIN_SPEED), 0.0);
 	cfg->scroll_coast.tick_ms = MAXVAL(DEFAULT_SCROLL_COAST_TICK_MS, 1);
 	cfg->scroll_coast.duration = MAXVAL(xf86SetRealOption(opts, "ScrollCoastDuration", DEFAULT_SCROLL_COAST_DURATION), 0);
+	cfg->scroll_coast.no_boost = xf86SetBoolOption(opts, "ScrollCoastNoBoost", DEFAULT_SCROLL_COAST_NO_BOOST);
+	cfg->scroll_coast.ease = xf86SetBoolOption(opts, "ScrollCoastEase", DEFAULT_SCROLL_COAST_EASE);
 	cfg->swipe3.dist = MAXVAL(xf86SetIntOption(opts, "SwipeDistance", DEFAULT_SWIPE_DIST), 1);
 	cfg->swipe3.hold = MAXVAL(xf86SetIntOption(opts, "SwipeClickTime", DEFAULT_SWIPE_HOLD), 0);
 	cfg->swipe3.drag_sens = MAXVAL(xf86SetIntOption(opts, "SwipeSensitivity", DEFAULT_SWIPE_SENS), 0);
