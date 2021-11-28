@@ -179,6 +179,11 @@ void mconfig_init(struct MConfig* cfg,
 		LOG_INFO("Touchpad is pressure based.\n");
 		LOG_INFO("  pressure_min = %d, pressure_max = %d\n", cfg->pressure_min, cfg->pressure_max);
 	}
+	else if (caps->has_mtdata && caps->has_abs[ABS_MT_TOOL_TYPE])
+	{
+		cfg->touch_type = MCFG_DUMB_PALM;
+		LOG_WARNING("Touchpad only supports multitouch and palm rejection.\n");
+	}
 	else {
 		cfg->touch_type = MCFG_NONE;
 		LOG_WARNING("Touchpad has minimal capabilities. Some features will be unavailable.\n");
