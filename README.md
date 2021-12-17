@@ -268,8 +268,10 @@ Integer value representing milliseconds. Defaults to 100.
 ##### Two fingers Scrolling<a name="two-finger-scrolling"></a>
 
 **[ScrollDistance](#ScrollDistance)**<a name="ScrollDistance"></a>
-For two finger scrolling. How far you must move your fingers before a button
-click is triggered.  
+For two finger scrolling. This sets the speed of your scrolling: the lower the
+number, the faster you scroll. 
+Technically, it is how far you must move your fingers before a button
+click registering scrolling is triggered.
 Integer value. Defaults to 150.
 
 **[ScrollClickTime](#ScrollClickTime)**<a name="ScrollClickTime"></a>
