@@ -353,8 +353,8 @@ CARD32 mt_timer_callback(OsTimerPtr timer, CARD32 time, void *arg)
 		delta_ms = mt->cfg.scroll_coast.tick_ms;
 		if (mt->cfg.scroll_coast.ease) {
 			/* Calculate easing effect */
-			coasting_progress = ((double)mt->cfg.scroll_coast.duration - gs->coasting_duration_left) / (double)mt->cfg.scroll_coast.duration;
-			delta_ms = delta_ms - ((delta_ms * coasting_progress) / 2);
+			coasting_progress = 1 - gs->coasting_duration_left / (double)mt->cfg.scroll_coast.duration;
+			delta_ms = delta_ms - (delta_ms * coasting_progress / 2);
 			coasting_progress = (cos(PI * coasting_progress) + 1) / 2;
 		}
 		else
