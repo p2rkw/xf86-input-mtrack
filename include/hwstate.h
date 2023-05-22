@@ -32,7 +32,7 @@ struct FingerState {
 	int width_major, width_minor;
 	int orientation, pressure;
 	int position_x, position_y;
-	int tracking_id;
+	int tracking_id, tool_type;
 };
 
 struct HWState {

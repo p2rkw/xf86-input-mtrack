@@ -115,6 +115,12 @@ static int is_palm(const struct MConfig* cfg,
 	case MCFG_PRESSURE:
 		ratio =  pressure_range_ratio(cfg, hw->pressure);
 		break;
+	case MCFG_DUMB_PALM:
+	  if(hw->tool_type > 0)
+		{
+		  ratio = cfg->palm_size+1;
+			break;
+		}
 	default:
 		return 0;
 	}
@@ -392,4 +398,3 @@ void mtstate_extract(struct MTState* ms,
 	mtstate_output(ms, hs);
 #endif
 }
-

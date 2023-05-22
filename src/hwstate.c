@@ -112,6 +112,9 @@ static int read_event(struct HWState *s, const struct Capabilities *caps,
 			s->data[s->slot].tracking_id = ev->value;
 			MODBIT(s->used, s->slot, ev->value != MT_ID_NULL);
 			break;
+		case ABS_MT_TOOL_TYPE:
+			s->data[s->slot].tool_type = ev->value;
+			break;
 		}
 		break;
 	}
